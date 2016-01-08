@@ -1,0 +1,43 @@
+{
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "B7AD115BD2185E97451D71D3AC53AD8903E191C3" : 0,
+    "D8B77186584699D3376BE96D8D99394FFE1062A4" : 0,
+    "F9CB73B84AAC4DF4FDAC59E7AE333891CE32959C" : 0,
+    "67620B5EFA902936DF04070AF595B76AB0333747" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "5E613126-D4B1-405F-9B16-0AE2DD927F1E",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "B7AD115BD2185E97451D71D3AC53AD8903E191C3" : "ApidocSwiftGenerator\/Libraries\/swiftpoet\/",
+    "D8B77186584699D3376BE96D8D99394FFE1062A4" : "ApidocSwiftGenerator\/Libraries\/CleanroomLogger\/Libraries\/CleanroomASL\/",
+    "F9CB73B84AAC4DF4FDAC59E7AE333891CE32959C" : "ApidocSwiftGenerator\/Libraries\/CleanroomLogger\/",
+    "67620B5EFA902936DF04070AF595B76AB0333747" : "ApidocSwiftGenerator\/Libraries\/Alamofire\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "ApidocSwiftGenerator",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "ApidocSwiftGenerator.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/Alamofire\/Alamofire.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "67620B5EFA902936DF04070AF595B76AB0333747"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/kyle-dorman\/swiftpoet",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "B7AD115BD2185E97451D71D3AC53AD8903E191C3"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/emaloney\/CleanroomASL.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "D8B77186584699D3376BE96D8D99394FFE1062A4"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/emaloney\/CleanroomLogger",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "F9CB73B84AAC4DF4FDAC59E7AE333891CE32959C"
+    }
+  ]
+}
