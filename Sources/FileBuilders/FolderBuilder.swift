@@ -10,33 +10,33 @@ import Foundation
 
 public class FolderBuilder {
 
-//    public typealias FileSystemResult = Result<String, FileSystemError>
-
     public init() {}
 
-    public func createFolder(folderName: String, atPath path: String, overwriteStyle: OverwriteStyle = .Parallel) throws {
+    public func createFolder(folderName: String, atPath path: String, overwriteStyle: OverwriteStyle = .FailOnCollision) throws -> NSURL {
         let folderURL = NSURL(fileURLWithPath: path, isDirectory: true)
-        try createFolder(folderName, atUrlPath: folderURL, overwriteStyle: overwriteStyle)
+        return try createFolder(folderName, atUrlPath: folderURL, overwriteStyle: overwriteStyle)
     }
 
-    public func createFolder(folderName: String, atUrlPath url: NSURL, overwriteStyle: OverwriteStyle = .Parallel) throws {
+    public func createFolder(folderName: String, atUrlPath url: NSURL, overwriteStyle: OverwriteStyle = .FailOnCollision) throws -> NSURL {
         let manager = NSFileManager.defaultManager()
 
         let contents = try discoverRootFolder(atUrlPath: url)
 
-        guard contents.count == 0 || overwriteStyle != .FailIfNotEmpty else {
-            throw FileSystemError.DirectoryContainsFiles
-        }
+        let newFolderURL = NSURL.fileURLWithPath(url.path! + "/" + folderName, isDirectory: true)
 
-        guard let newFolderURL = NSURL(string: folderName, relativeToURL: url) else {
-            throw FileSystemError.InvalidFolderName(folderName)
+        try contents.forEach { f in
+            if newFolderURL == f {
+                if overwriteStyle == .FailOnCollision {
+                    throw FileSystemError.DirectoryCollision
+                } else {
+                    try deleteFolder(newFolderURL.path!)
+                }
+            }
         }
 
         try manager.createDirectoryAtURL(newFolderURL, withIntermediateDirectories: false, attributes: nil)
 
-        if contents.count > 0 && overwriteStyle == .Overwrite {
-            try deleteFiles(contents)
-        }
+        return newFolderURL
     }
 
     public func discoverRootFolder(atUrlPath url: NSURL) throws -> [NSURL] {
@@ -56,39 +56,22 @@ public class FolderBuilder {
         return try discoverRootFolder(atUrlPath: url)
     }
 
-    private func deleteFiles(fileUrls: [NSURL]) throws {
+    public func deleteFiles(fileUrls: [NSURL]) throws {
         let manager = NSFileManager.defaultManager()
 
         for url in fileUrls {
             try manager.removeItemAtURL(url)
         }
     }
-}
 
-public enum FileSystemError: ErrorType {
-    case DirectoryContainsFiles
-    case DirectoryNotFound(ErrorType)
-    case OSXError(ErrorType)
-    case InvalidFolderName(String)
-    case InvalidFileName(String)
-    case InvalidFileContents
-    case FileCreationError(String)
-
-    public var description: String {
-        switch self {
-        case .DirectoryContainsFiles: return "Directory contains a file"
-        case .DirectoryNotFound(let error): return "Directory not found \(error)"
-        case .OSXError(let error): return "OSXError \(error)"
-        case .InvalidFolderName(let str): return "Invalid folder name \(str)"
-        case .InvalidFileName(let str): return "Invalid file name \(str)"
-        case .InvalidFileContents: return "Invalid file contents"
-        case .FileCreationError(let str): return "Error creating file \(str)"
-        }
+    public func deleteFolder(path: String) throws {
+        let manager = NSFileManager.defaultManager()
+        let url = NSURL(fileURLWithPath: path, isDirectory: true)
+        try manager.removeItemAtURL(url)
     }
 }
 
 public enum OverwriteStyle {
     case Overwrite
-    case Parallel
-    case FailIfNotEmpty
+    case FailOnCollision
 }

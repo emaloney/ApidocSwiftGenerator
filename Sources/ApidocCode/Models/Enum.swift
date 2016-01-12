@@ -12,14 +12,14 @@ public struct Enum {
     public let name: String
     public let plural: String
     public let description: String?
-    public let deprication: String?
+    public let deprecation: String?
     public let values: [EnumValue]
 
-    public init(name: String, plural: String, description: String?, deprication: String?, values: [EnumValue]) {
+    public init(name: String, plural: String, description: String?, deprecation: String?, values: [EnumValue]) {
         self.name = name
         self.plural = plural
         self.description = description
-        self.deprication = deprication
+        self.deprecation = deprecation
         self.values = values
     }
 
@@ -27,7 +27,7 @@ public struct Enum {
         let name = payload["name"] as! String
         let plural = payload["plural"] as! String
         let description = payload["description"] as? String
-        let deprication = payload["deprication"] as? String
+        let deprecation = payload["deprecation"] as? String
 
 
         let values: [EnumValue]
@@ -40,6 +40,6 @@ public struct Enum {
             values = [EnumValue]() // TODO
         }
 
-        self.init(name: name, plural: plural, description: description, deprication: deprication, values: values)
+        self.init(name: name, plural: plural, description: description, deprecation: deprecation, values: values)
     }
 }

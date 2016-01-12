@@ -7,21 +7,26 @@
 //
 
 import Foundation
+import SwiftPoet
 
 public class FileBuilder {
 
-    public func createFile(fileName: String, fileType: String, atPath path: String, contents: String) throws {
+    public init() {}
+
+    public func createFile(fileName: String, atPath path: String, contents: String) throws {
         guard let urlPath = NSURL(string: path) else {
             throw FileSystemError.InvalidFolderName(path)
         }
-        try createFile(fileName, fileType: fileType, atUrlPath: urlPath, contents: contents)
+        try createFile(fileName, atUrlPath: urlPath, contents: contents)
     }
 
-    public func createFile(fileName: String, fileType: String, atUrlPath path: NSURL, contents: String) throws {
-        let fullFileName = fileName + "." + fileType
+    public func createFile(fileName: String, atUrlPath path: NSURL, contents: String) throws {
+        let fullFileName = PoetUtil.cleanTypeName(fileName) + ".swift"
         guard let fileUrl = NSURL(string: fullFileName, relativeToURL: path) else {
             throw FileSystemError.InvalidFileName(fullFileName)
         }
+
+        print(fileUrl)
 
         guard let fileData = contents.dataUsingEncoding(NSUTF8StringEncoding) else {
             throw FileSystemError.InvalidFileContents

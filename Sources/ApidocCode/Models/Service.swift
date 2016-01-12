@@ -75,7 +75,16 @@ public struct Service {
             enums = nil
         }
 
-        self.init(apidoc: apidoc, name: name, organization: organization, application: application, namespace: namespace, version: version, baseUrl: baseUrl, description: description, enums: enums, unions: unions)
+        let models: [Model]?
+        if let modelsJson = payload["models"] as? [NSDictionary] {
+            models = modelsJson.flatMap { m in
+                return Model(payload: m)
+            }
+        } else {
+            models = nil
+        }
+
+        self.init(apidoc: apidoc, name: name, organization: organization, application: application, namespace: namespace, version: version, baseUrl: baseUrl, description: description, enums: enums, unions: unions, models: models)
 //
     }
 }

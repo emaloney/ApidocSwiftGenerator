@@ -77,16 +77,16 @@ class ApiEndpointTests: XCTestCase {
 //        }
 //    }
 
-    func testParseJson() {
+    func testIntegration() {
         let readyExpectation = expectationWithDescription("ready")
 
-        let g = ApidocSwiftGenerator()
+        let g = ApidocGeneratorConstructor()
         g.generate {
             readyExpectation.fulfill()
         }
 
 
-        waitForExpectationsWithTimeout(3) { error in
+        waitForExpectationsWithTimeout(10) { error in
             XCTAssertNil(error, "Error")
         }
     }

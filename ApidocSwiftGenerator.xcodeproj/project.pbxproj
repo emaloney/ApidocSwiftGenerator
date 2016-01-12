@@ -8,12 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		3B00E5681BA3782D0011486D /* ApidocSwiftGenerator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B00E55D1BA3782D0011486D /* ApidocSwiftGenerator.framework */; };
-		3B00E5751BA3793F0011486D /* ApidocSwiftGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B00E4D31BA36B840011486D /* ApidocSwiftGenerator.swift */; };
 		3B00E5861BA379830011486D /* ApidocSwiftGenerator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B00E57C1BA379830011486D /* ApidocSwiftGenerator.framework */; };
-		3B00E5931BA37A290011486D /* ApidocSwiftGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B00E4D31BA36B840011486D /* ApidocSwiftGenerator.swift */; };
 		3B00E5A41BA37A420011486D /* ApidocSwiftGenerator.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B00E59A1BA37A420011486D /* ApidocSwiftGenerator.framework */; };
-		3B38DBE41BA764BA000986DF /* ApidocSwiftGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B00E4D31BA36B840011486D /* ApidocSwiftGenerator.swift */; };
-		3B78C6B61BA762CF00173EAC /* ApidocSwiftGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B00E4D31BA36B840011486D /* ApidocSwiftGenerator.swift */; };
 		3B78C6B91BA762FD00173EAC /* ApiEndpointTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B78C6B81BA762FD00173EAC /* ApiEndpointTests.swift */; };
 		3B78C6BA1BA762FD00173EAC /* ApiEndpointTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B78C6B81BA762FD00173EAC /* ApiEndpointTests.swift */; };
 		3B78C6BB1BA762FD00173EAC /* ApiEndpointTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B78C6B81BA762FD00173EAC /* ApiEndpointTests.swift */; };
@@ -82,10 +78,6 @@
 		590260791C3DB5BB00FB39E8 /* FolderBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260771C3DB5BB00FB39E8 /* FolderBuilder.swift */; };
 		5902607A1C3DB5BB00FB39E8 /* FolderBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260771C3DB5BB00FB39E8 /* FolderBuilder.swift */; };
 		5902607B1C3DB5BB00FB39E8 /* FolderBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260771C3DB5BB00FB39E8 /* FolderBuilder.swift */; };
-		5902607D1C3DBAD300FB39E8 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5902607C1C3DBAD300FB39E8 /* Result.swift */; };
-		5902607E1C3DBAD300FB39E8 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5902607C1C3DBAD300FB39E8 /* Result.swift */; };
-		5902607F1C3DBAD300FB39E8 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5902607C1C3DBAD300FB39E8 /* Result.swift */; };
-		590260801C3DBAD300FB39E8 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5902607C1C3DBAD300FB39E8 /* Result.swift */; };
 		590260821C3DBED200FB39E8 /* FolderBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260811C3DBED200FB39E8 /* FolderBuilderTests.swift */; };
 		590260831C3DBED200FB39E8 /* FolderBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260811C3DBED200FB39E8 /* FolderBuilderTests.swift */; };
 		590260841C3DBED200FB39E8 /* FolderBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260811C3DBED200FB39E8 /* FolderBuilderTests.swift */; };
@@ -99,6 +91,61 @@
 		590260961C4019D200FB39E8 /* Operation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260941C4019D200FB39E8 /* Operation.swift */; };
 		590260971C4019D200FB39E8 /* Operation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260941C4019D200FB39E8 /* Operation.swift */; };
 		590260981C4019D200FB39E8 /* Operation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260941C4019D200FB39E8 /* Operation.swift */; };
+		590260A31C401B4900FB39E8 /* FileBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260A21C401B4900FB39E8 /* FileBuilderTests.swift */; };
+		590260A41C401B4900FB39E8 /* FileBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260A21C401B4900FB39E8 /* FileBuilderTests.swift */; };
+		590260A51C401B4900FB39E8 /* FileBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260A21C401B4900FB39E8 /* FileBuilderTests.swift */; };
+		590260A71C401BC300FB39E8 /* FileSystemError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260A61C401BC300FB39E8 /* FileSystemError.swift */; };
+		590260A81C401BC300FB39E8 /* FileSystemError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260A61C401BC300FB39E8 /* FileSystemError.swift */; };
+		590260A91C401BC300FB39E8 /* FileSystemError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260A61C401BC300FB39E8 /* FileSystemError.swift */; };
+		590260AA1C401BC300FB39E8 /* FileSystemError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260A61C401BC300FB39E8 /* FileSystemError.swift */; };
+		590260B31C4021B600FB39E8 /* ApidocGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260AC1C4021B600FB39E8 /* ApidocGenerator.swift */; };
+		590260B41C4021B600FB39E8 /* ApidocGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260AC1C4021B600FB39E8 /* ApidocGenerator.swift */; };
+		590260B51C4021B600FB39E8 /* ApidocGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260AC1C4021B600FB39E8 /* ApidocGenerator.swift */; };
+		590260B61C4021B600FB39E8 /* ApidocGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260AC1C4021B600FB39E8 /* ApidocGenerator.swift */; };
+		590260B71C4021B600FB39E8 /* ApidocLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260AE1C4021B600FB39E8 /* ApidocLoader.swift */; };
+		590260B81C4021B600FB39E8 /* ApidocLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260AE1C4021B600FB39E8 /* ApidocLoader.swift */; };
+		590260B91C4021B600FB39E8 /* ApidocLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260AE1C4021B600FB39E8 /* ApidocLoader.swift */; };
+		590260BA1C4021B600FB39E8 /* ApidocLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260AE1C4021B600FB39E8 /* ApidocLoader.swift */; };
+		590260BB1C4021B600FB39E8 /* URLConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260AF1C4021B600FB39E8 /* URLConstructor.swift */; };
+		590260BC1C4021B600FB39E8 /* URLConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260AF1C4021B600FB39E8 /* URLConstructor.swift */; };
+		590260BD1C4021B600FB39E8 /* URLConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260AF1C4021B600FB39E8 /* URLConstructor.swift */; };
+		590260BE1C4021B600FB39E8 /* URLConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260AF1C4021B600FB39E8 /* URLConstructor.swift */; };
+		590260BF1C4021B600FB39E8 /* URLLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260B01C4021B600FB39E8 /* URLLoader.swift */; };
+		590260C01C4021B600FB39E8 /* URLLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260B01C4021B600FB39E8 /* URLLoader.swift */; };
+		590260C11C4021B600FB39E8 /* URLLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260B01C4021B600FB39E8 /* URLLoader.swift */; };
+		590260C21C4021B600FB39E8 /* URLLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260B01C4021B600FB39E8 /* URLLoader.swift */; };
+		590260C31C4021B600FB39E8 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260B21C4021B600FB39E8 /* Result.swift */; };
+		590260C41C4021B600FB39E8 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260B21C4021B600FB39E8 /* Result.swift */; };
+		590260C51C4021B600FB39E8 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260B21C4021B600FB39E8 /* Result.swift */; };
+		590260C61C4021B600FB39E8 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260B21C4021B600FB39E8 /* Result.swift */; };
+		590260C81C4021DD00FB39E8 /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260C71C4021DD00FB39E8 /* Either.swift */; };
+		590260C91C4021DD00FB39E8 /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260C71C4021DD00FB39E8 /* Either.swift */; };
+		590260CA1C4021DD00FB39E8 /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260C71C4021DD00FB39E8 /* Either.swift */; };
+		590260CB1C4021DD00FB39E8 /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260C71C4021DD00FB39E8 /* Either.swift */; };
+		590260CD1C40223000FB39E8 /* EnumGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260CC1C40223000FB39E8 /* EnumGenerator.swift */; };
+		590260CE1C40223000FB39E8 /* EnumGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260CC1C40223000FB39E8 /* EnumGenerator.swift */; };
+		590260CF1C40223000FB39E8 /* EnumGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260CC1C40223000FB39E8 /* EnumGenerator.swift */; };
+		590260D01C40223000FB39E8 /* EnumGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260CC1C40223000FB39E8 /* EnumGenerator.swift */; };
+		590260D21C40230300FB39E8 /* ServiceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260D11C40230300FB39E8 /* ServiceExtension.swift */; };
+		590260D31C40230300FB39E8 /* ServiceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260D11C40230300FB39E8 /* ServiceExtension.swift */; };
+		590260D41C40230300FB39E8 /* ServiceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260D11C40230300FB39E8 /* ServiceExtension.swift */; };
+		590260D51C40230300FB39E8 /* ServiceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260D11C40230300FB39E8 /* ServiceExtension.swift */; };
+		590260D71C402AA400FB39E8 /* Generator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260D61C402AA400FB39E8 /* Generator.swift */; };
+		590260D81C402AA400FB39E8 /* Generator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260D61C402AA400FB39E8 /* Generator.swift */; };
+		590260D91C402AA400FB39E8 /* Generator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260D61C402AA400FB39E8 /* Generator.swift */; };
+		590260DA1C402AA400FB39E8 /* Generator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260D61C402AA400FB39E8 /* Generator.swift */; };
+		590260DC1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */; };
+		590260DD1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */; };
+		590260DE1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */; };
+		590260DF1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */; };
+		599D0DF61C459522003DCCF0 /* ModelGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599D0DF51C459522003DCCF0 /* ModelGenerator.swift */; };
+		599D0DF71C459522003DCCF0 /* ModelGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599D0DF51C459522003DCCF0 /* ModelGenerator.swift */; };
+		599D0DF81C459522003DCCF0 /* ModelGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599D0DF51C459522003DCCF0 /* ModelGenerator.swift */; };
+		599D0DF91C459522003DCCF0 /* ModelGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599D0DF51C459522003DCCF0 /* ModelGenerator.swift */; };
+		599EAB801C45A74E002DEAB3 /* SwiftType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599EAB7F1C45A74E002DEAB3 /* SwiftType.swift */; };
+		599EAB811C45A74E002DEAB3 /* SwiftType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599EAB7F1C45A74E002DEAB3 /* SwiftType.swift */; };
+		599EAB821C45A74E002DEAB3 /* SwiftType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599EAB7F1C45A74E002DEAB3 /* SwiftType.swift */; };
+		599EAB831C45A74E002DEAB3 /* SwiftType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599EAB7F1C45A74E002DEAB3 /* SwiftType.swift */; };
 		59AA6A621C3B2DA8003CD1A2 /* CleanroomLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6A551C3B2D7D003CD1A2 /* CleanroomLogger.framework */; };
 		59AA6A631C3B2DA8003CD1A2 /* SwiftPoet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6A3C1C3B2D75003CD1A2 /* SwiftPoet.framework */; };
 		59AA6A6C1C3B2DCC003CD1A2 /* CleanroomLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6A571C3B2D7D003CD1A2 /* CleanroomLogger.framework */; };
@@ -107,27 +154,11 @@
 		59AA6A731C3B2DDD003CD1A2 /* SwiftPoet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6A401C3B2D75003CD1A2 /* SwiftPoet.framework */; };
 		59AA6A781C3B2DEC003CD1A2 /* CleanroomLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6A5B1C3B2D7D003CD1A2 /* CleanroomLogger.framework */; };
 		59AA6A791C3B2DEC003CD1A2 /* SwiftPoet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6A421C3B2D75003CD1A2 /* SwiftPoet.framework */; };
-		59AA6A801C3B30CC003CD1A2 /* ApidocLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6A7F1C3B30CC003CD1A2 /* ApidocLoader.swift */; };
-		59AA6A811C3B30CC003CD1A2 /* ApidocLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6A7F1C3B30CC003CD1A2 /* ApidocLoader.swift */; };
-		59AA6A821C3B30CC003CD1A2 /* ApidocLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6A7F1C3B30CC003CD1A2 /* ApidocLoader.swift */; };
-		59AA6A831C3B30CC003CD1A2 /* ApidocLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6A7F1C3B30CC003CD1A2 /* ApidocLoader.swift */; };
-		59AA6A851C3B3122003CD1A2 /* URLLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6A841C3B3122003CD1A2 /* URLLoader.swift */; };
-		59AA6A861C3B3122003CD1A2 /* URLLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6A841C3B3122003CD1A2 /* URLLoader.swift */; };
-		59AA6A871C3B3122003CD1A2 /* URLLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6A841C3B3122003CD1A2 /* URLLoader.swift */; };
-		59AA6A881C3B3122003CD1A2 /* URLLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6A841C3B3122003CD1A2 /* URLLoader.swift */; };
-		59AA6A8A1C3B3874003CD1A2 /* URLConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6A891C3B3874003CD1A2 /* URLConstructor.swift */; };
-		59AA6A8B1C3B3874003CD1A2 /* URLConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6A891C3B3874003CD1A2 /* URLConstructor.swift */; };
-		59AA6A8C1C3B3874003CD1A2 /* URLConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6A891C3B3874003CD1A2 /* URLConstructor.swift */; };
-		59AA6A8D1C3B3874003CD1A2 /* URLConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6A891C3B3874003CD1A2 /* URLConstructor.swift */; };
 		59AA6AA81C3B3D85003CD1A2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6A9D1C3B3D6F003CD1A2 /* Alamofire.framework */; };
 		59AA6AA91C3B3DC9003CD1A2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6A991C3B3D6F003CD1A2 /* Alamofire.framework */; };
 		59AA6AAE1C3B3DE3003CD1A2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6AA11C3B3D6F003CD1A2 /* Alamofire.framework */; };
 		59AA6AB11C3B3DF2003CD1A2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6AA51C3B3D6F003CD1A2 /* Alamofire.framework */; };
 		59AA6AB21C3B402D003CD1A2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6A9D1C3B3D6F003CD1A2 /* Alamofire.framework */; };
-		59AA6AB61C3C4702003CD1A2 /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6AB51C3C4702003CD1A2 /* Either.swift */; };
-		59AA6AB71C3C4702003CD1A2 /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6AB51C3C4702003CD1A2 /* Either.swift */; };
-		59AA6AB81C3C4702003CD1A2 /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6AB51C3C4702003CD1A2 /* Either.swift */; };
-		59AA6AB91C3C4702003CD1A2 /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AA6AB51C3C4702003CD1A2 /* Either.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -395,7 +426,6 @@
 /* Begin PBXFileReference section */
 		3B00E4D01BA36B840011486D /* Info-Framework.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-Framework.plist"; sourceTree = "<group>"; };
 		3B00E4D11BA36B840011486D /* Info-Tests.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-Tests.plist"; sourceTree = "<group>"; };
-		3B00E4D31BA36B840011486D /* ApidocSwiftGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApidocSwiftGenerator.swift; sourceTree = "<group>"; };
 		3B00E55D1BA3782D0011486D /* ApidocSwiftGenerator.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ApidocSwiftGenerator.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B00E5671BA3782D0011486D /* ApidocSwiftGeneratorUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ApidocSwiftGeneratorUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B00E57C1BA379830011486D /* ApidocSwiftGenerator.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ApidocSwiftGenerator.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -441,17 +471,26 @@
 		590260671C3D9E1400FB39E8 /* ResponseCodeOption.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResponseCodeOption.swift; sourceTree = "<group>"; };
 		5902606C1C3DA00F00FB39E8 /* Service.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
 		590260771C3DB5BB00FB39E8 /* FolderBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolderBuilder.swift; sourceTree = "<group>"; };
-		5902607C1C3DBAD300FB39E8 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		590260811C3DBED200FB39E8 /* FolderBuilderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolderBuilderTests.swift; sourceTree = "<group>"; };
 		590260851C3DE18600FB39E8 /* FileBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileBuilder.swift; sourceTree = "<group>"; };
 		590260941C4019D200FB39E8 /* Operation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Operation.swift; sourceTree = "<group>"; };
+		590260A21C401B4900FB39E8 /* FileBuilderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileBuilderTests.swift; sourceTree = "<group>"; };
+		590260A61C401BC300FB39E8 /* FileSystemError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileSystemError.swift; sourceTree = "<group>"; };
+		590260AC1C4021B600FB39E8 /* ApidocGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApidocGenerator.swift; sourceTree = "<group>"; };
+		590260AE1C4021B600FB39E8 /* ApidocLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApidocLoader.swift; sourceTree = "<group>"; };
+		590260AF1C4021B600FB39E8 /* URLConstructor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLConstructor.swift; sourceTree = "<group>"; };
+		590260B01C4021B600FB39E8 /* URLLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLLoader.swift; sourceTree = "<group>"; };
+		590260B21C4021B600FB39E8 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
+		590260C71C4021DD00FB39E8 /* Either.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Either.swift; sourceTree = "<group>"; };
+		590260CC1C40223000FB39E8 /* EnumGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnumGenerator.swift; sourceTree = "<group>"; };
+		590260D11C40230300FB39E8 /* ServiceExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServiceExtension.swift; sourceTree = "<group>"; };
+		590260D61C402AA400FB39E8 /* Generator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Generator.swift; sourceTree = "<group>"; };
+		590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApidocGeneratorConstructor.swift; sourceTree = "<group>"; };
+		599D0DF51C459522003DCCF0 /* ModelGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelGenerator.swift; sourceTree = "<group>"; };
+		599EAB7F1C45A74E002DEAB3 /* SwiftType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftType.swift; sourceTree = "<group>"; };
 		59AA6A311C3B2D75003CD1A2 /* SwiftPoet.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SwiftPoet.xcodeproj; path = SwiftPoet/SwiftPoet.xcodeproj; sourceTree = "<group>"; };
 		59AA6A491C3B2D7D003CD1A2 /* CleanroomLogger.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CleanroomLogger.xcodeproj; path = CleanroomLogger/CleanroomLogger.xcodeproj; sourceTree = "<group>"; };
-		59AA6A7F1C3B30CC003CD1A2 /* ApidocLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApidocLoader.swift; sourceTree = "<group>"; };
-		59AA6A841C3B3122003CD1A2 /* URLLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLLoader.swift; sourceTree = "<group>"; };
-		59AA6A891C3B3874003CD1A2 /* URLConstructor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLConstructor.swift; sourceTree = "<group>"; };
 		59AA6A8E1C3B3D6F003CD1A2 /* Alamofire.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Alamofire.xcodeproj; path = Alamofire/Alamofire.xcodeproj; sourceTree = "<group>"; };
-		59AA6AB51C3C4702003CD1A2 /* Either.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Either.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -563,14 +602,12 @@
 		3B00E4D21BA36B840011486D /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				590260AB1C4021B600FB39E8 /* Generators */,
+				590260AD1C4021B600FB39E8 /* Loaders */,
+				590260B11C4021B600FB39E8 /* Util */,
 				590260761C3DB5A900FB39E8 /* FileBuilders */,
 				5902601D1C3D973C00FB39E8 /* ApidocCode */,
-				3B00E4D31BA36B840011486D /* ApidocSwiftGenerator.swift */,
-				59AA6A7F1C3B30CC003CD1A2 /* ApidocLoader.swift */,
-				59AA6A841C3B3122003CD1A2 /* URLLoader.swift */,
-				59AA6A891C3B3874003CD1A2 /* URLConstructor.swift */,
-				59AA6AB51C3C4702003CD1A2 /* Either.swift */,
-				5902607C1C3DBAD300FB39E8 /* Result.swift */,
+				590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -581,6 +618,7 @@
 				59025FEE1C3D7F0F00FB39E8 /* test-service.json */,
 				3B78C6B81BA762FD00173EAC /* ApiEndpointTests.swift */,
 				590260811C3DBED200FB39E8 /* FolderBuilderTests.swift */,
+				590260A21C401B4900FB39E8 /* FileBuilderTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -662,8 +700,41 @@
 			children = (
 				590260771C3DB5BB00FB39E8 /* FolderBuilder.swift */,
 				590260851C3DE18600FB39E8 /* FileBuilder.swift */,
+				590260A61C401BC300FB39E8 /* FileSystemError.swift */,
 			);
 			path = FileBuilders;
+			sourceTree = "<group>";
+		};
+		590260AB1C4021B600FB39E8 /* Generators */ = {
+			isa = PBXGroup;
+			children = (
+				590260AC1C4021B600FB39E8 /* ApidocGenerator.swift */,
+				590260CC1C40223000FB39E8 /* EnumGenerator.swift */,
+				590260D61C402AA400FB39E8 /* Generator.swift */,
+				599D0DF51C459522003DCCF0 /* ModelGenerator.swift */,
+			);
+			path = Generators;
+			sourceTree = "<group>";
+		};
+		590260AD1C4021B600FB39E8 /* Loaders */ = {
+			isa = PBXGroup;
+			children = (
+				590260AE1C4021B600FB39E8 /* ApidocLoader.swift */,
+				590260AF1C4021B600FB39E8 /* URLConstructor.swift */,
+				590260B01C4021B600FB39E8 /* URLLoader.swift */,
+			);
+			path = Loaders;
+			sourceTree = "<group>";
+		};
+		590260B11C4021B600FB39E8 /* Util */ = {
+			isa = PBXGroup;
+			children = (
+				590260C71C4021DD00FB39E8 /* Either.swift */,
+				590260B21C4021B600FB39E8 /* Result.swift */,
+				590260D11C40230300FB39E8 /* ServiceExtension.swift */,
+				599EAB7F1C45A74E002DEAB3 /* SwiftType.swift */,
+			);
+			path = Util;
 			sourceTree = "<group>";
 		};
 		59AA66C81C3B2CBC003CD1A2 /* Libraries */ = {
@@ -1169,29 +1240,36 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				590260CD1C40223000FB39E8 /* EnumGenerator.swift in Sources */,
 				5902608C1C40158100FB39E8 /* FileBuilder.swift in Sources */,
 				5902602A1C3D973C00FB39E8 /* EnumValue.swift in Sources */,
-				59AA6A8A1C3B3874003CD1A2 /* URLConstructor.swift in Sources */,
 				5902602E1C3D973C00FB39E8 /* Field.swift in Sources */,
-				59AA6A801C3B30CC003CD1A2 /* ApidocLoader.swift in Sources */,
 				590260321C3D973C00FB39E8 /* Model.swift in Sources */,
+				590260D21C40230300FB39E8 /* ServiceExtension.swift in Sources */,
 				590260631C3D9A9600FB39E8 /* ResponseCode.swift in Sources */,
 				590260681C3D9E1400FB39E8 /* ResponseCodeOption.swift in Sources */,
-				3B00E5751BA3793F0011486D /* ApidocSwiftGenerator.swift in Sources */,
+				590260DC1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */,
+				590260C31C4021B600FB39E8 /* Result.swift in Sources */,
 				5902606D1C3DA00F00FB39E8 /* Service.swift in Sources */,
+				599EAB801C45A74E002DEAB3 /* SwiftType.swift in Sources */,
+				590260B71C4021B600FB39E8 /* ApidocLoader.swift in Sources */,
 				5902603A1C3D973C00FB39E8 /* Resource.swift in Sources */,
 				590260951C4019D200FB39E8 /* Operation.swift in Sources */,
+				590260B31C4021B600FB39E8 /* ApidocGenerator.swift in Sources */,
+				599D0DF61C459522003DCCF0 /* ModelGenerator.swift in Sources */,
 				590260581C3D9A0100FB39E8 /* Unions.swift in Sources */,
+				590260BF1C4021B600FB39E8 /* URLLoader.swift in Sources */,
+				590260C81C4021DD00FB39E8 /* Either.swift in Sources */,
 				590260441C3D97BB00FB39E8 /* Body.swift in Sources */,
 				590260531C3D98F600FB39E8 /* Response.swift in Sources */,
-				5902607D1C3DBAD300FB39E8 /* Result.swift in Sources */,
+				590260BB1C4021B600FB39E8 /* URLConstructor.swift in Sources */,
+				590260A71C401BC300FB39E8 /* FileSystemError.swift in Sources */,
 				590260261C3D973C00FB39E8 /* Enum.swift in Sources */,
 				5902603F1C3D975F00FB39E8 /* Method.swift in Sources */,
-				59AA6A851C3B3122003CD1A2 /* URLLoader.swift in Sources */,
 				5902604E1C3D98C600FB39E8 /* ParameterLocation.swift in Sources */,
 				5902605D1C3D9A4B00FB39E8 /* UnionType.swift in Sources */,
+				590260D71C402AA400FB39E8 /* Generator.swift in Sources */,
 				590260781C3DB5BB00FB39E8 /* FolderBuilder.swift in Sources */,
-				59AA6AB61C3C4702003CD1A2 /* Either.swift in Sources */,
 				590260491C3D980B00FB39E8 /* Parameter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1202,6 +1280,7 @@
 			files = (
 				3B78C6B91BA762FD00173EAC /* ApiEndpointTests.swift in Sources */,
 				590260821C3DBED200FB39E8 /* FolderBuilderTests.swift in Sources */,
+				590260A31C401B4900FB39E8 /* FileBuilderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1209,29 +1288,36 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				590260CE1C40223000FB39E8 /* EnumGenerator.swift in Sources */,
 				590260891C40157000FB39E8 /* FileBuilder.swift in Sources */,
 				5902602B1C3D973C00FB39E8 /* EnumValue.swift in Sources */,
-				59AA6A8B1C3B3874003CD1A2 /* URLConstructor.swift in Sources */,
 				5902602F1C3D973C00FB39E8 /* Field.swift in Sources */,
-				59AA6A811C3B30CC003CD1A2 /* ApidocLoader.swift in Sources */,
 				590260331C3D973C00FB39E8 /* Model.swift in Sources */,
+				590260D31C40230300FB39E8 /* ServiceExtension.swift in Sources */,
 				590260641C3D9A9600FB39E8 /* ResponseCode.swift in Sources */,
 				590260691C3D9E1400FB39E8 /* ResponseCodeOption.swift in Sources */,
-				3B00E5931BA37A290011486D /* ApidocSwiftGenerator.swift in Sources */,
+				590260DD1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */,
+				590260C41C4021B600FB39E8 /* Result.swift in Sources */,
 				5902606E1C3DA00F00FB39E8 /* Service.swift in Sources */,
+				599EAB811C45A74E002DEAB3 /* SwiftType.swift in Sources */,
+				590260B81C4021B600FB39E8 /* ApidocLoader.swift in Sources */,
 				5902603B1C3D973C00FB39E8 /* Resource.swift in Sources */,
 				590260961C4019D200FB39E8 /* Operation.swift in Sources */,
+				590260B41C4021B600FB39E8 /* ApidocGenerator.swift in Sources */,
+				599D0DF71C459522003DCCF0 /* ModelGenerator.swift in Sources */,
 				590260591C3D9A0100FB39E8 /* Unions.swift in Sources */,
+				590260C01C4021B600FB39E8 /* URLLoader.swift in Sources */,
+				590260C91C4021DD00FB39E8 /* Either.swift in Sources */,
 				590260451C3D97BB00FB39E8 /* Body.swift in Sources */,
 				590260541C3D98F600FB39E8 /* Response.swift in Sources */,
-				5902607E1C3DBAD300FB39E8 /* Result.swift in Sources */,
+				590260BC1C4021B600FB39E8 /* URLConstructor.swift in Sources */,
+				590260A81C401BC300FB39E8 /* FileSystemError.swift in Sources */,
 				590260271C3D973C00FB39E8 /* Enum.swift in Sources */,
 				590260401C3D975F00FB39E8 /* Method.swift in Sources */,
-				59AA6A861C3B3122003CD1A2 /* URLLoader.swift in Sources */,
 				5902604F1C3D98C600FB39E8 /* ParameterLocation.swift in Sources */,
 				5902605E1C3D9A4B00FB39E8 /* UnionType.swift in Sources */,
+				590260D81C402AA400FB39E8 /* Generator.swift in Sources */,
 				590260791C3DB5BB00FB39E8 /* FolderBuilder.swift in Sources */,
-				59AA6AB71C3C4702003CD1A2 /* Either.swift in Sources */,
 				5902604A1C3D980B00FB39E8 /* Parameter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1242,6 +1328,7 @@
 			files = (
 				3B78C6BA1BA762FD00173EAC /* ApiEndpointTests.swift in Sources */,
 				590260831C3DBED200FB39E8 /* FolderBuilderTests.swift in Sources */,
+				590260A41C401B4900FB39E8 /* FileBuilderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1249,29 +1336,36 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				590260CF1C40223000FB39E8 /* EnumGenerator.swift in Sources */,
 				5902608A1C40157600FB39E8 /* FileBuilder.swift in Sources */,
 				5902602C1C3D973C00FB39E8 /* EnumValue.swift in Sources */,
-				59AA6A8C1C3B3874003CD1A2 /* URLConstructor.swift in Sources */,
 				590260301C3D973C00FB39E8 /* Field.swift in Sources */,
-				59AA6A821C3B30CC003CD1A2 /* ApidocLoader.swift in Sources */,
 				590260341C3D973C00FB39E8 /* Model.swift in Sources */,
+				590260D41C40230300FB39E8 /* ServiceExtension.swift in Sources */,
 				590260651C3D9A9600FB39E8 /* ResponseCode.swift in Sources */,
 				5902606A1C3D9E1400FB39E8 /* ResponseCodeOption.swift in Sources */,
-				3B78C6B61BA762CF00173EAC /* ApidocSwiftGenerator.swift in Sources */,
+				590260DE1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */,
+				590260C51C4021B600FB39E8 /* Result.swift in Sources */,
 				5902606F1C3DA00F00FB39E8 /* Service.swift in Sources */,
+				599EAB821C45A74E002DEAB3 /* SwiftType.swift in Sources */,
+				590260B91C4021B600FB39E8 /* ApidocLoader.swift in Sources */,
 				5902603C1C3D973C00FB39E8 /* Resource.swift in Sources */,
 				590260971C4019D200FB39E8 /* Operation.swift in Sources */,
+				590260B51C4021B600FB39E8 /* ApidocGenerator.swift in Sources */,
+				599D0DF81C459522003DCCF0 /* ModelGenerator.swift in Sources */,
 				5902605A1C3D9A0100FB39E8 /* Unions.swift in Sources */,
+				590260C11C4021B600FB39E8 /* URLLoader.swift in Sources */,
+				590260CA1C4021DD00FB39E8 /* Either.swift in Sources */,
 				590260461C3D97BB00FB39E8 /* Body.swift in Sources */,
 				590260551C3D98F600FB39E8 /* Response.swift in Sources */,
-				5902607F1C3DBAD300FB39E8 /* Result.swift in Sources */,
+				590260BD1C4021B600FB39E8 /* URLConstructor.swift in Sources */,
+				590260A91C401BC300FB39E8 /* FileSystemError.swift in Sources */,
 				590260281C3D973C00FB39E8 /* Enum.swift in Sources */,
 				590260411C3D975F00FB39E8 /* Method.swift in Sources */,
-				59AA6A871C3B3122003CD1A2 /* URLLoader.swift in Sources */,
 				590260501C3D98C600FB39E8 /* ParameterLocation.swift in Sources */,
 				5902605F1C3D9A4B00FB39E8 /* UnionType.swift in Sources */,
+				590260D91C402AA400FB39E8 /* Generator.swift in Sources */,
 				5902607A1C3DB5BB00FB39E8 /* FolderBuilder.swift in Sources */,
-				59AA6AB81C3C4702003CD1A2 /* Either.swift in Sources */,
 				5902604B1C3D980B00FB39E8 /* Parameter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1282,6 +1376,7 @@
 			files = (
 				3B78C6BB1BA762FD00173EAC /* ApiEndpointTests.swift in Sources */,
 				590260841C3DBED200FB39E8 /* FolderBuilderTests.swift in Sources */,
+				590260A51C401B4900FB39E8 /* FileBuilderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1289,29 +1384,36 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				590260D01C40223000FB39E8 /* EnumGenerator.swift in Sources */,
 				5902608B1C40157A00FB39E8 /* FileBuilder.swift in Sources */,
 				5902602D1C3D973C00FB39E8 /* EnumValue.swift in Sources */,
-				59AA6A8D1C3B3874003CD1A2 /* URLConstructor.swift in Sources */,
 				590260311C3D973C00FB39E8 /* Field.swift in Sources */,
-				59AA6A831C3B30CC003CD1A2 /* ApidocLoader.swift in Sources */,
 				590260351C3D973C00FB39E8 /* Model.swift in Sources */,
+				590260D51C40230300FB39E8 /* ServiceExtension.swift in Sources */,
 				590260661C3D9A9600FB39E8 /* ResponseCode.swift in Sources */,
 				5902606B1C3D9E1400FB39E8 /* ResponseCodeOption.swift in Sources */,
-				3B38DBE41BA764BA000986DF /* ApidocSwiftGenerator.swift in Sources */,
+				590260DF1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */,
+				590260C61C4021B600FB39E8 /* Result.swift in Sources */,
 				590260701C3DA00F00FB39E8 /* Service.swift in Sources */,
+				599EAB831C45A74E002DEAB3 /* SwiftType.swift in Sources */,
+				590260BA1C4021B600FB39E8 /* ApidocLoader.swift in Sources */,
 				5902603D1C3D973C00FB39E8 /* Resource.swift in Sources */,
 				590260981C4019D200FB39E8 /* Operation.swift in Sources */,
+				590260B61C4021B600FB39E8 /* ApidocGenerator.swift in Sources */,
+				599D0DF91C459522003DCCF0 /* ModelGenerator.swift in Sources */,
 				5902605B1C3D9A0100FB39E8 /* Unions.swift in Sources */,
+				590260C21C4021B600FB39E8 /* URLLoader.swift in Sources */,
+				590260CB1C4021DD00FB39E8 /* Either.swift in Sources */,
 				590260471C3D97BB00FB39E8 /* Body.swift in Sources */,
 				590260561C3D98F600FB39E8 /* Response.swift in Sources */,
-				590260801C3DBAD300FB39E8 /* Result.swift in Sources */,
+				590260BE1C4021B600FB39E8 /* URLConstructor.swift in Sources */,
+				590260AA1C401BC300FB39E8 /* FileSystemError.swift in Sources */,
 				590260291C3D973C00FB39E8 /* Enum.swift in Sources */,
 				590260421C3D975F00FB39E8 /* Method.swift in Sources */,
-				59AA6A881C3B3122003CD1A2 /* URLLoader.swift in Sources */,
 				590260511C3D98C600FB39E8 /* ParameterLocation.swift in Sources */,
 				590260601C3D9A4B00FB39E8 /* UnionType.swift in Sources */,
+				590260DA1C402AA400FB39E8 /* Generator.swift in Sources */,
 				5902607B1C3DB5BB00FB39E8 /* FolderBuilder.swift in Sources */,
-				59AA6AB91C3C4702003CD1A2 /* Either.swift in Sources */,
 				5902604C1C3D980B00FB39E8 /* Parameter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
