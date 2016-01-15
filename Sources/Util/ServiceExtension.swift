@@ -19,6 +19,17 @@ public extension Service {
             return false
         }
     }
+
+//    public func getEnum(typeName: String) -> Enum {
+//        switch type {
+//        case .Enum:
+//            return self.enums?.contains { e in
+//                return e.name == typeName
+//                } ?? false
+//        default:
+//            return false
+//        }
+//    }
 }
 
 public enum ApidocRepresentation: String {

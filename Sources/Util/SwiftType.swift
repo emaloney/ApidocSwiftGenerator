@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftPoet
 
 // Maps Apidoc types to swift types
 public indirect enum SwiftType {
@@ -24,18 +25,15 @@ public indirect enum SwiftType {
     case Dictionary(SwiftType, SwiftType)
     case Array(SwiftType)
     case ExternalType(String)
-    case ImportedType(String)
+    case ImportedType(String, String) // Namespace, Name
 
-    public init?(apidocType: String) {
+    public init?(apidocType: String, imports: [Import]?) {
         if SwiftType.isDictionary(apidocType) {
-            let chars = apidocType.characters
-            let endIndex = chars.endIndex.predecessor()
-            let splitIndex = apidocType.rangeOfString(":")!.startIndex
+            let endIndex = apidocType.rangeOfString("]")!.startIndex
+            let startIndex = apidocType.rangeOfString("[")!.endIndex
+            let innerTypeStr = apidocType.substringWithRange(Range(start: startIndex, end: endIndex))
 
-            let leftInnerType = apidocType.substringWithRange(Range(start: chars.startIndex.successor(), end: splitIndex))
-            let rightInnerType = apidocType.substringWithRange(Range(start: splitIndex.successor(), end: endIndex))
-
-            self = .Dictionary(SwiftType(apidocType: leftInnerType)!, SwiftType(apidocType: rightInnerType)!)
+            self = .Dictionary(SwiftType(apidocType: innerTypeStr, imports: imports)!, SwiftType(apidocType: innerTypeStr, imports: imports)!)
         }
         else if SwiftType.isArray(apidocType) {
             let chars = apidocType.characters
@@ -44,7 +42,7 @@ public indirect enum SwiftType {
 
             let innerType = apidocType.substringWithRange(range)
 
-            self = .Array(SwiftType(apidocType: innerType)!)
+            self = .Array(SwiftType(apidocType: innerType, imports: imports)!)
         } else {
             switch apidocType {
             case "boolean": self = .Boolean; break;
@@ -59,12 +57,11 @@ public indirect enum SwiftType {
             case "unit": self = .Unit; break;
             case "uuid": self = .UUID; break;
             default:
-                if SwiftType.isImportedType(apidocType) {
-                    self = .ImportedType(apidocType)
+                if let (namespace, name) = SwiftType.getImportedNamespace(apidocType, imports: imports) {
+                    self = .ImportedType(namespace, name)
                 } else {
                     self = .ExternalType(apidocType)
                 }
-
             }
         }
     }
@@ -92,8 +89,8 @@ public indirect enum SwiftType {
             return "[\(left.swiftTypeString) : \(right.swiftTypeString)]"
         case .Array(let inner):
             return "[\(inner.swiftTypeString)]"
-        case .ImportedType(let s):
-            return s
+        case .ImportedType(_, let name):
+            return name
         case .ExternalType(let s):
             return s
         default:
@@ -122,7 +119,7 @@ public indirect enum SwiftType {
         let range = NSRange(location: 0, length: keyword.characters.count)
 
         do {
-            dictionaryMatch = try NSRegularExpression(pattern: "^\\[.+:.+\\]\\??$", options: .CaseInsensitive)
+            dictionaryMatch = try NSRegularExpression(pattern: "^map\\[.+\\]$", options: .CaseInsensitive)
         } catch {
             dictionaryMatch = nil // this should never happen
         }
@@ -130,16 +127,19 @@ public indirect enum SwiftType {
         return dictionaryMatch?.numberOfMatchesInString(keyword, options: .Anchored, range: range) == 1
     }
 
-    private static func isImportedType(apidocType: String) -> Bool {
-        let regex = importedTypeRegex()
-        return regex.matchesInString(apidocType, options: [], range: NSMakeRange(0, apidocType.characters.count)).count > 0
-    }
-
-    private static func importedTypeRegex() -> NSRegularExpression {
-        do {
-            return try NSRegularExpression(pattern: "com\\.", options: NSRegularExpressionOptions.CaseInsensitive)
-        } catch {
-            return NSRegularExpression() // This should never happen
+    private static func getImportedNamespace(apidocType: String, imports: [Import]?) -> (String, String)? {
+        var result: (String, String)? = nil
+        imports?.forEach { i in
+            do {
+                let regex = try NSRegularExpression(pattern: i.namespace, options: NSRegularExpressionOptions.CaseInsensitive)
+                if regex.matchesInString(apidocType, options: [], range: NSMakeRange(0, apidocType.characters.count)).count > 0 {
+                    let name = apidocType.componentsSeparatedByString(".").last!
+                    result = (PoetUtil.cleanTypeName(i.application.key), PoetUtil.cleanTypeName(name))
+                }
+            } catch {
+                result = nil
+            }
         }
+        return result
     }
 }

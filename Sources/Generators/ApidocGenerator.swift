@@ -11,10 +11,10 @@ import SwiftPoet
 import Foundation
 
 public struct ApidocGenerator: Generator {
-    public typealias ResultType = Application
+    public typealias ResultType = GeneratorApplication
 
-    public static func generate(service: Service) -> Application {
-        return Application(
+    public static func generate(service: Service) -> GeneratorApplication {
+        return GeneratorApplication(
             enums: EnumGenerator.generate(service),
             models: ModelGenerator.generate(service),
             resources: nil,
@@ -23,7 +23,7 @@ public struct ApidocGenerator: Generator {
     }
 }
 
-public struct Application {
+public struct GeneratorApplication {
     let enums: [Apidoc.FileName : EnumSpec]?
     let models: [Apidoc.FileName : StructSpec]?
     let resources: [Apidoc.FileName : StructSpec]?
