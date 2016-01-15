@@ -94,8 +94,21 @@ case ImportedType(String, String) // Namespace, Name
             cb.addCodeBlock(SimpleTypeGenerator.generateParseJsonGuid(field))
         case .Dictionary:
             cb.addCodeBlock(SimpleTypeGenerator.generateParseJsonObject(field))
-        case .Array(let internalType): break
-            // TODO
+        case .Array(let innerType):
+            switch innerType {
+            case .ExternalType(let typeName):
+                if service.contains(.Enum, typeName: typeName) {
+                    cb.addCodeBlock(ArrayGenerator.generateParseArrayJson(typeName, fieldName: field.name, required: field.required, isModel: false))
+                } else if service.contains(.Model, typeName: typeName) {
+                    cb.addCodeBlock(ArrayGenerator.generateParseArrayJson(typeName, fieldName: field.name, required: field.required, isModel: true))
+                }
+            case .Array:
+                fatalError() // Cannot handle array of arrays
+            case .ImportedType(_, let name):
+                break // determine if its an enum or a model
+            default:
+                break; // TODO simple type array stuffs
+            }
         }
 
         return cb.build()

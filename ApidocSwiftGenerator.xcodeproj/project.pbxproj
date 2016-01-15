@@ -189,6 +189,13 @@
 		59DE1E7E1C4844FC002B1AFA /* SimpleGeneratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E7D1C4844FC002B1AFA /* SimpleGeneratorTest.swift */; };
 		59DE1E7F1C4844FC002B1AFA /* SimpleGeneratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E7D1C4844FC002B1AFA /* SimpleGeneratorTest.swift */; };
 		59DE1E801C4844FC002B1AFA /* SimpleGeneratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E7D1C4844FC002B1AFA /* SimpleGeneratorTest.swift */; };
+		59DE1E951C4987DF002B1AFA /* ArrayGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E941C4987DF002B1AFA /* ArrayGenerator.swift */; };
+		59DE1E961C4987DF002B1AFA /* ArrayGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E941C4987DF002B1AFA /* ArrayGenerator.swift */; };
+		59DE1E971C4987DF002B1AFA /* ArrayGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E941C4987DF002B1AFA /* ArrayGenerator.swift */; };
+		59DE1E981C4987DF002B1AFA /* ArrayGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E941C4987DF002B1AFA /* ArrayGenerator.swift */; };
+		59DE1E9A1C49A50F002B1AFA /* ArrayGeneratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E991C49A50F002B1AFA /* ArrayGeneratorTest.swift */; };
+		59DE1E9B1C49A50F002B1AFA /* ArrayGeneratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E991C49A50F002B1AFA /* ArrayGeneratorTest.swift */; };
+		59DE1E9C1C49A50F002B1AFA /* ArrayGeneratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E991C49A50F002B1AFA /* ArrayGeneratorTest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -529,6 +536,8 @@
 		59DE1E611C47136A002B1AFA /* SimpleTypeGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleTypeGenerator.swift; sourceTree = "<group>"; };
 		59DE1E661C47F745002B1AFA /* SwiftTypeTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftTypeTest.swift; sourceTree = "<group>"; };
 		59DE1E7D1C4844FC002B1AFA /* SimpleGeneratorTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleGeneratorTest.swift; sourceTree = "<group>"; };
+		59DE1E941C4987DF002B1AFA /* ArrayGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayGenerator.swift; sourceTree = "<group>"; };
+		59DE1E991C49A50F002B1AFA /* ArrayGeneratorTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayGeneratorTest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -659,6 +668,7 @@
 				590260A21C401B4900FB39E8 /* FileBuilderTests.swift */,
 				59DE1E661C47F745002B1AFA /* SwiftTypeTest.swift */,
 				59DE1E7D1C4844FC002B1AFA /* SimpleGeneratorTest.swift */,
+				59DE1E991C49A50F002B1AFA /* ArrayGeneratorTest.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -758,6 +768,7 @@
 				59DE1E321C46F3B8002B1AFA /* FieldGenerator.swift */,
 				59DE1E401C46F9CB002B1AFA /* MethodGenerator.swift */,
 				59DE1E611C47136A002B1AFA /* SimpleTypeGenerator.swift */,
+				59DE1E941C4987DF002B1AFA /* ArrayGenerator.swift */,
 			);
 			path = Generators;
 			sourceTree = "<group>";
@@ -1295,6 +1306,7 @@
 				590260321C3D973C00FB39E8 /* Model.swift in Sources */,
 				590260D21C40230300FB39E8 /* ServiceExtension.swift in Sources */,
 				59DE1E411C46F9CB002B1AFA /* MethodGenerator.swift in Sources */,
+				59DE1E951C4987DF002B1AFA /* ArrayGenerator.swift in Sources */,
 				590260631C3D9A9600FB39E8 /* ResponseCode.swift in Sources */,
 				590260681C3D9E1400FB39E8 /* ResponseCodeOption.swift in Sources */,
 				590260DC1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */,
@@ -1331,6 +1343,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B78C6B91BA762FD00173EAC /* ApiEndpointTests.swift in Sources */,
+				59DE1E9A1C49A50F002B1AFA /* ArrayGeneratorTest.swift in Sources */,
 				59DE1E671C47F745002B1AFA /* SwiftTypeTest.swift in Sources */,
 				59DE1E7E1C4844FC002B1AFA /* SimpleGeneratorTest.swift in Sources */,
 				590260821C3DBED200FB39E8 /* FolderBuilderTests.swift in Sources */,
@@ -1351,6 +1364,7 @@
 				590260331C3D973C00FB39E8 /* Model.swift in Sources */,
 				590260D31C40230300FB39E8 /* ServiceExtension.swift in Sources */,
 				59DE1E421C46F9CB002B1AFA /* MethodGenerator.swift in Sources */,
+				59DE1E961C4987DF002B1AFA /* ArrayGenerator.swift in Sources */,
 				590260641C3D9A9600FB39E8 /* ResponseCode.swift in Sources */,
 				590260691C3D9E1400FB39E8 /* ResponseCodeOption.swift in Sources */,
 				590260DD1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */,
@@ -1387,6 +1401,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B78C6BA1BA762FD00173EAC /* ApiEndpointTests.swift in Sources */,
+				59DE1E9B1C49A50F002B1AFA /* ArrayGeneratorTest.swift in Sources */,
 				59DE1E681C47F745002B1AFA /* SwiftTypeTest.swift in Sources */,
 				59DE1E7F1C4844FC002B1AFA /* SimpleGeneratorTest.swift in Sources */,
 				590260831C3DBED200FB39E8 /* FolderBuilderTests.swift in Sources */,
@@ -1407,6 +1422,7 @@
 				590260341C3D973C00FB39E8 /* Model.swift in Sources */,
 				590260D41C40230300FB39E8 /* ServiceExtension.swift in Sources */,
 				59DE1E431C46F9CB002B1AFA /* MethodGenerator.swift in Sources */,
+				59DE1E971C4987DF002B1AFA /* ArrayGenerator.swift in Sources */,
 				590260651C3D9A9600FB39E8 /* ResponseCode.swift in Sources */,
 				5902606A1C3D9E1400FB39E8 /* ResponseCodeOption.swift in Sources */,
 				590260DE1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */,
@@ -1443,6 +1459,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B78C6BB1BA762FD00173EAC /* ApiEndpointTests.swift in Sources */,
+				59DE1E9C1C49A50F002B1AFA /* ArrayGeneratorTest.swift in Sources */,
 				59DE1E691C47F745002B1AFA /* SwiftTypeTest.swift in Sources */,
 				59DE1E801C4844FC002B1AFA /* SimpleGeneratorTest.swift in Sources */,
 				590260841C3DBED200FB39E8 /* FolderBuilderTests.swift in Sources */,
@@ -1463,6 +1480,7 @@
 				590260351C3D973C00FB39E8 /* Model.swift in Sources */,
 				590260D51C40230300FB39E8 /* ServiceExtension.swift in Sources */,
 				59DE1E441C46F9CB002B1AFA /* MethodGenerator.swift in Sources */,
+				59DE1E981C4987DF002B1AFA /* ArrayGenerator.swift in Sources */,
 				590260661C3D9A9600FB39E8 /* ResponseCode.swift in Sources */,
 				5902606B1C3D9E1400FB39E8 /* ResponseCodeOption.swift in Sources */,
 				590260DF1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */,
