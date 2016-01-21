@@ -143,7 +143,7 @@ public struct ArrayGenerator {
                     }
                 }
                 return ArrayGenerator.toJsonCodeBlock(field) {
-                    return ArrayGenerator.rightSideWithMap(field) { retur n CodeBlock.builder().addEmitObject(.Literal, any: "\(field.cammelCaseName).\(rightSide)").build() }
+                    return ArrayGenerator.rightSideWithMap(field) { return CodeBlock.builder().addEmitObject(.Literal, any: "\(field.cammelCaseName).\(rightSide)").build() }
                 }
             }
         }
