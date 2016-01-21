@@ -139,14 +139,15 @@ class SimpleGeneratorTest: XCTestCase {
         let field = Field(name: "test_field_name", type: "uuid", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
         let result = SimpleTypeGenerator.generateParseJsonGuid(field).toString()
 
-        let test = "let testFieldNameStr = payload[\"test_field_name\"] as? String\n" +
+        let test =
+        "let testFieldNameStr = payload[\"test_field_name\"] as? String\n" +
         "var testFieldName: NSUUID? = nil\n" +
         "if let testFieldNameStr = testFieldNameStr {\n" +
-        "\n" +
         "    testFieldName = NSUUID(string: testFieldNameStr)\n" +
         "}\n"
 
-//        print(result)
+        print(result)
+        print(test)
 
         XCTAssertEqual(result, test)
     }

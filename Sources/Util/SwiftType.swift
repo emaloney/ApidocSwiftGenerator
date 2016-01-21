@@ -24,8 +24,8 @@ public indirect enum SwiftType {
     case UUID
     case Dictionary(SwiftType, SwiftType)
     case Array(SwiftType)
-    case ExternalType(String)
-    case ImportedType(String, String) // Namespace, Name
+    case ExternalType(String) // typeName
+    case ImportedType(Namespace, String) // Namespace, typeName
 
     public init?(apidocType: String, imports: [Import]?) {
         if SwiftType.isDictionary(apidocType) {
@@ -119,7 +119,7 @@ public indirect enum SwiftType {
         let range = NSRange(location: 0, length: keyword.characters.count)
 
         do {
-            dictionaryMatch = try NSRegularExpression(pattern: "^map\\[.+\\]$", options: .CaseInsensitive)
+            dictionaryMatch = try NSRegularExpression(pattern: "^map\\[.+\\]$", options: NSRegularExpressionOptions.CaseInsensitive)
         } catch {
             dictionaryMatch = nil // this should never happen
         }
@@ -127,14 +127,14 @@ public indirect enum SwiftType {
         return dictionaryMatch?.numberOfMatchesInString(keyword, options: .Anchored, range: range) == 1
     }
 
-    private static func getImportedNamespace(apidocType: String, imports: [Import]?) -> (String, String)? {
-        var result: (String, String)? = nil
-        imports?.forEach { i in
+    private static func getImportedNamespace(apidocType: String, imports: [Import]?) -> (Namespace, String)? {
+        var result: (Namespace, String)? = nil
+        imports?.forEach { imprt in
             do {
-                let regex = try NSRegularExpression(pattern: i.namespace, options: NSRegularExpressionOptions.CaseInsensitive)
+                let regex = try NSRegularExpression(pattern: imprt.namespace, options: NSRegularExpressionOptions.CaseInsensitive)
                 if regex.matchesInString(apidocType, options: [], range: NSMakeRange(0, apidocType.characters.count)).count > 0 {
                     let name = apidocType.componentsSeparatedByString(".").last!
-                    result = (PoetUtil.cleanTypeName(i.application.key), PoetUtil.cleanTypeName(name))
+                    result = (Namespace(namespace: imprt.namespace, applicationKey: imprt.application.key), PoetUtil.cleanTypeName(name))
                 }
             } catch {
                 result = nil

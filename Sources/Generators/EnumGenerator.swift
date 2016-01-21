@@ -42,15 +42,16 @@ public struct EnumGenerator: Generator {
 
     /*
     let fieldNameStr = try payload.requiredString(fieldName)
-    let fieldName = Enum(rawValue: fieldNameStr)
-    guard fieldName != nil  else {
-        throw DataTransactionError.FormatError("Error creating Enum")
+    let fieldNameOptional = Enum(rawValue: fieldNameStr)
+    guard let fieldName = fieldNameOptional else {
+        throw DataTransactionError.FormatError("Error creating Enum with key \(fieldNameStr)")
     }
     */
     private static func generateEnumParseJsonBlockRequired(field: Field) -> CodeBlock {
         let globalCB = CodeBlock.builder()
-        let strVariable = "\(PoetUtil.cleanCammelCaseString(field.name))Str"
         let cammelCaseName = PoetUtil.cleanCammelCaseString(field.name)
+        let strVariable = "\(cammelCaseName)Str"
+        let optionalVariable = "\(cammelCaseName)Optional"
         let capitalizeName = PoetUtil.cleanTypeName(field.name)
 
         globalCB.addCodeBlock(
@@ -62,13 +63,13 @@ public struct EnumGenerator: Generator {
         let cb = CodeBlock.builder()
         cb.addEmitObject(
             .Literal,
-            any: "let \(cammelCaseName) = \(capitalizeName)(rawValue: \(strVariable))!")
+            any: "let \(optionalVariable) = \(capitalizeName)(rawValue: \(strVariable))")
 
-        let left = CodeBlock.builder().addEmitObject(.Literal, any: cammelCaseName).build()
-        let right = CodeBlock.builder().addEmitObject(.Literal, any: "nil").build()
-        let compare = ComparisonList(lhs: left, comparator: .Equals, rhs: right)
+        let left = CodeBlock.builder().addEmitObject(.Literal, any: "let \(cammelCaseName)").build()
+        let right = CodeBlock.builder().addEmitObject(.Literal, any: optionalVariable).build()
+        let compare = ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)
         let body = CodeBlock.builder().addEmitObject(.Literal,
-            any: "throw DataTransactionError.FormatError(\"Error creating \(capitalizeName) with key \(field.name)\"").build()
+            any: "throw DataTransactionError.FormatError(\"Error creating \(capitalizeName) with key \\(\(strVariable))\")").build()
         let controlFlow = ControlFlow.guardControlFlow(body, compare)
 
         cb.addCodeBlock(controlFlow)
@@ -121,5 +122,21 @@ public struct EnumGenerator: Generator {
         globalCB.addCodeBlock(cb.build())
         
         return globalCB.build()
+    }
+
+    /*
+    resultJSON["field_name"] = json.rawValue
+    */
+    public static func toJsonFunction(field: Field) -> CodeBlock {
+        return ToJsonFunctionGenerator.generate(field) { field in
+            return EnumGenerator.toJsonCodeBlock(field.name)
+        }
+    }
+
+    internal static func toJsonCodeBlock(fieldName: String) -> CodeBlock {
+        let cammelCaseName = PoetUtil.cleanCammelCaseString(fieldName)
+        return CodeBlock.builder().addEmitObject(.Literal, any:
+            "\(MethodGenerator.toJSONVarName)[\(fieldName)] = \(cammelCaseName).rawValue"
+            ).build()
     }
 }

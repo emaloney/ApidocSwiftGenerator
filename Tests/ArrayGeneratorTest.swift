@@ -22,29 +22,117 @@ class ArrayGeneratorTest: XCTestCase {
 
     func testRequiredModel() {
 
-        let cb = ArrayGenerator.generateParseArrayJson("Item", fieldName: "unshppable_items", required: true, isModel: true)
+        let cb = ArrayGenerator.generateParseArrayModelJson("Item", fieldName: "unshippable_items", required: true, canThrow: true)
 
-        print(cb.toString())
-        
+        let result =
+        "let unshippableItems = try payload.requiredArrayWithType(\"unshippable_items\") {\n" +
+        "    ( json: NSDictionary ) throws -> Item in\n" +
+        "        Item(payload: json)\n}\n"
+
+//        print(cb.toString())
+//        print(result)
+
+        XCTAssertEqual(cb.toString(), result)
     }
 
     func testOptionalModel() {
 
-        let cb = ArrayGenerator.generateParseArrayJson("PaymentMethodType", fieldName: "payment_method_types", required: false, isModel: true)
+        let cb = ArrayGenerator.generateParseArrayModelJson("PaymentMethodType", fieldName: "payment_method_types", required: false, canThrow: false)
 
+        let result =
+        "let paymentMethodTypes = try payload.optionalArrayWithType(\"payment_method_types\") {\n" +
+        "    ( json: NSDictionary ) throws -> PaymentMethodType in\n" +
+        "        PaymentMethodType(payload: json)\n}\n"
+
+//        print(cb.toString())
+//        print(result)
+
+        XCTAssertEqual(cb.toString(), result)
+    }
+
+    func testRequiredEnum() {
+
+        let cb = ArrayGenerator.generateParseArrayEnumJson("Item", fieldName: "unshippable_items", required: true)
+
+        let result =
+        "let unshippableItems = try payload.requiredArrayWithType(\"unshippable_items\") {\n" +
+        "    ( rawValue: NSString ) throws -> Item? in\n" +
+        "        Item(rawValue: rawValue as String)\n}\n"
+
+//        print(result)
+//        print(cb.toString())
+
+        XCTAssertEqual(cb.toString(), result)
+
+    }
+
+    func testOptionalEnum() {
+
+        let cb = ArrayGenerator.generateParseArrayEnumJson("PaymentMethodType", fieldName: "payment_method_types", required: false)
+
+        let result =
+        "let paymentMethodTypes = try payload.optionalArrayWithType(\"payment_method_types\") {\n" +
+        "    ( rawValue: NSString ) throws -> PaymentMethodType? in\n" +
+        "        PaymentMethodType(rawValue: rawValue as String)\n}\n"
+
+//        print(cb.toString())
+//        print(result)
+
+        XCTAssertEqual(cb.toString(), result)
+        
+    }
+
+    func testRequiredSimpleType() {
+
+        let cb = ArrayGenerator.generateParseArraySimpleTypeJson("Item", fieldName: "unshippable_items", required: true)
+
+        let result = "let unshippableItems = try payload.requiredArray(\"unshippable_items\").flatMap { $0 as? Item }"
+
+        print(result)
         print(cb.toString())
 
+        XCTAssertEqual(cb.toString(), result)
+
+    }
+
+    func testOptionalSimpleType() {
+
+        let cb = ArrayGenerator.generateParseArraySimpleTypeJson("String", fieldName: "payment_method_types", required: false)
+
+        let result = "let paymentMethodTypes = payload[\"payment_method_types\"] as? [String]"
+
+        print(cb.toString())
+        print(result)
+
+        XCTAssertEqual(cb.toString(), result)
+        
     }
 
     func testRequiredModelParseJson() {
         let field = Field(name: "test_field_name", type: "test_type", description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
+        let cb = ModelGenerator.generateParseModelJson(field)
+        let result =
+        "\nlet testFieldNameJson = try payload.requiredDictionary(\"test_field_name\")\n" +
+        "let testFieldName = try TestType(payload: testFieldNameJson)"
 
-        print(ModelGenerator.generateParseModelJson(field).toString())
+        print(result)
+        print(cb.toString())
+
+        XCTAssertEqual(cb.toString(), result)
     }
 
     func testOptionalModelParseJson() {
         let field = Field(name: "test_field_name", type: "test_type", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
 
+        let cb = ModelGenerator.generateParseModelJson(field)
+        let result =
+        "\nvar testFieldName: TestType? = nil\n" +
+        "if let testFieldNameJson = payload[\"test_field_name\"] as? NSDictionary {\n" +
+        "    testFieldName = TestType(payload: testFieldNameJson)\n}\n"
+
+        print(result)
         print(ModelGenerator.generateParseModelJson(field).toString())
+
+        XCTAssertEqual(cb.toString(), result)
     }
 }

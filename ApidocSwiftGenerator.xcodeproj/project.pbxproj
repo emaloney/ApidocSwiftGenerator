@@ -196,6 +196,22 @@
 		59DE1E9A1C49A50F002B1AFA /* ArrayGeneratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E991C49A50F002B1AFA /* ArrayGeneratorTest.swift */; };
 		59DE1E9B1C49A50F002B1AFA /* ArrayGeneratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E991C49A50F002B1AFA /* ArrayGeneratorTest.swift */; };
 		59DE1E9C1C49A50F002B1AFA /* ArrayGeneratorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E991C49A50F002B1AFA /* ArrayGeneratorTest.swift */; };
+		59DE1EAC1C4FECD4002B1AFA /* ModelExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1EAB1C4FECD4002B1AFA /* ModelExtension.swift */; };
+		59DE1EAD1C4FECD4002B1AFA /* ModelExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1EAB1C4FECD4002B1AFA /* ModelExtension.swift */; };
+		59DE1EAE1C4FECD4002B1AFA /* ModelExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1EAB1C4FECD4002B1AFA /* ModelExtension.swift */; };
+		59DE1EAF1C4FECD4002B1AFA /* ModelExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1EAB1C4FECD4002B1AFA /* ModelExtension.swift */; };
+		59DE1EC91C503585002B1AFA /* ToJsonFunctionGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1EC81C503585002B1AFA /* ToJsonFunctionGenerator.swift */; };
+		59DE1ECA1C503585002B1AFA /* ToJsonFunctionGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1EC81C503585002B1AFA /* ToJsonFunctionGenerator.swift */; };
+		59DE1ECB1C503585002B1AFA /* ToJsonFunctionGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1EC81C503585002B1AFA /* ToJsonFunctionGenerator.swift */; };
+		59DE1ECC1C503585002B1AFA /* ToJsonFunctionGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1EC81C503585002B1AFA /* ToJsonFunctionGenerator.swift */; };
+		59DE1ECE1C5040C7002B1AFA /* FieldExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1ECD1C5040C7002B1AFA /* FieldExtension.swift */; };
+		59DE1ECF1C5040C7002B1AFA /* FieldExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1ECD1C5040C7002B1AFA /* FieldExtension.swift */; };
+		59DE1ED01C5040C7002B1AFA /* FieldExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1ECD1C5040C7002B1AFA /* FieldExtension.swift */; };
+		59DE1ED11C5040C7002B1AFA /* FieldExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1ECD1C5040C7002B1AFA /* FieldExtension.swift */; };
+		59DE1ED31C50461D002B1AFA /* Namespace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1ED21C50461D002B1AFA /* Namespace.swift */; };
+		59DE1ED41C50461D002B1AFA /* Namespace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1ED21C50461D002B1AFA /* Namespace.swift */; };
+		59DE1ED51C50461D002B1AFA /* Namespace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1ED21C50461D002B1AFA /* Namespace.swift */; };
+		59DE1ED61C50461D002B1AFA /* Namespace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1ED21C50461D002B1AFA /* Namespace.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -538,6 +554,10 @@
 		59DE1E7D1C4844FC002B1AFA /* SimpleGeneratorTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleGeneratorTest.swift; sourceTree = "<group>"; };
 		59DE1E941C4987DF002B1AFA /* ArrayGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayGenerator.swift; sourceTree = "<group>"; };
 		59DE1E991C49A50F002B1AFA /* ArrayGeneratorTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayGeneratorTest.swift; sourceTree = "<group>"; };
+		59DE1EAB1C4FECD4002B1AFA /* ModelExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelExtension.swift; sourceTree = "<group>"; };
+		59DE1EC81C503585002B1AFA /* ToJsonFunctionGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ToJsonFunctionGenerator.swift; sourceTree = "<group>"; };
+		59DE1ECD1C5040C7002B1AFA /* FieldExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FieldExtension.swift; sourceTree = "<group>"; };
+		59DE1ED21C50461D002B1AFA /* Namespace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Namespace.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -769,6 +789,7 @@
 				59DE1E401C46F9CB002B1AFA /* MethodGenerator.swift */,
 				59DE1E611C47136A002B1AFA /* SimpleTypeGenerator.swift */,
 				59DE1E941C4987DF002B1AFA /* ArrayGenerator.swift */,
+				59DE1EC81C503585002B1AFA /* ToJsonFunctionGenerator.swift */,
 			);
 			path = Generators;
 			sourceTree = "<group>";
@@ -790,6 +811,9 @@
 				590260B21C4021B600FB39E8 /* Result.swift */,
 				590260D11C40230300FB39E8 /* ServiceExtension.swift */,
 				599EAB7F1C45A74E002DEAB3 /* SwiftType.swift */,
+				59DE1EAB1C4FECD4002B1AFA /* ModelExtension.swift */,
+				59DE1ECD1C5040C7002B1AFA /* FieldExtension.swift */,
+				59DE1ED21C50461D002B1AFA /* Namespace.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -1298,11 +1322,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				590260CD1C40223000FB39E8 /* EnumGenerator.swift in Sources */,
+				59DE1ED31C50461D002B1AFA /* Namespace.swift in Sources */,
 				5902608C1C40158100FB39E8 /* FileBuilder.swift in Sources */,
 				599EABD01C46B8E7002DEAB3 /* Application.swift in Sources */,
 				599EABB41C46A3BA002DEAB3 /* Import.swift in Sources */,
 				5902602A1C3D973C00FB39E8 /* EnumValue.swift in Sources */,
 				5902602E1C3D973C00FB39E8 /* Field.swift in Sources */,
+				59DE1EAC1C4FECD4002B1AFA /* ModelExtension.swift in Sources */,
 				590260321C3D973C00FB39E8 /* Model.swift in Sources */,
 				590260D21C40230300FB39E8 /* ServiceExtension.swift in Sources */,
 				59DE1E411C46F9CB002B1AFA /* MethodGenerator.swift in Sources */,
@@ -1314,8 +1340,10 @@
 				5902606D1C3DA00F00FB39E8 /* Service.swift in Sources */,
 				599EAB801C45A74E002DEAB3 /* SwiftType.swift in Sources */,
 				599EABCB1C46B65C002DEAB3 /* Organization.swift in Sources */,
+				59DE1EC91C503585002B1AFA /* ToJsonFunctionGenerator.swift in Sources */,
 				590260B71C4021B600FB39E8 /* ApidocLoader.swift in Sources */,
 				5902603A1C3D973C00FB39E8 /* Resource.swift in Sources */,
+				59DE1ECE1C5040C7002B1AFA /* FieldExtension.swift in Sources */,
 				590260951C4019D200FB39E8 /* Operation.swift in Sources */,
 				590260B31C4021B600FB39E8 /* ApidocGenerator.swift in Sources */,
 				599D0DF61C459522003DCCF0 /* ModelGenerator.swift in Sources */,
@@ -1356,11 +1384,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				590260CE1C40223000FB39E8 /* EnumGenerator.swift in Sources */,
+				59DE1ED41C50461D002B1AFA /* Namespace.swift in Sources */,
 				590260891C40157000FB39E8 /* FileBuilder.swift in Sources */,
 				599EABD11C46B8E7002DEAB3 /* Application.swift in Sources */,
 				599EABB51C46A3BA002DEAB3 /* Import.swift in Sources */,
 				5902602B1C3D973C00FB39E8 /* EnumValue.swift in Sources */,
 				5902602F1C3D973C00FB39E8 /* Field.swift in Sources */,
+				59DE1EAD1C4FECD4002B1AFA /* ModelExtension.swift in Sources */,
 				590260331C3D973C00FB39E8 /* Model.swift in Sources */,
 				590260D31C40230300FB39E8 /* ServiceExtension.swift in Sources */,
 				59DE1E421C46F9CB002B1AFA /* MethodGenerator.swift in Sources */,
@@ -1372,8 +1402,10 @@
 				5902606E1C3DA00F00FB39E8 /* Service.swift in Sources */,
 				599EAB811C45A74E002DEAB3 /* SwiftType.swift in Sources */,
 				599EABCC1C46B65C002DEAB3 /* Organization.swift in Sources */,
+				59DE1ECA1C503585002B1AFA /* ToJsonFunctionGenerator.swift in Sources */,
 				590260B81C4021B600FB39E8 /* ApidocLoader.swift in Sources */,
 				5902603B1C3D973C00FB39E8 /* Resource.swift in Sources */,
+				59DE1ECF1C5040C7002B1AFA /* FieldExtension.swift in Sources */,
 				590260961C4019D200FB39E8 /* Operation.swift in Sources */,
 				590260B41C4021B600FB39E8 /* ApidocGenerator.swift in Sources */,
 				599D0DF71C459522003DCCF0 /* ModelGenerator.swift in Sources */,
@@ -1414,11 +1446,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				590260CF1C40223000FB39E8 /* EnumGenerator.swift in Sources */,
+				59DE1ED51C50461D002B1AFA /* Namespace.swift in Sources */,
 				5902608A1C40157600FB39E8 /* FileBuilder.swift in Sources */,
 				599EABD21C46B8E7002DEAB3 /* Application.swift in Sources */,
 				599EABB61C46A3BA002DEAB3 /* Import.swift in Sources */,
 				5902602C1C3D973C00FB39E8 /* EnumValue.swift in Sources */,
 				590260301C3D973C00FB39E8 /* Field.swift in Sources */,
+				59DE1EAE1C4FECD4002B1AFA /* ModelExtension.swift in Sources */,
 				590260341C3D973C00FB39E8 /* Model.swift in Sources */,
 				590260D41C40230300FB39E8 /* ServiceExtension.swift in Sources */,
 				59DE1E431C46F9CB002B1AFA /* MethodGenerator.swift in Sources */,
@@ -1430,8 +1464,10 @@
 				5902606F1C3DA00F00FB39E8 /* Service.swift in Sources */,
 				599EAB821C45A74E002DEAB3 /* SwiftType.swift in Sources */,
 				599EABCD1C46B65C002DEAB3 /* Organization.swift in Sources */,
+				59DE1ECB1C503585002B1AFA /* ToJsonFunctionGenerator.swift in Sources */,
 				590260B91C4021B600FB39E8 /* ApidocLoader.swift in Sources */,
 				5902603C1C3D973C00FB39E8 /* Resource.swift in Sources */,
+				59DE1ED01C5040C7002B1AFA /* FieldExtension.swift in Sources */,
 				590260971C4019D200FB39E8 /* Operation.swift in Sources */,
 				590260B51C4021B600FB39E8 /* ApidocGenerator.swift in Sources */,
 				599D0DF81C459522003DCCF0 /* ModelGenerator.swift in Sources */,
@@ -1472,11 +1508,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				590260D01C40223000FB39E8 /* EnumGenerator.swift in Sources */,
+				59DE1ED61C50461D002B1AFA /* Namespace.swift in Sources */,
 				5902608B1C40157A00FB39E8 /* FileBuilder.swift in Sources */,
 				599EABD31C46B8E7002DEAB3 /* Application.swift in Sources */,
 				599EABB71C46A3BA002DEAB3 /* Import.swift in Sources */,
 				5902602D1C3D973C00FB39E8 /* EnumValue.swift in Sources */,
 				590260311C3D973C00FB39E8 /* Field.swift in Sources */,
+				59DE1EAF1C4FECD4002B1AFA /* ModelExtension.swift in Sources */,
 				590260351C3D973C00FB39E8 /* Model.swift in Sources */,
 				590260D51C40230300FB39E8 /* ServiceExtension.swift in Sources */,
 				59DE1E441C46F9CB002B1AFA /* MethodGenerator.swift in Sources */,
@@ -1488,8 +1526,10 @@
 				590260701C3DA00F00FB39E8 /* Service.swift in Sources */,
 				599EAB831C45A74E002DEAB3 /* SwiftType.swift in Sources */,
 				599EABCE1C46B65C002DEAB3 /* Organization.swift in Sources */,
+				59DE1ECC1C503585002B1AFA /* ToJsonFunctionGenerator.swift in Sources */,
 				590260BA1C4021B600FB39E8 /* ApidocLoader.swift in Sources */,
 				5902603D1C3D973C00FB39E8 /* Resource.swift in Sources */,
+				59DE1ED11C5040C7002B1AFA /* FieldExtension.swift in Sources */,
 				590260981C4019D200FB39E8 /* Operation.swift in Sources */,
 				590260B61C4021B600FB39E8 /* ApidocGenerator.swift in Sources */,
 				599D0DF91C459522003DCCF0 /* ModelGenerator.swift in Sources */,

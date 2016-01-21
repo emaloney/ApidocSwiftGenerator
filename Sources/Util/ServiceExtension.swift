@@ -7,29 +7,50 @@
 //
 
 import Foundation
+import SwiftPoet
 
 public extension Service {
     public func contains(type: ApidocRepresentation, typeName: String) -> Bool {
         switch type {
         case .Enum:
-            return self.enums?.contains { e in
-                return e.name == typeName
-            } ?? false
+            return (enums?.filter { $0.name == typeName })?.count == 1
+        case .Model:
+            return (models?.filter { $0.name == typeName })?.count == 1
         default:
             return false
         }
     }
 
-//    public func getEnum(typeName: String) -> Enum {
-//        switch type {
-//        case .Enum:
-//            return self.enums?.contains { e in
-//                return e.name == typeName
-//                } ?? false
-//        default:
-//            return false
-//        }
-//    }
+    public func contains(type: ApidocRepresentation, typeName: String, namespace: Namespace) -> Bool {
+        guard let importModel = (imports?.filter { namespace.match($0.namespace) })?.first else {
+            return false
+        }
+
+        var result = false
+
+        switch type {
+        case .Enum:
+            if (importModel.enums?.filter { PoetUtil.cleanTypeName($0) == typeName })?.count == 1 {
+                result = true
+                break
+            }
+        case .Model:
+            if (importModel.models?.filter { PoetUtil.cleanTypeName($0) == typeName })?.count == 1 {
+                result = true
+                break
+            }
+        default: break
+        }
+        return result
+    }
+
+    public func getEnum(typeName: String) -> Enum? {
+        return self.enums?.filter { $0.name == typeName }.first
+    }
+
+    public func getModel(typeName: String) -> Model? {
+        return self.models?.filter { $0.name == typeName }.first
+    }
 }
 
 public enum ApidocRepresentation: String {

@@ -10,6 +10,36 @@ import Foundation
 import SwiftPoet
 
 public struct SimpleTypeGenerator {
+    public static func generateParseJson(field: Field, swiftType: SwiftType) -> CodeBlock {
+        switch swiftType {
+        case .Boolean:
+            return SimpleTypeGenerator.generateParseJsonBool(field)
+        case .DateISO8601:
+            return SimpleTypeGenerator.generateParseJsonDate(field)
+        case .DateTimeISO8601:
+            return SimpleTypeGenerator.generateParseJsonDate(field)
+        case .Decimal:
+            return SimpleTypeGenerator.generateParseJsonDecimal(field)
+        case .Double:
+            return SimpleTypeGenerator.generateParseJsonDouble(field)
+        case .Integer:
+            return SimpleTypeGenerator.generateParseJsonInteger(field)
+        case .Long:
+            return SimpleTypeGenerator.generateParseJsonLong(field)
+        case .Object:
+            return SimpleTypeGenerator.generateParseJsonObject(field)
+        case .SwiftString:
+            return SimpleTypeGenerator.generateParseJsonString(field)
+        case .Unit:
+            return SimpleTypeGenerator.generateParseJsonObject(field)
+        case .UUID:
+            return SimpleTypeGenerator.generateParseJsonGuid(field)
+        case .Dictionary:
+            return SimpleTypeGenerator.generateParseJsonObject(field)
+        default: return CodeBlock.builder().build()
+        }
+    }
+
     private static func generateParseJsonGeneric(field: Field, requiredType: String, type: String) -> CodeBlock {
         let cammelCaseName = PoetUtil.cleanCammelCaseString(field.name)
         /*
@@ -253,5 +283,25 @@ public struct SimpleTypeGenerator {
         globalCB.addCodeBlock(elseControlFlow)
 
         return globalCB.build()
+    }
+
+    public static func toJsonCodeBlock(field: Field, swiftType: SwiftType) -> CodeBlock {
+        let rightSide = SimpleTypeGenerator.toString(swiftType)
+        let rightSideStr = rightSide == nil ? field.cammelCaseName : "\(field.cammelCaseName).\(rightSide!)"
+        return SimpleTypeGenerator.requiredToJsonCodeBlock(field.name, rightSide: rightSideStr)
+    }
+
+    private static func requiredToJsonCodeBlock(fieldName: String, rightSide: String) -> CodeBlock {
+        return CodeBlock.builder().addEmitObject(.Literal, any:
+            "\(MethodGenerator.toJSONVarName)[\"\(fieldName)\"] = \(rightSide)"
+            ).build()
+    }
+
+    public static func toString(swiftType: SwiftType) -> String? {
+        switch swiftType {
+        case .UUID: return "UUIDString"
+        case .DateISO8601, .DateTimeISO8601: return "toasISO8601()"
+        default: return nil
+        }
     }
 }
