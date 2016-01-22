@@ -26,8 +26,6 @@ public class FileBuilder {
             throw FileSystemError.InvalidFileName(fullFileName)
         }
 
-        print(fileUrl)
-
         guard let fileData = contents.dataUsingEncoding(NSUTF8StringEncoding) else {
             throw FileSystemError.InvalidFileContents
         }

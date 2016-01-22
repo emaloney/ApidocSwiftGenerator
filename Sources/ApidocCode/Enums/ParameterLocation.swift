@@ -8,8 +8,8 @@
 
 import Foundation
 
-public enum ParameterLocation {
-    case Path
-    case Query
-    case Form
+public enum ParameterLocation: String {
+    case Path = "Path"
+    case Query = "Query"
+    case Form = "Form"
 }

@@ -8,6 +8,6 @@
 
 import Foundation
 
-public enum ResponseCodeOption {
-    case Default
+public enum ResponseCodeOption: String {
+    case Default = "Default"
 }

@@ -41,37 +41,31 @@ public struct SimpleTypeGenerator {
     }
 
     private static func generateParseJsonGeneric(field: Field, requiredType: String, type: String) -> CodeBlock {
-        let cammelCaseName = PoetUtil.cleanCammelCaseString(field.name)
         /*
         let fieldName = try payload.required`requiredType`(field_name)
         */
         if field.required {
-            return CodeBlock.builder().addEmitObject(.Literal,
-                any: "let \(cammelCaseName) = try payload.required\(requiredType)(\"\(field.name)\")").build()
+            return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = try payload.required\(requiredType)(\"\(field.name)\")").build()
         } else {
         /*
         let fieldName = payload["field_name"] as? Type
         */
-            return CodeBlock.builder().addEmitObject(.Literal,
-                any: "let \(cammelCaseName) = payload[\"\(field.name)\"] as? \(type)").build()
+            return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = payload[\"\(field.name)\"] as? \(type)").build()
         }
     }
 
     public static func generateParseJsonBool(field: Field) -> CodeBlock {
-        let cammelCaseName = PoetUtil.cleanCammelCaseString(field.name)
         let requiredType = "Bool"
         /*
         let fieldName = try payload.requiredBool(field_name)
         */
         if field.required {
-            return CodeBlock.builder().addEmitObject(.Literal,
-                any: "let \(cammelCaseName) = try payload.required\(requiredType)(\"\(field.name)\")").build()
+            return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = try payload.required\(requiredType)(\"\(field.name)\")").build()
         } else {
         /*
         let fieldName = payload.optionalBool(field_name)
         */
-            return CodeBlock.builder().addEmitObject(.Literal,
-                any: "let \(cammelCaseName) = try payload.optional\(requiredType)(\"\(field.name)\")").build()
+            return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = try payload.optional\(requiredType)(\"\(field.name)\")").build()
         }
     }
 
@@ -99,21 +93,16 @@ public struct SimpleTypeGenerator {
         let fieldName = nil
     */
     public static func generateParseJsonUnit(field: Field) -> CodeBlock {
-        let cammelCaseName = PoetUtil.cleanCammelCaseString(field.name)
-
-        return CodeBlock.builder().addEmitObject(.Literal,
-            any: "let \(cammelCaseName) = nil").build()
+        return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = nil").build()
     }
 
     public static func generateParseJsonGuid(field: Field) -> CodeBlock {
-        let cammelCaseName = PoetUtil.cleanCammelCaseString(field.name)
-        let fieldNameStr = "\(cammelCaseName)Str"
+        let fieldNameStr = "\(field.cammelCaseName)Str"
         /*
         let fieldName = try payload.requiredGUID(field_name)
         */
         if field.required {
-            return CodeBlock.builder().addEmitObject(.Literal,
-                any: "let \(cammelCaseName) = try payload.requiredGUID(\"\(field.name)\")").build()
+            return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = try payload.requiredGUID(\"\(field.name)\")").build()
         } else {
             /*
             let fieldNameStr = payload["field_name"] as? String
@@ -122,23 +111,19 @@ public struct SimpleTypeGenerator {
                 fieldName = NSUUID(string: fieldNameStr)
             }
             */
-            let globalCB = CodeBlock.builder()
-            globalCB.addEmitObject(.Literal,
-                any: "let \(fieldNameStr) = payload[\"\(field.name)\"] as? String")
+            let cb = CodeBlock.builder()
+            cb.addCodeLine("let \(fieldNameStr) = payload[\"\(field.name)\"] as? String")
 
-            globalCB.addCodeBlock(CodeBlock.builder().addEmitObject(.Literal,
-                any: "var \(cammelCaseName): NSUUID? = nil").build())
+            cb.addCodeLine("var \(field.cammelCaseName): NSUUID? = nil")
 
-            let left = CodeBlock.builder().addEmitObject(.Literal, any: "let \(fieldNameStr)").build()
-            let right = CodeBlock.builder().addEmitObject(.Literal, any: fieldNameStr).build()
-            let ifCompare = ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)
-            let ifBody = CodeBlock.builder().addEmitObject(.Literal,
-                any: "\(cammelCaseName) = NSUUID(string: \(fieldNameStr))").build()
+            let left = CodeBlock.builder().addLiteral("let \(fieldNameStr)").build()
+            let right = CodeBlock.builder().addLiteral(fieldNameStr).build()
 
-            let ifControlFlow = ControlFlow.ifControlFlow(ifBody, ifCompare)
+            cb.addCodeBlock(ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
+                return CodeBlock.builder().addLiteral("\(field.cammelCaseName) = NSUUID(string: \(fieldNameStr))").build()
+            })
 
-            globalCB.addCodeBlock(ifControlFlow)
-            return globalCB.build()
+            return cb.build()
         }
     }
 
@@ -149,14 +134,12 @@ public struct SimpleTypeGenerator {
             /*
                 let fieldName = try payload.requiredISO8601Date(field_name)
             */
-            return CodeBlock.builder().addEmitObject(.Literal,
-                    any: "let \(cammelCaseName) = try payload.requiredISO8601Date(\"\(field.name)\")").build()
+            return CodeBlock.builder().addLiteral("let \(cammelCaseName) = try payload.requiredISO8601Date(\"\(field.name)\")").build()
         } else {
             /*
             let fieldName = (payload["field_name"] as? String)?.asDateISO8601()
             */
-            return CodeBlock.builder().addEmitObject(.Literal,
-                    any: "let \(cammelCaseName) = (payload[\"\(field.name)\"] as? String)?.asDateISO8601()").build()
+            return CodeBlock.builder().addLiteral("let \(cammelCaseName) = (payload[\"\(field.name)\"] as? String)?.asDateISO8601()").build()
         }
     }
 
@@ -183,106 +166,97 @@ public struct SimpleTypeGenerator {
     }
     */
     private static func generateParseJsonObjectRequired(field: Field) -> CodeBlock {
-        let globalCB = CodeBlock.builder()
-        let cammelCaseType = PoetUtil.cleanCammelCaseString(field.name)
+        let cb = CodeBlock.builder()
         let capitalizedType: String
         switch SwiftType(apidocType: field.type, imports: nil)! {
         case .Dictionary(let leftType, _):
             capitalizedType = PoetUtil.cleanTypeName(leftType.swiftTypeString)
         default:
-            capitalizedType = PoetUtil.cleanTypeName(field.type)
+            capitalizedType = field.cleanTypeName
         }
 
-        globalCB.addCodeBlock(CodeBlock.builder()
-            .addEmitObject(.Literal, any:
-                "var \(cammelCaseType) = [\(capitalizedType) : \(capitalizedType)]()"
-            ).build())
+        cb.addCodeLine("var \(field.cammelCaseName) = [\(capitalizedType) : \(capitalizedType)]()")
 
-        let iterator = CodeBlock.builder().addEmitObject(.Literal, any: "(key, value)").build()
-        let iterable = CodeBlock.builder().addEmitObject(.Literal, any: "try payload.requiredDictionary(\(field.name))").build()
+        cb.addCodeBlock(ControlFlow.forInControlFlow("(key, value)", iterable: "try payload.requiredDictionary(\(field.name))") {
+            let innerCB = CodeBlock.builder()
+            let leftOne = CodeBlock.builder().addLiteral("let kType").build()
+            let rightOne = CodeBlock.builder().addLiteral("key as? \(capitalizedType)").build()
+            let comparisonOne = ComparisonListItem(comparison: Comparison(lhs: leftOne, comparator: .OptionalCheck, rhs: rightOne))
 
-        let leftOne = CodeBlock.builder().addEmitObject(.Literal, any: "let kType").build()
-        let rightOne = CodeBlock.builder().addEmitObject(.Literal, any: "key as? \(capitalizedType)").build()
-        let comparisonOne = ComparisonListItem(comparison: Comparison(lhs: leftOne, comparator: .OptionalCheck, rhs: rightOne))
+            let leftTwo = CodeBlock.builder().addLiteral("let vType").build()
+            let rightTwo = CodeBlock.builder().addLiteral("value as? \(capitalizedType)").build()
+            let comparisonTwo = ComparisonListItem(comparison: Comparison(lhs: leftTwo, comparator: .OptionalCheck, rhs: rightTwo), requirement: Requirement.OptionalList)
 
-        let leftTwo = CodeBlock.builder().addEmitObject(.Literal, any: "let vType").build()
-        let rightTwo = CodeBlock.builder().addEmitObject(.Literal, any: "value as? \(capitalizedType)").build()
-        let comparisonTwo = ComparisonListItem(comparison: Comparison(lhs: leftTwo, comparator: .OptionalCheck, rhs: rightTwo), requirement: Requirement.OptionalList)
+            let comparisons = ComparisonList(list: [comparisonOne, comparisonTwo])
 
-        let body = CodeBlock.builder().addEmitObject(.Literal, any: "\(cammelCaseType)[kType] = vType").build()
-        let comparisons = ComparisonList(list: [comparisonOne, comparisonTwo])
-        let ifControlFlow = ControlFlow.ifControlFlow(body, comparisons)
 
-        let elseBody = CodeBlock.builder().addEmitObject(.Literal,
-            any: "throw DataTransactionError.FormatError(\"Error creating field \(field.name). Expected a \(capitalizedType) found \\(key) and\\(value)\"").build()
-        let elseControlFlow = ControlFlow.elseControlFlow(elseBody, nil)
+            innerCB
+                // IF
+                .addCodeBlock(ControlFlow.ifControlFlow(comparisons) {
+                    return CodeBlock.builder().addLiteral("\(field.cammelCaseName)[kType] = vType").build()
+                })
+                // ELSE
+                .addCodeBlock(ControlFlow.elseControlFlow(nil) {
+                    return CodeBlock.builder().addLiteral("throw DataTransactionError.FormatError(\"Error creating field \(field.name). Expected a \(capitalizedType) found \\(key) and\\(value)\"").build()
+                })
 
-        let forIn = ControlFlow.forInControlFlow(iterator, iterable: iterable, execution: CodeBlock.builder().addCodeBlock(ifControlFlow).addCodeBlock(elseControlFlow).build())
-        globalCB.addCodeBlock(forIn)
-        return globalCB.build()
+            return innerCB.build()
+        })
+
+        return cb.build()
     }
 
     /*
-    var fieldName: [Type : Type]?
+    var fieldName: [Type : Type]? = nil
     if let dict = payload["field_name"] as? NSDictionary {
         for (key, value) in dict {
             if let kType = key as? Type, let vType = value as? Type {
                 fieldName[kType] = vType
             }
         }
-    } else {
-        fieldName = nil
     }
     */
     private static func generateParseJsonObjectOptional(field: Field) -> CodeBlock {
-        let globalCB = CodeBlock.builder()
-        let cammelCaseType = PoetUtil.cleanCammelCaseString(field.name)
+        let cb = CodeBlock.builder()
         let capitalizedType: String
         switch SwiftType(apidocType: field.type, imports: nil)! {
         case .Dictionary(let leftType, _):
             capitalizedType = PoetUtil.cleanTypeName(leftType.swiftTypeString)
         default:
-            capitalizedType = PoetUtil.cleanTypeName(field.type)
+            capitalizedType = field.cleanTypeName
         }
 
-        globalCB.addCodeBlock(CodeBlock.builder()
-            .addEmitObject(.Literal, any:
-                "var \(cammelCaseType) = [\(capitalizedType) : \(capitalizedType)]?"
-            ).build())
+        cb.addCodeLine("var \(field.cammelCaseName) = [\(capitalizedType) : \(capitalizedType)]? = nil")
+
+        let left = CodeBlock.builder().addLiteral("let dict").build()
+        let right = CodeBlock.builder().addLiteral("payload[\"\(field.name)\"] as? NSDictionary").build()
 
         // if let dict = payload["field_name"] as? NSDictionary
-        let left = CodeBlock.builder().addEmitObject(.Literal, any: "let dict").build()
-        let right = CodeBlock.builder().addEmitObject(.Literal, any: "payload[\"\(field.name)\"] as? NSDictionary").build()
-        let ifCompare = ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)
+        cb.addCodeBlock(ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
 
-        //for loop
-        let iterator = CodeBlock.builder().addEmitObject(.Literal, any: "(key, value)").build()
-        let iterable = CodeBlock.builder().addEmitObject(.Literal, any: "dict").build()
+            //for (key, value) in dict {
+            return ControlFlow.forInControlFlow("(key, value)", iterable: "dict") {
 
-        // if let kType = key as? Type, let vType = value as? Type
-        let leftOne = CodeBlock.builder().addEmitObject(.Literal, any: "let kType").build()
-        let rightOne = CodeBlock.builder().addEmitObject(.Literal, any: "key as? \(capitalizedType)").build()
-        let comparisonOne = ComparisonListItem(comparison: Comparison(lhs: leftOne, comparator: .OptionalCheck, rhs: rightOne))
+                let leftOne = CodeBlock.builder().addLiteral("let kType").build()
+                let rightOne = CodeBlock.builder().addLiteral("key as? \(capitalizedType)").build()
+                let comparisonOne = ComparisonListItem(comparison: Comparison(lhs: leftOne, comparator: .OptionalCheck, rhs: rightOne))
 
-        let leftTwo = CodeBlock.builder().addEmitObject(.Literal, any: "let vType").build()
-        let rightTwo = CodeBlock.builder().addEmitObject(.Literal, any: "value as? \(capitalizedType)").build()
-        let comparisonTwo = ComparisonListItem(comparison: Comparison(lhs: leftTwo, comparator: .OptionalCheck, rhs: rightTwo), requirement: Requirement.OptionalList)
+                let leftTwo = CodeBlock.builder().addLiteral("let vType").build()
+                let rightTwo = CodeBlock.builder().addLiteral("value as? \(capitalizedType)").build()
+                let comparisonTwo = ComparisonListItem(comparison: Comparison(lhs: leftTwo, comparator: .OptionalCheck, rhs: rightTwo), requirement: Requirement.OptionalList)
 
-        let body = CodeBlock.builder().addEmitObject(.Literal, any: "\(cammelCaseType)[kType] = vType").build()
-        let comparisons = ComparisonList(list: [comparisonOne, comparisonTwo])
-        let innerIfControlFlow = ControlFlow.ifControlFlow(body, comparisons)
+                let comparisons = ComparisonList(list: [comparisonOne, comparisonTwo])
 
-        let forIn = ControlFlow.forInControlFlow(iterator, iterable: iterable, execution: innerIfControlFlow)
+                // if let kType = key as? Type, let vType = value as? Type
+                return ControlFlow.ifControlFlow(comparisons) {
+                    //  fieldName[kType] = vType
+                    CodeBlock.builder().addLiteral("\(field.cammelCaseName)[kType] = vType").build()
+                }
 
-        let ifControlFlow = ControlFlow.ifControlFlow(forIn, ifCompare)
-        globalCB.addCodeBlock(ifControlFlow)
+            }
+        })
 
-        let elseBody = CodeBlock.builder().addEmitObject(.Literal,
-            any: "\(cammelCaseType) = nil").build()
-        let elseControlFlow = ControlFlow.elseControlFlow(elseBody, nil)
-        globalCB.addCodeBlock(elseControlFlow)
-
-        return globalCB.build()
+        return cb.build()
     }
 
     public static func toJsonCodeBlock(field: Field, swiftType: SwiftType) -> CodeBlock {
@@ -292,9 +266,7 @@ public struct SimpleTypeGenerator {
     }
 
     private static func requiredToJsonCodeBlock(fieldName: String, rightSide: String) -> CodeBlock {
-        return CodeBlock.builder().addEmitObject(.Literal, any:
-            "\(MethodGenerator.toJSONVarName)[\"\(fieldName)\"] = \(rightSide)"
-            ).build()
+        return CodeBlock.builder().addLiteral("\(MethodGenerator.toJSONVarName)[\"\(fieldName)\"] = \(rightSide)").build()
     }
 
     public static func toString(swiftType: SwiftType) -> String? {

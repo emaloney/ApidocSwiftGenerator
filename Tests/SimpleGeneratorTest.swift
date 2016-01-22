@@ -140,14 +140,14 @@ class SimpleGeneratorTest: XCTestCase {
         let result = SimpleTypeGenerator.generateParseJsonGuid(field).toString()
 
         let test =
-        "let testFieldNameStr = payload[\"test_field_name\"] as? String\n" +
+        "\nlet testFieldNameStr = payload[\"test_field_name\"] as? String\n" +
         "var testFieldName: NSUUID? = nil\n" +
         "if let testFieldNameStr = testFieldNameStr {\n" +
         "    testFieldName = NSUUID(string: testFieldNameStr)\n" +
-        "}\n"
+        "}"
 
-        print(result)
-        print(test)
+//        print(result)
+//        print(test)
 
         XCTAssertEqual(result, test)
     }

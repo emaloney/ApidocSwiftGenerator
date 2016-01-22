@@ -12,7 +12,7 @@ import SwiftPoet
 public struct ToJsonFunctionGenerator {
     internal static let functionName = "toJSON"
     /*
-    // if required
+    // if field.required
     requiredBlock
 
     // else
@@ -21,11 +21,8 @@ public struct ToJsonFunctionGenerator {
     }
     */
     internal static func generate(field: Field, requiredBlockGen: (Field) -> CodeBlock) -> CodeBlock {
-        let cammelCaseName = PoetUtil.cleanCammelCaseString(field.name)
-
         let requiredCodeBlock = requiredBlockGen(field)
-
-        let optionalCodeBlock = ToJsonFunctionGenerator.optionalGenerator(requiredCodeBlock, cammelCaseName: cammelCaseName)
+        let optionalCodeBlock = ToJsonFunctionGenerator.optionalGenerator(requiredCodeBlock, cammelCaseName: field.cammelCaseName)
 
         return ToJsonFunctionGenerator.dualGenerator(field, requiredCodeBlock: requiredCodeBlock, optionalCodeBlock: optionalCodeBlock)
     }
@@ -41,14 +38,11 @@ public struct ToJsonFunctionGenerator {
     }
 
     private static func optionalGenerator(body: CodeBlock, cammelCaseName: String) -> CodeBlock {
-        let cb = CodeBlock.builder()
+        let left = CodeBlock.builder().addLiteral("let \(cammelCaseName)").build()
+        let right = CodeBlock.builder().addLiteral(cammelCaseName).build()
 
-        let left = CodeBlock.builder().addEmitObject(.Literal, any: "let \(cammelCaseName)").build()
-        let right = CodeBlock.builder().addEmitObject(.Literal, any: cammelCaseName).build()
-        let compare = ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)
-
-        let controlFlow = ControlFlow.ifControlFlow(body, compare)
-        
-        return cb.addEmitObjects(controlFlow.emittableObjects).build()
+        return ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
+            return body
+        }
     }
 }

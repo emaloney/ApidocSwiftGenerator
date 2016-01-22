@@ -51,12 +51,10 @@ public struct ArrayGenerator {
         let cleanTypeName = PoetUtil.cleanTypeName(typeName)
 
         if required {
-            return CodeBlock.builder().addEmitObject(.Literal, any:
-                "let \(cammelCaseName) = try payload.requiredArray(\"\(fieldName)\").flatMap { $0 as? \(cleanTypeName) }"
+            return CodeBlock.builder().addLiteral("let \(cammelCaseName) = try payload.requiredArray(\"\(fieldName)\").flatMap { $0 as? \(cleanTypeName) }"
             ).build()
         } else {
-            return CodeBlock.builder().addEmitObject(.Literal, any:
-                "let \(cammelCaseName) = payload[\"\(fieldName)\"] as? [\(cleanTypeName)]"
+            return CodeBlock.builder().addLiteral("let \(cammelCaseName) = payload[\"\(fieldName)\"] as? [\(cleanTypeName)]"
                 ).build()
         }
     }
@@ -74,7 +72,7 @@ public struct ArrayGenerator {
     }
 
     private static func generateParseArrayApidocType(cammelCaseName: String, typeName: String, fieldName: String, required: Bool, isModel: Bool, canThrow: Bool) -> CodeBlock {
-        let globalCB = CodeBlock.builder()
+        let cb = CodeBlock.builder()
         let mustTryStr = canThrow || required ? "try" : ""
         let canThrowStr = canThrow ? "try " : ""
         let requiredStr = required ? "required" : "optional"
@@ -84,19 +82,16 @@ public struct ArrayGenerator {
         let initParamName = isModel ? "payload" : "rawValue"
         let convertClosureType = isModel ? "" : " as String"
 
-        globalCB.addEmitObject(.Literal, any:
-            "let \(cammelCaseName) = \(mustTryStr) payload.\(requiredStr)ArrayWithType(\"\(fieldName)\")")
+        cb.addCodeLine("let \(cammelCaseName) = \(mustTryStr) payload.\(requiredStr)ArrayWithType(\"\(fieldName)\")")
 
+        cb.addCodeBlock(ControlFlow.closureControlFlow("\(closureVarName): \(closureType)",
+            canThrow: canThrow,
+            returnType: returnType) {
+            return CodeBlock.builder().addLiteral("\(canThrowStr)\(typeName)(\(initParamName): \(closureVarName)\(convertClosureType))"
+                ).build()
+        })
 
-        let parameters = CodeBlock.builder().addEmitObject(.Literal, any: "\(closureVarName): \(closureType)").build()
-        let returnTypeCB = CodeBlock.builder().addEmitObject(.Literal, any: returnType).build()
-        let execution = CodeBlock.builder().addEmitObject(.Literal, any:
-            "\(canThrowStr)\(typeName)(\(initParamName): \(closureVarName)\(convertClosureType))"
-        ).build()
-
-        let closure = ControlFlow.closureControlFlow(parameters, canThrow: canThrow, returnType: returnTypeCB, execution: execution)
-
-        return globalCB.addEmitObjects(closure.emittableObjects).build()
+        return cb.build()
     }
 
     /*
@@ -119,7 +114,7 @@ public struct ArrayGenerator {
                     }
                 } else if service.contains(.Model, typeName: typeName, namespace: namespace) {
                     return ArrayGenerator.toJsonCodeBlock(field) {
-                        return ArrayGenerator.rightSideWithMap(field) { return CodeBlock.builder().addEmitObject(.Literal, any: "$0.toJSON()").build() }
+                        return ArrayGenerator.rightSideWithMap(field) { return CodeBlock.builder().addLiteral("$0.toJSON()").build() }
                     }
                 } else {
                     fatalError()
@@ -131,7 +126,7 @@ public struct ArrayGenerator {
                     }
                 } else if service.contains(.Model, typeName: typeName) {
                     return ArrayGenerator.toJsonCodeBlock(field) {
-                        return ArrayGenerator.rightSideWithMap(field) { return CodeBlock.builder().addEmitObject(.Literal, any: "$0.toJSON()").build() }
+                        return ArrayGenerator.rightSideWithMap(field) { return CodeBlock.builder().addLiteral("$0.toJSON()").build() }
                     }
                 } else {
                     fatalError()
@@ -139,25 +134,23 @@ public struct ArrayGenerator {
             default:
                 guard let rightSide = SimpleTypeGenerator.toString(innerType) else {
                     return ArrayGenerator.toJsonCodeBlock(field) {
-                        return CodeBlock.builder().addEmitObject(.Literal, any: field.cammelCaseName).build()
+                        return CodeBlock.builder().addLiteral(field.cammelCaseName).build()
                     }
                 }
                 return ArrayGenerator.toJsonCodeBlock(field) {
-                    return ArrayGenerator.rightSideWithMap(field) { return CodeBlock.builder().addEmitObject(.Literal, any: "\(field.cammelCaseName).\(rightSide)").build() }
+                    return ArrayGenerator.rightSideWithMap(field) { return CodeBlock.builder().addLiteral("\(field.cammelCaseName).\(rightSide)").build() }
                 }
             }
         }
     }
 
     private static func toJsonCodeBlock(field: Field, innerFn: () -> CodeBlock) -> CodeBlock {
-        return CodeBlock.builder().addEmitObject(.Literal, any:
-            "\(MethodGenerator.toJSONVarName)[\"\(field.name)\"] = \(innerFn().toString())"
+        return CodeBlock.builder().addLiteral("\(MethodGenerator.toJSONVarName)[\"\(field.name)\"] = \(innerFn().toString())"
         ).build()
     }
 
     private static func rightSideWithMap(field: Field, innerFn: () -> CodeBlock) -> CodeBlock {
-        return CodeBlock.builder().addEmitObject(.Literal, any:
-            "\(field.cammelCaseName).map { return \(innerFn().toString()) }"
+        return CodeBlock.builder().addLiteral("\(field.cammelCaseName).map { return \(innerFn().toString()) }"
         ).build()
     }
 }

@@ -138,6 +138,14 @@
 		590260DD1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */; };
 		590260DE1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */; };
 		590260DF1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */; };
+		595ECF7B1C51460F002A43E1 /* ResourceGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595ECF7A1C51460F002A43E1 /* ResourceGenerator.swift */; };
+		595ECF7C1C51460F002A43E1 /* ResourceGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595ECF7A1C51460F002A43E1 /* ResourceGenerator.swift */; };
+		595ECF7D1C51460F002A43E1 /* ResourceGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595ECF7A1C51460F002A43E1 /* ResourceGenerator.swift */; };
+		595ECF7E1C51460F002A43E1 /* ResourceGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595ECF7A1C51460F002A43E1 /* ResourceGenerator.swift */; };
+		595ECF891C5160D7002A43E1 /* StringUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595ECF881C5160D7002A43E1 /* StringUtil.swift */; };
+		595ECF8A1C5160D7002A43E1 /* StringUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595ECF881C5160D7002A43E1 /* StringUtil.swift */; };
+		595ECF8B1C5160D7002A43E1 /* StringUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595ECF881C5160D7002A43E1 /* StringUtil.swift */; };
+		595ECF8C1C5160D7002A43E1 /* StringUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595ECF881C5160D7002A43E1 /* StringUtil.swift */; };
 		599D0DF61C459522003DCCF0 /* ModelGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599D0DF51C459522003DCCF0 /* ModelGenerator.swift */; };
 		599D0DF71C459522003DCCF0 /* ModelGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599D0DF51C459522003DCCF0 /* ModelGenerator.swift */; };
 		599D0DF81C459522003DCCF0 /* ModelGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599D0DF51C459522003DCCF0 /* ModelGenerator.swift */; };
@@ -539,6 +547,8 @@
 		590260D11C40230300FB39E8 /* ServiceExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServiceExtension.swift; sourceTree = "<group>"; };
 		590260D61C402AA400FB39E8 /* Generator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Generator.swift; sourceTree = "<group>"; };
 		590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApidocGeneratorConstructor.swift; sourceTree = "<group>"; };
+		595ECF7A1C51460F002A43E1 /* ResourceGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResourceGenerator.swift; sourceTree = "<group>"; };
+		595ECF881C5160D7002A43E1 /* StringUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringUtil.swift; sourceTree = "<group>"; };
 		599D0DF51C459522003DCCF0 /* ModelGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelGenerator.swift; sourceTree = "<group>"; };
 		599EAB7F1C45A74E002DEAB3 /* SwiftType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftType.swift; sourceTree = "<group>"; };
 		599EABB31C46A3BA002DEAB3 /* Import.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Import.swift; sourceTree = "<group>"; };
@@ -790,6 +800,7 @@
 				59DE1E611C47136A002B1AFA /* SimpleTypeGenerator.swift */,
 				59DE1E941C4987DF002B1AFA /* ArrayGenerator.swift */,
 				59DE1EC81C503585002B1AFA /* ToJsonFunctionGenerator.swift */,
+				595ECF7A1C51460F002A43E1 /* ResourceGenerator.swift */,
 			);
 			path = Generators;
 			sourceTree = "<group>";
@@ -814,6 +825,7 @@
 				59DE1EAB1C4FECD4002B1AFA /* ModelExtension.swift */,
 				59DE1ECD1C5040C7002B1AFA /* FieldExtension.swift */,
 				59DE1ED21C50461D002B1AFA /* Namespace.swift */,
+				595ECF881C5160D7002A43E1 /* StringUtil.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -1349,9 +1361,11 @@
 				599D0DF61C459522003DCCF0 /* ModelGenerator.swift in Sources */,
 				590260581C3D9A0100FB39E8 /* Unions.swift in Sources */,
 				590260BF1C4021B600FB39E8 /* URLLoader.swift in Sources */,
+				595ECF891C5160D7002A43E1 /* StringUtil.swift in Sources */,
 				590260C81C4021DD00FB39E8 /* Either.swift in Sources */,
 				590260441C3D97BB00FB39E8 /* Body.swift in Sources */,
 				590260531C3D98F600FB39E8 /* Response.swift in Sources */,
+				595ECF7B1C51460F002A43E1 /* ResourceGenerator.swift in Sources */,
 				590260BB1C4021B600FB39E8 /* URLConstructor.swift in Sources */,
 				590260A71C401BC300FB39E8 /* FileSystemError.swift in Sources */,
 				590260261C3D973C00FB39E8 /* Enum.swift in Sources */,
@@ -1411,9 +1425,11 @@
 				599D0DF71C459522003DCCF0 /* ModelGenerator.swift in Sources */,
 				590260591C3D9A0100FB39E8 /* Unions.swift in Sources */,
 				590260C01C4021B600FB39E8 /* URLLoader.swift in Sources */,
+				595ECF8A1C5160D7002A43E1 /* StringUtil.swift in Sources */,
 				590260C91C4021DD00FB39E8 /* Either.swift in Sources */,
 				590260451C3D97BB00FB39E8 /* Body.swift in Sources */,
 				590260541C3D98F600FB39E8 /* Response.swift in Sources */,
+				595ECF7C1C51460F002A43E1 /* ResourceGenerator.swift in Sources */,
 				590260BC1C4021B600FB39E8 /* URLConstructor.swift in Sources */,
 				590260A81C401BC300FB39E8 /* FileSystemError.swift in Sources */,
 				590260271C3D973C00FB39E8 /* Enum.swift in Sources */,
@@ -1473,9 +1489,11 @@
 				599D0DF81C459522003DCCF0 /* ModelGenerator.swift in Sources */,
 				5902605A1C3D9A0100FB39E8 /* Unions.swift in Sources */,
 				590260C11C4021B600FB39E8 /* URLLoader.swift in Sources */,
+				595ECF8B1C5160D7002A43E1 /* StringUtil.swift in Sources */,
 				590260CA1C4021DD00FB39E8 /* Either.swift in Sources */,
 				590260461C3D97BB00FB39E8 /* Body.swift in Sources */,
 				590260551C3D98F600FB39E8 /* Response.swift in Sources */,
+				595ECF7D1C51460F002A43E1 /* ResourceGenerator.swift in Sources */,
 				590260BD1C4021B600FB39E8 /* URLConstructor.swift in Sources */,
 				590260A91C401BC300FB39E8 /* FileSystemError.swift in Sources */,
 				590260281C3D973C00FB39E8 /* Enum.swift in Sources */,
@@ -1535,9 +1553,11 @@
 				599D0DF91C459522003DCCF0 /* ModelGenerator.swift in Sources */,
 				5902605B1C3D9A0100FB39E8 /* Unions.swift in Sources */,
 				590260C21C4021B600FB39E8 /* URLLoader.swift in Sources */,
+				595ECF8C1C5160D7002A43E1 /* StringUtil.swift in Sources */,
 				590260CB1C4021DD00FB39E8 /* Either.swift in Sources */,
 				590260471C3D97BB00FB39E8 /* Body.swift in Sources */,
 				590260561C3D98F600FB39E8 /* Response.swift in Sources */,
+				595ECF7E1C51460F002A43E1 /* ResourceGenerator.swift in Sources */,
 				590260BE1C4021B600FB39E8 /* URLConstructor.swift in Sources */,
 				590260AA1C401BC300FB39E8 /* FileSystemError.swift in Sources */,
 				590260291C3D973C00FB39E8 /* Enum.swift in Sources */,

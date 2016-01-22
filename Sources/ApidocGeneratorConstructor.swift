@@ -77,10 +77,10 @@ public class ApidocGeneratorConstructor {
         let fileBuilder = FileBuilder()
 
         do {
-            let enumsFolder = try folderBuilder.createFolder(type.rawValue, atPath: "/Users/kdorman/Documents/SwiftGenerationTest", overwriteStyle: .Overwrite)
+            let typeFolder = try folderBuilder.createFolder(type.rawValue, atPath: "/Users/kdorman/Documents/SwiftGenerationTest", overwriteStyle: .Overwrite)
             print("Created \(type.rawValue) folder")
             try data.forEach { e in
-                try fileBuilder.createFile(e.0, atUrlPath: enumsFolder, contents: e.1.toFile())
+                try fileBuilder.createFile(e.0, atUrlPath: typeFolder, contents: e.1.toFile())
                 print("Created \(e.0).swift file.")
             }
 

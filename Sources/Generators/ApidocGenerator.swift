@@ -17,7 +17,7 @@ public struct ApidocGenerator: Generator {
         return GeneratorApplication(
             enums: EnumGenerator.generate(service),
             models: ModelGenerator.generate(service),
-            resources: nil,
+            resources: ResourceGenerator.generate(service),
             unions: nil
         )
     }
@@ -26,6 +26,6 @@ public struct ApidocGenerator: Generator {
 public struct GeneratorApplication {
     let enums: [Apidoc.FileName : EnumSpec]?
     let models: [Apidoc.FileName : StructSpec]?
-    let resources: [Apidoc.FileName : StructSpec]?
+    let resources: [Apidoc.FileName : ClassSpec]?
     let unions: [Apidoc.FileName : ProtocolSpec]?
 }

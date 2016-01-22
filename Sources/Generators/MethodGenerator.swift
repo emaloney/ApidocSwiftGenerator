@@ -27,20 +27,20 @@ public struct MethodGenerator {
         }
 
         let lastLineCB = CodeBlock.builder()
-        lastLineCB.addEmitObject(.Literal, any: "self.init(")
+        lastLineCB.addLiteral("self.init(")
 
         var first = true
         model.fields.forEach { field in
             if !first {
-                lastLineCB.addEmitObject(.Literal, any: ",")
+                lastLineCB.addLiteral(",")
             }
-            lastLineCB.addEmitObject(.Literal, any: PoetUtil.cleanCammelCaseString(field.name))
-            lastLineCB.addEmitObject(.Literal, any: ":")
-            lastLineCB.addEmitObject(.Literal, any: PoetUtil.cleanCammelCaseString(field.name))
+            lastLineCB.addLiteral(field.cammelCaseName)
+            lastLineCB.addLiteral(":")
+            lastLineCB.addLiteral(field.cammelCaseName)
             first = false
         }
 
-        lastLineCB.addEmitObject(.Literal, any: ")")
+        lastLineCB.addLiteral(")")
         cb.addCodeBlock(lastLineCB.build())
         mb.addCode(cb.build())
         return mb.build()
@@ -53,17 +53,13 @@ public struct MethodGenerator {
 
         let cb = CodeBlock.builder()
 
-        cb.addCodeBlock(CodeBlock.builder().addEmitObject(.Literal, any:
-            "var \(MethodGenerator.toJSONVarName) = [String : AnyObject]()"
-        ).build())
+        cb.addCodeLine("var \(MethodGenerator.toJSONVarName) = [String : AnyObject]()")
 
         model.fields.forEach { field in
             cb.addCodeBlock(FieldGenerator.toJsonCodeBlock(field, service: service))
         }
 
-        cb.addCodeBlock(CodeBlock.builder().addEmitObject(.Literal, any:
-            "return .Succeeded(\(MethodGenerator.toJSONVarName))"
-        ).build())
+        cb.addCodeLine("return .Succeeded(\(MethodGenerator.toJSONVarName))")
 
         mb.addCode(cb.build())
         return mb.build()

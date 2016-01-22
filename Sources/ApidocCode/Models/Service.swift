@@ -26,7 +26,7 @@ public struct Service {
     public let models: [Model]?
     public let resources: [Resource]?
 
-    public init(apidoc: String, name: String, organization: Organization, application: Application, namespace: String, version: String, baseUrl: String?, description: String?, imports: [Import]?, enums: [Enum]?, unions: [Union]?, models: [Model]? = nil, resources: [Resource]? = nil) {
+    public init(apidoc: String, name: String, organization: Organization, application: Application, namespace: String, version: String, baseUrl: String?, description: String?, imports: [Import]?, enums: [Enum]?, unions: [Union]?, models: [Model]?, resources: [Resource]?) {
         self.apidoc = apidoc
         self.name = name
         self.organization = organization
@@ -88,6 +88,13 @@ public struct Service {
             models = nil
         }
 
-        self.init(apidoc: apidoc, name: name, organization: organization, application: application, namespace: namespace, version: version, baseUrl: baseUrl, description: description, imports: imports, enums: enums, unions: unions, models: models)
+        var resources: [Resource]? = nil
+        if let resourceJson = payload["resources"] as? [NSDictionary] {
+            resources = resourceJson.flatMap { r in
+                return Resource(payload: r)
+            }
+        }
+
+        self.init(apidoc: apidoc, name: name, organization: organization, application: application, namespace: namespace, version: version, baseUrl: baseUrl, description: description, imports: imports, enums: enums, unions: unions, models: models, resources: resources)
     }
 }

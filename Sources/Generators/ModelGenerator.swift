@@ -45,20 +45,13 @@ public struct ModelGenerator: Generator {
     let fieldName = try FieldType(payload: fieldNameJson)
     */
     private static func generateParseRequiredModelJson(field: Field) -> CodeBlock {
-        let globalCB = CodeBlock.builder()
-        let cammelCaseName = PoetUtil.cleanCammelCaseString(field.name)
-        let jsonVarName = "\(cammelCaseName)Json"
-        let typeName = PoetUtil.cleanTypeName(field.type)
+        let jsonVarName = "\(field.cammelCaseName)Json"
+        let cb = CodeBlock.builder()
 
-        globalCB.addCodeBlock(CodeBlock.builder().addEmitObject(.Literal, any:
-            "let \(jsonVarName) = try payload.requiredDictionary(\"\(field.name)\")"
-            ).build())
+        cb.addCodeLine("let \(jsonVarName) = try payload.requiredDictionary(\"\(field.name)\")")
+        cb.addCodeLine("let \(field.cammelCaseName) = try \(field.cleanTypeName)(payload: \(jsonVarName))")
 
-        globalCB.addCodeBlock(CodeBlock.builder().addEmitObject(.Literal, any:
-            "let \(cammelCaseName) = try \(typeName)(payload: \(jsonVarName))"
-            ).build())
-
-        return globalCB.build()
+        return cb.build()
     }
 
     /*
@@ -68,25 +61,20 @@ public struct ModelGenerator: Generator {
     }
     */
     private static func generateParseOptionalModelJson(field: Field) -> CodeBlock {
-        let globalCB = CodeBlock.builder()
-        let cammelCaseName = PoetUtil.cleanCammelCaseString(field.name)
-        let jsonVarName = "\(cammelCaseName)Json"
-        let typeName = PoetUtil.cleanTypeName(field.type)
+        let jsonVarName = "\(field.cammelCaseName)Json"
 
-        globalCB.addCodeBlock(CodeBlock.builder().addEmitObject(.Literal,
-            any: "var \(cammelCaseName): \(typeName)? = nil").build())
+        let cb = CodeBlock.builder()
 
-        let left = CodeBlock.builder().addEmitObject(.Literal, any: "let \(jsonVarName)").build()
-        let right = CodeBlock.builder().addEmitObject(.Literal, any:
-            "payload[\"\(field.name)\"] as? NSDictionary").build()
-        let ifCompare = ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)
-        let ifBody = CodeBlock.builder().addEmitObject(.Literal,
-            any: "\(cammelCaseName) = \(typeName)(payload: \(jsonVarName))").build()
+        cb.addCodeLine("var \(field.cammelCaseName): \(field.cleanTypeName)? = nil")
 
-        let ifControlFlow = ControlFlow.ifControlFlow(ifBody, ifCompare)
+        let left = CodeBlock.builder().addLiteral("let \(jsonVarName)").build()
+        let right = CodeBlock.builder().addLiteral("payload[\"\(field.name)\"] as? NSDictionary").build()
 
-        globalCB.addCodeBlock(ifControlFlow)
-        return globalCB.build()
+        cb.addCodeBlock(ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
+            return CodeBlock.builder().addLiteral("\(field.cammelCaseName) = \(field.cleanTypeName)(payload: \(jsonVarName))").build()
+        })
+
+        return cb.build()
     }
 
 
@@ -112,15 +100,12 @@ public struct ModelGenerator: Generator {
     }
 
     private static func toJsonSucceededCodeBlock(field: Field) -> CodeBlock {
-        return CodeBlock.builder().addEmitObject(.Literal, any:
-            "\(MethodGenerator.toJSONVarName)[\"\(field.name)\"] = json"
+        return CodeBlock.builder().addLiteral("\(MethodGenerator.toJSONVarName)[\"\(field.name)\"] = json"
         ).build()
     }
 
     private static func toJsonFailedCodeBlock(field: Field) -> CodeBlock {
-        let cammelCaseName = PoetUtil.cleanCammelCaseString(field.name)
-        return CodeBlock.builder().addEmitObject(.Literal, any:
-            "return .Failed(DataTransactionError.FormatError(\"Invalid \(cammelCaseName) data\"))"
+        return CodeBlock.builder().addLiteral("return .Failed(DataTransactionError.FormatError(\"Invalid \(field.cammelCaseName) data\"))"
             ).build()
     }
 }
