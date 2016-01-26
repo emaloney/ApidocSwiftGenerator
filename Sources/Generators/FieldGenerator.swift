@@ -36,29 +36,30 @@ public struct FieldGenerator {
         return fb.build()
     }
 
-    public static func generateJsonParse(field: Field, service: Service) -> CodeBlock {
-        let cb = CodeBlock.builder()
-
+    public static func generateJsonParse(field: Field, service: Service, rootJson: Bool = false) -> CodeBlock {
         guard let swiftType = SwiftType(apidocType: field.type, imports: service.imports) else {
-            return cb.build()
+            return CodeBlock.builder().build()
         }
 
         switch swiftType {
 
         case .ExternalType(let typeName):
-            if let _ = service.getEnum(typeName) {
-                cb.addCodeBlock(EnumGenerator.generateEnumParseJsonBlock(field))
-            } else if let _ = service.getModel(typeName) {
-                cb.addCodeBlock(ModelGenerator.generateParseModelJson(field))
+            if service.contains(.Enum, typeName: typeName) {
+                return EnumGenerator.generateEnumParseJsonBlock(field)
+            } else if service.contains(.Model, typeName: typeName)  {
+                return ModelGenerator.generateParseModelJson(field, rootJson: rootJson)
+            } else if service.contains(.Union, typeName: typeName) {
+                return UnionGenerator.generateParseUnionJson(field)
+            } else {
+                fatalError()
             }
-            break
         case .ImportedType(let namespace, let typeName):
             let importedField = field.clone(withTypeName: typeName)
 
             if service.contains(.Enum, typeName: typeName, namespace: namespace) {
-                cb.addCodeBlock(EnumGenerator.generateEnumParseJsonBlock(importedField))
+                return EnumGenerator.generateEnumParseJsonBlock(importedField)
             } else if service.contains(.Model, typeName: typeName, namespace: namespace) {
-                cb.addCodeBlock(ModelGenerator.generateParseModelJson(importedField))
+                return ModelGenerator.generateParseModelJson(importedField, rootJson: rootJson)
             } else {
                 fatalError()
             }
@@ -67,36 +68,35 @@ public struct FieldGenerator {
             switch innerType {
             case .ExternalType(let typeName):
 
-                if let _ = service.getEnum(typeName) {
-                    cb.addCodeBlock(ArrayGenerator.generateParseArrayEnumJson(typeName, fieldName: field.name, required: field.required))
+                if service.contains(.Enum, typeName: typeName) {
+                    return ArrayGenerator.generateParseArrayEnumJson(typeName, fieldName: field.name, required: field.required)
                 } else if let modelType = service.getModel(typeName) {
-                    cb.addCodeBlock(ArrayGenerator.generateParseArrayModelJson(typeName, fieldName: field.name, required: field.required, canThrow: modelType.canThrow(service)))
+                    return ArrayGenerator.generateParseArrayModelJson(typeName, fieldName: field.name, required: field.required, canThrow: modelType.canThrow(service))
+                } else {
+                    fatalError()
                 }
 
             case .ImportedType(let namespace, let name):
 
                 if service.contains(.Enum, typeName: name, namespace: namespace) {
-                    cb.addCodeBlock(ArrayGenerator.generateParseArrayEnumJson(name, fieldName: field.name, required: field.required))
+                    return ArrayGenerator.generateParseArrayEnumJson(name, fieldName: field.name, required: field.required)
                 } else if service.contains(.Model, typeName: name, namespace: namespace) {
-                    cb.addCodeBlock(ArrayGenerator.generateParseArrayModelJson(name, fieldName: field.name, required: field.required, canThrow: true))
+                    return ArrayGenerator.generateParseArrayModelJson(name, fieldName: field.name, required: field.required, canThrow: true)
                 } else {
                     fatalError()
                 }
 
             case .Array:
-
                 fatalError() // Cannot handle array of arrays
 
             default:
-
-                cb.addCodeBlock(ArrayGenerator.generateParseArraySimpleTypeJson(innerType.swiftTypeString, fieldName: field.name, required: field.required))
+                return ArrayGenerator.generateParseArraySimpleTypeJson(innerType.swiftTypeString, fieldName: field.name, required: field.required)
             }
         default:
-
-            cb.addCodeBlock(SimpleTypeGenerator.generateParseJson(field, swiftType: swiftType))
+            return SimpleTypeGenerator.generateParseJson(field, swiftType: swiftType)
         }
-
-        return cb.build()
+        print(field.cammelCaseName)
+        fatalError()
     }
 
     public static func toJsonCodeBlock(field: Field, service: Service) -> CodeBlock {

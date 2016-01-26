@@ -65,7 +65,7 @@ public struct ArrayGenerator {
         return ArrayGenerator.generateParseArrayApidocType(cammelCaseName, typeName: cleanTypeName, fieldName: fieldName, required: required, isModel: false, canThrow: false)
     }
 
-    public static func generateParseArrayModelJson(typeName: String, fieldName: String, required: Bool, canThrow: Bool) -> CodeBlock {
+    public static func generateParseArrayModelJson(typeName: String, fieldName: String, required: Bool, canThrow: Bool, rootJson: Bool = false) -> CodeBlock {
         let cammelCaseName = PoetUtil.cleanCammelCaseString(fieldName)
         let cleanTypeName = PoetUtil.cleanTypeName(typeName)
         return ArrayGenerator.generateParseArrayApidocType(cammelCaseName, typeName: cleanTypeName, fieldName: fieldName, required: required, isModel: true, canThrow: canThrow)

@@ -10,12 +10,18 @@ import Foundation
 import SwiftPoet
 
 public extension Service {
+    public var cleanTypeName: String {
+        return PoetUtil.cleanTypeName(self.name)
+    }
+
     public func contains(type: ApidocRepresentation, typeName: String) -> Bool {
         switch type {
         case .Enum:
             return (enums?.filter { $0.name == typeName })?.count == 1
         case .Model:
             return (models?.filter { $0.name == typeName })?.count == 1
+        case .Union:
+            return (unions?.filter { $0.name == typeName })?.count == 1
         default:
             return false
         }
@@ -39,6 +45,11 @@ public extension Service {
                 result = true
                 break
             }
+        case .Union:
+            if (importModel.unions?.filter { PoetUtil.cleanTypeName($0) == typeName })?.count == 1 {
+                result = true
+                break
+            }
         default: break
         }
         return result
@@ -50,6 +61,10 @@ public extension Service {
 
     public func getModel(typeName: String) -> Model? {
         return self.models?.filter { $0.name == typeName }.first
+    }
+
+    public func getUnion(typeName: String) -> Union? {
+        return self.unions?.filter { $0.name == typeName }.first
     }
 }
 

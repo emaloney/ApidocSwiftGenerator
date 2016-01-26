@@ -272,7 +272,7 @@ public struct SimpleTypeGenerator {
     public static func toString(swiftType: SwiftType) -> String? {
         switch swiftType {
         case .UUID: return "UUIDString"
-        case .DateISO8601, .DateTimeISO8601: return "toasISO8601()"
+        case .DateISO8601, .DateTimeISO8601: return "asISO8601()"
         default: return nil
         }
     }

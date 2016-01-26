@@ -138,6 +138,10 @@
 		590260DD1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */; };
 		590260DE1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */; };
 		590260DF1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */; };
+		5915043B1C56B1BB00A9844A /* UnionGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5915043A1C56B1BB00A9844A /* UnionGenerator.swift */; };
+		5915043C1C56B1BB00A9844A /* UnionGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5915043A1C56B1BB00A9844A /* UnionGenerator.swift */; };
+		5915043D1C56B1BB00A9844A /* UnionGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5915043A1C56B1BB00A9844A /* UnionGenerator.swift */; };
+		5915043E1C56B1BB00A9844A /* UnionGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5915043A1C56B1BB00A9844A /* UnionGenerator.swift */; };
 		595ECF7B1C51460F002A43E1 /* ResourceGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595ECF7A1C51460F002A43E1 /* ResourceGenerator.swift */; };
 		595ECF7C1C51460F002A43E1 /* ResourceGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595ECF7A1C51460F002A43E1 /* ResourceGenerator.swift */; };
 		595ECF7D1C51460F002A43E1 /* ResourceGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595ECF7A1C51460F002A43E1 /* ResourceGenerator.swift */; };
@@ -547,6 +551,7 @@
 		590260D11C40230300FB39E8 /* ServiceExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServiceExtension.swift; sourceTree = "<group>"; };
 		590260D61C402AA400FB39E8 /* Generator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Generator.swift; sourceTree = "<group>"; };
 		590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApidocGeneratorConstructor.swift; sourceTree = "<group>"; };
+		5915043A1C56B1BB00A9844A /* UnionGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnionGenerator.swift; sourceTree = "<group>"; };
 		595ECF7A1C51460F002A43E1 /* ResourceGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResourceGenerator.swift; sourceTree = "<group>"; };
 		595ECF881C5160D7002A43E1 /* StringUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringUtil.swift; sourceTree = "<group>"; };
 		599D0DF51C459522003DCCF0 /* ModelGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelGenerator.swift; sourceTree = "<group>"; };
@@ -801,6 +806,7 @@
 				59DE1E941C4987DF002B1AFA /* ArrayGenerator.swift */,
 				59DE1EC81C503585002B1AFA /* ToJsonFunctionGenerator.swift */,
 				595ECF7A1C51460F002A43E1 /* ResourceGenerator.swift */,
+				5915043A1C56B1BB00A9844A /* UnionGenerator.swift */,
 			);
 			path = Generators;
 			sourceTree = "<group>";
@@ -1349,6 +1355,7 @@
 				590260681C3D9E1400FB39E8 /* ResponseCodeOption.swift in Sources */,
 				590260DC1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */,
 				590260C31C4021B600FB39E8 /* Result.swift in Sources */,
+				5915043B1C56B1BB00A9844A /* UnionGenerator.swift in Sources */,
 				5902606D1C3DA00F00FB39E8 /* Service.swift in Sources */,
 				599EAB801C45A74E002DEAB3 /* SwiftType.swift in Sources */,
 				599EABCB1C46B65C002DEAB3 /* Organization.swift in Sources */,
@@ -1413,6 +1420,7 @@
 				590260691C3D9E1400FB39E8 /* ResponseCodeOption.swift in Sources */,
 				590260DD1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */,
 				590260C41C4021B600FB39E8 /* Result.swift in Sources */,
+				5915043C1C56B1BB00A9844A /* UnionGenerator.swift in Sources */,
 				5902606E1C3DA00F00FB39E8 /* Service.swift in Sources */,
 				599EAB811C45A74E002DEAB3 /* SwiftType.swift in Sources */,
 				599EABCC1C46B65C002DEAB3 /* Organization.swift in Sources */,
@@ -1477,6 +1485,7 @@
 				5902606A1C3D9E1400FB39E8 /* ResponseCodeOption.swift in Sources */,
 				590260DE1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */,
 				590260C51C4021B600FB39E8 /* Result.swift in Sources */,
+				5915043D1C56B1BB00A9844A /* UnionGenerator.swift in Sources */,
 				5902606F1C3DA00F00FB39E8 /* Service.swift in Sources */,
 				599EAB821C45A74E002DEAB3 /* SwiftType.swift in Sources */,
 				599EABCD1C46B65C002DEAB3 /* Organization.swift in Sources */,
@@ -1541,6 +1550,7 @@
 				5902606B1C3D9E1400FB39E8 /* ResponseCodeOption.swift in Sources */,
 				590260DF1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift in Sources */,
 				590260C61C4021B600FB39E8 /* Result.swift in Sources */,
+				5915043E1C56B1BB00A9844A /* UnionGenerator.swift in Sources */,
 				590260701C3DA00F00FB39E8 /* Service.swift in Sources */,
 				599EAB831C45A74E002DEAB3 /* SwiftType.swift in Sources */,
 				599EABCE1C46B65C002DEAB3 /* Organization.swift in Sources */,

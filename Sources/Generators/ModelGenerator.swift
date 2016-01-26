@@ -28,9 +28,9 @@ public struct ModelGenerator: Generator {
         }
     }
 
-    public static func generateParseModelJson(field: Field) -> CodeBlock {
-        if field.required {
-            return ModelGenerator.generateParseRequiredModelJson(field)
+    public static func generateParseModelJson(field: Field, rootJson: Bool = false) -> CodeBlock {
+        if rootJson || field.required {
+            return ModelGenerator.generateParseRequiredModelJson(field, rootJson: rootJson)
         } else {
             return ModelGenerator.generateParseOptionalModelJson(field)
         }
@@ -44,11 +44,13 @@ public struct ModelGenerator: Generator {
     let fieldNameJson = try payload.requiredDictionary("field_name")
     let fieldName = try FieldType(payload: fieldNameJson)
     */
-    private static func generateParseRequiredModelJson(field: Field) -> CodeBlock {
-        let jsonVarName = "\(field.cammelCaseName)Json"
+    private static func generateParseRequiredModelJson(field: Field, rootJson: Bool = false) -> CodeBlock {
+        let jsonVarName = rootJson ? "payload" : "\(field.cammelCaseName)Json"
         let cb = CodeBlock.builder()
 
-        cb.addCodeLine("let \(jsonVarName) = try payload.requiredDictionary(\"\(field.name)\")")
+        if !rootJson {
+            cb.addCodeLine("let \(jsonVarName) = try payload.requiredDictionary(\"\(field.name)\")")
+        }
         cb.addCodeLine("let \(field.cammelCaseName) = try \(field.cleanTypeName)(payload: \(jsonVarName))")
 
         return cb.build()

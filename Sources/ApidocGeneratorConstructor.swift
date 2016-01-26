@@ -48,7 +48,7 @@ public class ApidocGeneratorConstructor {
                             print("Created root folder")
 
                             ApidocGeneratorConstructor.generateFiles(app.enums, type: .Enum)
-                            print("Created Enum files")
+
                             ApidocGeneratorConstructor.generateFiles(app.models, type: .Model)
 
                             ApidocGeneratorConstructor.generateFiles(app.unions, type: .Union)
@@ -68,7 +68,7 @@ public class ApidocGeneratorConstructor {
         
     }
 
-    private static func generateFiles(data: [Apidoc.FileName : TypeSpecImpl]?, type: ApidocRepresentation) {
+    private static func generateFiles(data: [Apidoc.FileName : PoetPrintable]?, type: ApidocRepresentation) {
         guard let data = data where data.count > 0 else {
             return
         }

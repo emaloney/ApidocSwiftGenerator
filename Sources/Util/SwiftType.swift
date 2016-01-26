@@ -77,7 +77,7 @@ public indirect enum SwiftType {
         case .Long: return Int.self
         case .Object: return NSDictionary.self
         case .SwiftString: return String.self
-        case .Unit: return nil
+        case .Unit: return Void.self
         case .UUID: return NSUUID.self
         default: return nil
         }
@@ -90,14 +90,34 @@ public indirect enum SwiftType {
         case .Array(let inner):
             return "[\(inner.swiftTypeString)]"
         case .ImportedType(_, let name):
-            return name
+            return PoetUtil.cleanTypeName(name)
         case .ExternalType(let s):
-            return s
+            return PoetUtil.cleanTypeName(s)
         default:
             switch self.swiftType {
             case .Some(let type): return "\(type)"
             case .None: return "nil"
             }
+        }
+    }
+
+    public func toString(name: String) -> String {
+        switch self {
+        case .UUID:
+            return "\(name).UUIDString"
+        case .DateISO8601, .DateTimeISO8601:
+            return "\(name).asISO8601()"
+        case .Unit:
+            return "nil"
+        default:
+            return name
+        }
+    }
+
+    public var isArray: Bool {
+        switch self {
+        case .Array: return true
+        default: return false
         }
     }
 

@@ -14,8 +14,7 @@ public struct ResourceGenerator: Generator {
         return [
             ("MetadataType"           , "DelegateTransactionType.MetadataType"),
             ("Result"                 , "TransactionResult<DataType, MetadataType>"),
-            ("Callback"               , "(Result) -> Void"),
-            ("DelegateTransactionType", "ApiDocDictionaryTransaction")]
+            ("Callback"               , "(Result) -> Void")]
     }
     public typealias ResultType = [Apidoc.FileName : ClassSpec]?
 
@@ -23,19 +22,18 @@ public struct ResourceGenerator: Generator {
 
         return service.resources?.reduce([String : ClassSpec]()) { dict, resource in
             return resource.operations.reduce(dict) { (var dict, operation) in
-
-
-
-
                 let classBuilder = ClassSpec.builder(resource.cleanTypeName(operation))
                     .addModifier(.Public)
                     .addSuperType(TypeName(keyword: "DelegatingDataTransaction"))
                     .addImport("GiltDataLoading")
+                    .addImport("Foundation")
                     .addDescription(StringUtil.concat(resource.description, right: operation.description))
-                    .addFieldSpecs(ResourceGenerator.typealiasFields(operation.responses))
-                    .addFieldSpecs(ResourceGenerator.transactionFieldSpecs())
-                    .addMethodSpec(ResourceGenerator.getByUrlFunction(operation, resource: resource, service: service))
-
+                    .addFieldSpecs(ResourceGenerator.typealiasFields(operation, service: service))
+                    .addFieldSpecs(ResourceGenerator.transactionFields())
+                    .addMethodSpec(ResourceGenerator.getInitFn(operation, resource: resource, service: service))
+                    .addMethodSpec(ResourceGenerator.getBaseUrlFn(operation, resource: resource, service: service))
+                    .addMethodSpec(ResourceGenerator.getUrlFn(operation, resource: resource, service: service))
+                    .addMethodSpec(ResourceGenerator.executeTransactionFn(operation, service: service))
 
                 dict[resource.cleanTypeName(operation)] = classBuilder.build()
                 return dict
@@ -43,24 +41,15 @@ public struct ResourceGenerator: Generator {
         }
     }
 
-
-
-    static func typealiasFields(resources: [Response]?) -> [FieldSpec] {
-        let responseOption = (resources?.filter { r in
-            if let int = r.code as? Int {
-                return int == 200 || int == 201 || int == 204
-            } else if let defaultCode = r.code as? ResponseCodeOption {
-                return defaultCode == ResponseCodeOption.Default
-            }
-            return false
-        })?.first
-
-        guard let response = responseOption else {
+    static func typealiasFields(operation: Operation, service: Service) -> [FieldSpec] {
+        guard let successReturnType = operation.successReturnType,
+            let swiftType = SwiftType(apidocType: successReturnType, imports: service.imports) else {
             fatalError()
         }
 
         var typeAliases = ResourceGenerator.defaultTypeAliases
-        typeAliases.append(("DataType", PoetUtil.cleanTypeName(response.type)))
+        typeAliases.append(("DataType", swiftType.swiftTypeString))
+        typeAliases.append(("DelegateTransactionType", ResourceGenerator.getTransationType(swiftType)))
 
         return typeAliases.map { ta in
             FieldSpec.builder(ta.0, construct: Construct.TypeAlias)
@@ -70,7 +59,18 @@ public struct ResourceGenerator: Generator {
         }
     }
 
-    static func transactionFieldSpecs() -> [FieldSpec] {
+    private static func getTransationType(type: SwiftType) -> String {
+        switch type {
+        case .Unit:
+            return "ApiDocOptionalDictionaryTransaction"
+        case .Array:
+            return "ApiDocArrayTransaction"
+        default:
+            return "ApiDocDictionaryTransaction"
+        }
+    }
+
+    static func transactionFields() -> [FieldSpec] {
         var result = [FieldSpec]()
 
         let delegate = FieldSpec.builder("delegateTransaction", type: TypeName(keyword: "DelegateTransactionType?"), construct: Construct.MutableParam)
@@ -89,18 +89,129 @@ public struct ResourceGenerator: Generator {
         return result
     }
 
-    /*
-    private static func getBaseUrl(checkoutGuid: NSUUID) -> String {
-        return ApplicationName.baseUrl + checkoutGuid.UUIDString + "order/shipping_address"
-    }
 
+    /*
+    public init(guid: NSUUID, address: Address, refresh: Bool?, ipAddress: String, origin: String) throws {
+        let queryParams: [String : AnyObject?] = [
+            "refresh" : refresh,
+            "ipAppress" : ipAddress,
+            "origin" : origin]
+
+        do {
+            let request = NSMutableURLRequest(URL: try CheckoutSessionGetByGuid.getUrl(checkoutGuid, queryParams: queryParams))
+            request.HTTPRequestMethod = .Put
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+            let binaryData: NSData?
+            switch address.toBinaryData() {
+            case .Succeeded(let data):
+                binaryData = data
+            case .Failed(let error):
+                throw error
+            }
+
+            self.innerTransaction = ApiDocDictionaryTransaction(request: request, uploadData: binaryData)
+        } catch {
+            self.innerTransaction = nil
+            throw error
+        }
+    }
     */
-    private static func getBaseUrlFn(operation: Operation, resource: Resource, service: Service) {
-        // \(PoetUtil.cleanTypeName(service.name)).baseUrl
+    private static func getInitFn(operation: Operation, resource: Resource, service: Service) -> MethodSpec {
+        let mb = MethodSpec.builder("init")
+            .addModifier(.Public)
+            .canThrowError()
+            .addParameters(operation.parameters.map { param in
+                return ParameterSpec.builder(param.name, type: TypeName(keyword:param.type))
+                    .addDescription(param.description)
+                    .build()
+            })
+
+        if let body = operation.body {
+            mb.addParameter(ParameterSpec.builder(body.type, type: TypeName(keyword: body.type))
+                .addDescription(body.description).build())
+        }
+
+        let cb = CodeBlock.builder()
+        let swiftType = SwiftType(apidocType: operation.successReturnType!, imports: service.imports)!
+
+        if operation.queryParams.count > 0 {
+            cb.addCodeLine("let queryParams: [String : AnyObject?]? = [")
+            cb.addEmitObject(.IncreaseIndentation)
+            operation.queryParams.forEach { param in
+                cb.addCodeLine("\"\(param.cammelCaseName)\" : \(param.cammelCaseName)")
+            }
+            cb.addLiteral("]")
+            cb.addEmitObject(.DecreaseIndentation)
+            cb.addEmitObject(.NewLine)
+        } else {
+            cb.addCodeLine("let queryParams: [String : AnyObject?]? = nil")
+        }
+
+        cb.addCodeBlock(ControlFlow.doCatchControlFlow({
+            let cb = CodeBlock.builder()
+            cb.addCodeLine("let request = NSMutableURLRequest(URL: try \(resource.cleanTypeName(operation)).getUrl(" +
+                (operation.pathParams.map { param in
+                    return "\(param.cammelCaseName): \(param.cammelCaseName)"
+                    }).joinWithSeparator(", ")
+                + "queryParams : queryParams))")
+            cb.addCodeLine("request.HTTPRequestMethod = .\(PoetUtil.cleanTypeName(operation.method.rawValue.lowercaseString))")
+            cb.addCodeLine("request.addValue(\"application/json\", forHTTPHeaderField: \"Content-Type\")")
+            cb.addEmitObject(.NewLine)
+
+            if let body = operation.body {
+                cb.addCodeLine("let binaryData: NSData?")
+                cb.addCodeBlock(ControlFlow.switchControlFlow("\(PoetUtil.cleanCammelCaseString(body.type)).toBinaryData()", cases: [
+                    (".Succeeded(let data)", CodeBlock.builder().addLiteral("binaryData = data").build()),
+                    (".Failed(let error)", CodeBlock.builder().addLiteral("throw error").build())
+                ]))
+
+                cb.addCodeLine("self.innerTransaction = \(ResourceGenerator.getTransationType(swiftType))(request: request, uploadData: binaryData)")
+
+            } else {
+                cb.addCodeLine("self.innerTransaction = \(ResourceGenerator.getTransationType(swiftType))(request: request, uploadData: nil)")
+            }
+            return cb.build()
+
+        }) {
+            return CodeBlock.builder()
+                .addCodeLine("self.innerTransaction = nil")
+                .addCodeLine("throw error")
+                .build()
+        })
+
+        return mb.addCode(cb.build()).build()
     }
 
     /*
-    private static func getUrl(guid: NSUUID, queryParams: [String : AnyObject?]?) throws -> NSURL {
+    private static func getBaseUrl(pathParams...) -> String {
+        return ApplicationName.baseUrl + "/part/of/route/\(pathParam1)/more/route/\(pathParam2)"
+    }
+    stringByReplacingOccurrencesOfString
+    */
+    private static func getBaseUrlFn(operation: Operation, resource: Resource, service: Service) -> MethodSpec {
+        let mb = MethodSpec.builder("getBaseUrl")
+            .addModifiers([.Private, .Static])
+            .addParameters(operation.pathParams.map { param in
+                return ParameterSpec.builder(param.name, type: TypeName(keyword: param.type))
+                    .addDescription(param.description)
+                    .build()
+            })
+            .addReturnType(TypeName.StringType)
+
+        var pathString = operation.path
+        operation.pathParams.forEach { param in
+            let paramTypeToString: String = SwiftType(apidocType: param.type, imports: service.imports)!.toString(param.name)
+            pathString = pathString.stringByReplacingOccurrencesOfString(":\(param.name)", withString: "\\(\(paramTypeToString))")
+        }
+
+        mb.addCode(CodeBlock.builder().addLiteral("return \(service.cleanTypeName).baseUrl + \"\(pathString)\"").build())
+
+        return mb.build()
+    }
+
+    /*
+    private static func getUrl(pahParam: PathParamType, queryParams: [String : AnyObject?]?) throws -> NSURL {
         let urlString: String
         let baseUrlString = CheckoutSessionGetByGuid.getBaseUrl(guid)
         let queryParamStrings: [String]? = queryParams?.flatMap { k, v in
@@ -121,7 +232,7 @@ public struct ResourceGenerator: Generator {
         return url
     }
     */
-    private static func getByUrlFunction(operation: Operation, resource: Resource, service: Service) -> MethodSpec {
+    private static func getUrlFn(operation: Operation, resource: Resource, service: Service) -> MethodSpec {
         let mb = MethodSpec.builder("getUrl")
             .addParameters((operation.pathParams.map { parameter in
                 return ParameterSpec.builder(parameter.cammelCaseName, type: TypeName(keyword: parameter.type, optional: !parameter.required)).addDescription(parameter.description).build()
@@ -137,7 +248,7 @@ public struct ResourceGenerator: Generator {
         // Calling functions with an unknown number of params is a pain :( . Can probably find a cleaner way
         cb.addCodeLine("let baseUrlString = \(resource.cleanTypeName(operation)).getBaseUrl(" +
             (operation.pathParams.map { param in
-                return "\(param.cammelCaseName): \(param.cleanTypeName)"
+                return "\(param.cammelCaseName): \(param.cammelCaseName)"
                 }).joinWithSeparator(", ")
             + ")"
         ).addEmitObject(.NewLine)
@@ -173,5 +284,81 @@ public struct ResourceGenerator: Generator {
 
         mb.addCode(cb.build())
         return mb.build()
+    }
+
+    /*
+    public func executeTransaction(completion: Callback) {
+        innerTransaction?.executeTransaction() { result in
+            switch result {
+            case .Failed(let error):
+                completion(.Failed(error))
+
+            case .Succeeded(let payload, let meta):
+                async {
+                    do {
+                        let model = try CheckoutSession(jsonData: payload) ********************
+                        completion(.Succeeded(model, meta))
+                    }
+                    catch {
+                        completion(.Failed(.wrap(error)))
+                    }
+                }
+            }
+        }
+    }
+    */
+    private static func executeTransactionFn(operation: Operation, service: Service) -> MethodSpec {
+        let successCB = CodeBlock.builder()
+        let swiftType = SwiftType(apidocType: operation.successReturnType!, imports: service.imports)!
+        var field = Field(name: "model", type: operation.successReturnType!, description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
+
+        if swiftType.swiftTypeString == "Void" {
+            successCB.addLiteral("// Take no action")
+        } else {
+            let jsonParseCode: CodeBlock
+
+            switch swiftType {
+            case .Array(let innerType):
+                field = field.clone(withTypeName: innerType.swiftTypeString)
+
+                jsonParseCode = CodeBlock.builder().addLiteral("let model = payload.map")
+                    .addEmitObjects((ControlFlow.closureControlFlow("payload", canThrow: true, returnType: field.cleanTypeName) {
+                        CodeBlock.builder()
+                            .addEmitObjects(ModelGenerator.generateParseModelJson(field, rootJson: true).emittableObjects)
+                            .addCodeLine("return model")
+                            .build()
+                    }).emittableObjects)
+                    .build()
+            default:
+                jsonParseCode = FieldGenerator.generateJsonParse(field, service: service, rootJson: true)
+            }
+
+            successCB
+                .addLiteral("async")
+                .addEmitObject(.BeginStatement)
+                .addCodeBlock(ControlFlow.doCatchControlFlow({
+                    return CodeBlock.builder()
+                        .addCodeBlock(jsonParseCode)
+                        .addCodeLine("completion(.Succeeded(model, meta))").build()
+                    }) {
+                        return CodeBlock.builder().addLiteral("completion(.Failed(.wrap(error)))").build()
+                    })
+                .addEmitObject(.EndStatement)
+        }
+
+
+        let cb = CodeBlock.builder()
+            .addLiteral("innerTransaction?.executeTransaction()")
+            .addEmitObjects(ControlFlow.closureControlFlow("result", canThrow: false, returnType: nil) {
+                return ControlFlow.switchControlFlow("result", cases: [
+                    (".Failed(let error)", CodeBlock.builder().addLiteral("completion(.Failed(error))").build()),
+                    (".Succeeded(let payload, let meta)", successCB.build())])
+                }.emittableObjects).build()
+
+        return MethodSpec.builder("executeTransaction")
+            .addParameter(ParameterSpec.builder("completion", type: TypeName(keyword: "Callback")).build())
+            .addModifier(.Public)
+            .addCode(cb)
+            .build()
     }
 }

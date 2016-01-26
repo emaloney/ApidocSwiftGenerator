@@ -18,7 +18,7 @@ public struct ApidocGenerator: Generator {
             enums: EnumGenerator.generate(service),
             models: ModelGenerator.generate(service),
             resources: ResourceGenerator.generate(service),
-            unions: nil
+            unions: UnionGenerator.generate(service)
         )
     }
 }
@@ -27,5 +27,5 @@ public struct GeneratorApplication {
     let enums: [Apidoc.FileName : EnumSpec]?
     let models: [Apidoc.FileName : StructSpec]?
     let resources: [Apidoc.FileName : ClassSpec]?
-    let unions: [Apidoc.FileName : ProtocolSpec]?
+    let unions: [Apidoc.FileName : PrintableList]?
 }

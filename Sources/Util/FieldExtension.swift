@@ -90,4 +90,20 @@ extension Operation {
             return method + "PathUrl"
         }
     }
+
+    internal var successReturnType: String? {
+        let returnTypeOption = (self.responses?.filter { r in
+            if let int = r.code as? Int {
+                return int == 200 || int == 201 || int == 204
+            } else if let defaultCode = r.code as? ResponseCodeOption {
+                return defaultCode == ResponseCodeOption.Default
+            }
+            return false
+        })?.first
+
+        guard let returnType = returnTypeOption else {
+            return nil
+        }
+        return returnType.type
+    }
 }
