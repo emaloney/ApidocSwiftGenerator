@@ -25,9 +25,9 @@ class ArrayGeneratorTest: XCTestCase {
         let cb = ArrayGenerator.generateParseArrayModelJson("Item", fieldName: "unshippable_items", required: true, canThrow: true)
 
         let result =
-        "let unshippableItems = try payload.requiredArrayWithType(\"unshippable_items\") {\n" +
+        "\nlet unshippableItems = try payload.requiredArrayWithType(\"unshippable_items\") {\n" +
         "    ( json: NSDictionary ) throws -> Item in\n" +
-        "        Item(payload: json)\n}\n"
+        "        try Item(payload: json)\n}"
 
 //        print(cb.toString())
 //        print(result)
@@ -40,9 +40,9 @@ class ArrayGeneratorTest: XCTestCase {
         let cb = ArrayGenerator.generateParseArrayModelJson("PaymentMethodType", fieldName: "payment_method_types", required: false, canThrow: false)
 
         let result =
-        "let paymentMethodTypes = try payload.optionalArrayWithType(\"payment_method_types\") {\n" +
-        "    ( json: NSDictionary ) throws -> PaymentMethodType in\n" +
-        "        PaymentMethodType(payload: json)\n}\n"
+        "\nlet paymentMethodTypes = payload.optionalArrayWithType(\"payment_method_types\") {\n" +
+        "    ( json: NSDictionary ) -> PaymentMethodType in\n" +
+        "        PaymentMethodType(payload: json)\n}"
 
 //        print(cb.toString())
 //        print(result)
@@ -55,10 +55,10 @@ class ArrayGeneratorTest: XCTestCase {
         let cb = ArrayGenerator.generateParseArrayEnumJson("Item", fieldName: "unshippable_items", required: true)
 
         let result =
-        "let unshippableItems = try payload.requiredArrayWithType(\"unshippable_items\") {\n" +
-        "    ( rawValue: NSString ) throws -> Item? in\n" +
-        "        Item(rawValue: rawValue as String)\n}\n"
-
+        "\nlet unshippableItems = try payload.requiredArrayWithType(\"unshippable_items\") {\n" +
+        "    ( rawValue: NSString ) -> Item? in\n" +
+        "        Item(rawValue: rawValue as String)\n}"
+//
 //        print(result)
 //        print(cb.toString())
 
@@ -71,9 +71,9 @@ class ArrayGeneratorTest: XCTestCase {
         let cb = ArrayGenerator.generateParseArrayEnumJson("PaymentMethodType", fieldName: "payment_method_types", required: false)
 
         let result =
-        "let paymentMethodTypes = try payload.optionalArrayWithType(\"payment_method_types\") {\n" +
-        "    ( rawValue: NSString ) throws -> PaymentMethodType? in\n" +
-        "        PaymentMethodType(rawValue: rawValue as String)\n}\n"
+        "\nlet paymentMethodTypes = payload.optionalArrayWithType(\"payment_method_types\") {\n" +
+        "    ( rawValue: NSString ) -> PaymentMethodType? in\n" +
+        "        PaymentMethodType(rawValue: rawValue as String)\n}"
 
 //        print(cb.toString())
 //        print(result)
@@ -115,8 +115,8 @@ class ArrayGeneratorTest: XCTestCase {
         "\nlet testFieldNameJson = try payload.requiredDictionary(\"test_field_name\")\n" +
         "let testFieldName = try TestType(payload: testFieldNameJson)"
 
-        print(result)
-        print(cb.toString())
+//        print(result)
+//        print(cb.toString())
 
         XCTAssertEqual(cb.toString(), result)
     }
@@ -128,10 +128,10 @@ class ArrayGeneratorTest: XCTestCase {
         let result =
         "\nvar testFieldName: TestType? = nil\n" +
         "if let testFieldNameJson = payload[\"test_field_name\"] as? NSDictionary {\n" +
-        "    testFieldName = TestType(payload: testFieldNameJson)\n}\n"
+        "    testFieldName = TestType(payload: testFieldNameJson)\n}"
 
-        print(result)
-        print(ModelGenerator.generateParseModelJson(field).toString())
+//        print(result)
+//        print(ModelGenerator.generateParseModelJson(field).toString())
 
         XCTAssertEqual(cb.toString(), result)
     }

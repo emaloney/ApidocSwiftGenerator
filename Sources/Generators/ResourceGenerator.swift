@@ -16,12 +16,12 @@ public struct ResourceGenerator: Generator {
             ("Result"                 , "TransactionResult<DataType, MetadataType>"),
             ("Callback"               , "(Result) -> Void")]
     }
-    public typealias ResultType = [Apidoc.FileName : ClassSpec]?
+    public typealias ResultType = [PoetFile]?
 
     public static func generate(service: Service) -> ResultType {
 
-        return service.resources?.reduce([String : ClassSpec]()) { dict, resource in
-            return resource.operations.reduce(dict) { (var dict, operation) in
+        return service.resources?.reduce([PoetFile]()) { (var list, resource) in
+            let transactionList: [PoetFile] = resource.operations.map { operation in
                 let classBuilder = ClassSpec.builder(resource.cleanTypeName(operation))
                     .addModifier(.Public)
                     .addSuperType(TypeName(keyword: "DelegatingDataTransaction"))
@@ -35,9 +35,10 @@ public struct ResourceGenerator: Generator {
                     .addMethodSpec(ResourceGenerator.getUrlFn(operation, resource: resource, service: service))
                     .addMethodSpec(ResourceGenerator.executeTransactionFn(operation, service: service))
 
-                dict[resource.cleanTypeName(operation)] = classBuilder.build()
-                return dict
+                return classBuilder.build().toFile()
             }
+            list.appendContentsOf(transactionList)
+            return list
         }
     }
 
@@ -138,9 +139,9 @@ public struct ResourceGenerator: Generator {
         if operation.queryParams.count > 0 {
             cb.addCodeLine("let queryParams: [String : AnyObject?]? = [")
             cb.addEmitObject(.IncreaseIndentation)
-            operation.queryParams.forEach { param in
-                cb.addCodeLine("\"\(param.cammelCaseName)\" : \(param.cammelCaseName)")
-            }
+            cb.addCodeBlock(CodeBlock.builder().addLiteral((operation.queryParams.map { param in
+                return "\"\(param.cammelCaseName) : \(param.cammelCaseName) \""
+            }).joinWithSeparator(", ")).build())
             cb.addLiteral("]")
             cb.addEmitObject(.DecreaseIndentation)
             cb.addEmitObject(.NewLine)
@@ -150,11 +151,12 @@ public struct ResourceGenerator: Generator {
 
         cb.addCodeBlock(ControlFlow.doCatchControlFlow({
             let cb = CodeBlock.builder()
-            cb.addCodeLine("let request = NSMutableURLRequest(URL: try \(resource.cleanTypeName(operation)).getUrl(" +
-                (operation.pathParams.map { param in
+            cb.addLiteral("let request = NSMutableURLRequest(URL: try)")
+            cb.addLiteral("\(resource.cleanTypeName(operation)).getUrl(")
+            cb.addLiteral((operation.pathParams.map { param in
                     return "\(param.cammelCaseName): \(param.cammelCaseName)"
-                    }).joinWithSeparator(", ")
-                + "queryParams : queryParams))")
+                    }).joinWithSeparator(", "))
+            cb.addLiteral("queryParams : queryParams))")
             cb.addCodeLine("request.HTTPRequestMethod = .\(PoetUtil.cleanTypeName(operation.method.rawValue.lowercaseString))")
             cb.addCodeLine("request.addValue(\"application/json\", forHTTPHeaderField: \"Content-Type\")")
             cb.addEmitObject(.NewLine)
@@ -235,8 +237,9 @@ public struct ResourceGenerator: Generator {
     private static func getUrlFn(operation: Operation, resource: Resource, service: Service) -> MethodSpec {
         let mb = MethodSpec.builder("getUrl")
             .addParameters((operation.pathParams.map { parameter in
-                return ParameterSpec.builder(parameter.cammelCaseName, type: TypeName(keyword: parameter.type, optional: !parameter.required)).addDescription(parameter.description).build()
+                return ParameterSpec.builder(parameter.name, type: TypeName(keyword: parameter.type, optional: !parameter.required)).addDescription(parameter.description).build()
                 }))
+            .addParameter(ParameterSpec.builder("queryParams", type: TypeName(keyword: "[String : AnyObject?]?")).build())
             .canThrowError()
             .addModifiers([.Private, .Static])
             .addReturnType(TypeName(keyword: "NSURL"))

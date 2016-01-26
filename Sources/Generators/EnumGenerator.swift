@@ -10,15 +10,16 @@ import SwiftPoet
 
 public struct EnumGenerator: Generator {
 
-    public typealias ResultType = [Apidoc.FileName : EnumSpec]?
+    public typealias ResultType = [PoetFile]?
 
     public static func generate(service: Service) -> ResultType {
-        return service.enums?.reduce([String : EnumSpec]()) { (var dict, e) in
+        return service.enums?.map { e in
             let eb = EnumSpec.builder(e.name)
-                .addSuperType(TypeName.StringType)
+                .addFramework(service.name)
                 .addModifier(.Public)
                 .addDescription(e.deprecation)
                 .addImport("Foundation")
+                .addSuperType(TypeName.StringType)
                 .addFieldSpecs(
                     e.values.map { value in
                         return FieldSpec.builder(value.name)
@@ -27,8 +28,7 @@ public struct EnumGenerator: Generator {
                             .build()
                     }
             )
-            dict[PoetUtil.cleanCammelCaseString(e.name)] = eb.build()
-            return dict
+            return eb.build().toFile()
         }
     }
 

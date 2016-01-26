@@ -10,7 +10,7 @@ import Foundation
 import SwiftPoet
 
 public struct UnionGenerator: Generator {
-    public typealias ResultType = [Apidoc.FileName : PrintableList]?
+    public typealias ResultType = [PoetFile]?
 
     /*
     public protocol Union {}
@@ -41,20 +41,22 @@ public struct UnionGenerator: Generator {
     extension ResponseCodeOption: ResponseCode {}
     */
     public static func generate(service: Service) -> ResultType {
-        return service.unions?.reduce([String : PrintableList]()) { (var dict, union) in
-            let list = PrintableList(list: nil)
-            list.add(UnionGenerator.generateProtocol(union))
-            list.add(UnionGenerator.unionImpl(union, service: service))
-            UnionGenerator.unionTypeExtensions(union).forEach { list.add($0) }
+        return service.unions?.map { union in
+            let file = PoetFile(list: [], framework: service.name)
 
-            dict[PoetUtil.cleanTypeName(union.name)] = list
-            return dict
+            file.add(UnionGenerator.generateProtocol(union))
+            file.add(UnionGenerator.unionImpl(union, service: service))
+            UnionGenerator.unionTypeExtensions(union).forEach { file.add($0) }
+
+            return file
         }
     }
 
     private static func unionImpl(union: Union, service: Service) -> StructSpec {
         return StructSpec.builder("\(union.name)Impl")
             .addModifier(.Internal)
+            .addFramework(service.name)
+            .addImport("Foundation")
             .addMethodSpec(UnionGenerator.toModelFunction(union, service: service))
             .build()
     }

@@ -68,8 +68,9 @@ public class ApidocGeneratorConstructor {
         
     }
 
-    private static func generateFiles(data: [Apidoc.FileName : PoetPrintable]?, type: ApidocRepresentation) {
-        guard let data = data where data.count > 0 else {
+    private static func generateFiles(files: [PoetFile]?, type: ApidocRepresentation) {
+        guard let files = files where !files.isEmpty else {
+            print("Exiting early. Found an empty dataset for \(type.rawValue)")
             return
         }
 
@@ -79,9 +80,14 @@ public class ApidocGeneratorConstructor {
         do {
             let typeFolder = try folderBuilder.createFolder(type.rawValue, atPath: "/Users/kdorman/Documents/SwiftGenerationTest", overwriteStyle: .Overwrite)
             print("Created \(type.rawValue) folder")
-            try data.forEach { e in
-                try fileBuilder.createFile(e.0, atUrlPath: typeFolder, contents: e.1.toFile())
-                print("Created \(e.0).swift file.")
+
+            try files.forEach { file in
+                guard let fileName = file.fileName else {
+                    print("Unable to create file because it does not have a name")
+                    return
+                }
+                try fileBuilder.createFile(fileName, atUrlPath: typeFolder, contents: file.fileContents)
+                print("Created \(fileName).swift in folder \(type.rawValue)")
             }
 
         } catch {

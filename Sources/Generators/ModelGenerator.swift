@@ -10,11 +10,12 @@ import Foundation
 import SwiftPoet
 
 public struct ModelGenerator: Generator {
-    public typealias ResultType = [Apidoc.FileName : StructSpec]?
+    public typealias ResultType = [PoetFile]?
 
     public static func generate(service: Service) -> ResultType {
-        return service.models?.reduce([String : StructSpec]()) { (var dict, model) in
+        return service.models?.map { model in
             let sb = StructSpec.builder(model.name)
+                .addFramework(service.name)
                 .includeDefaultInit()
                 .addModifier(.Public)
                 .addDescription(model.description)
@@ -23,8 +24,7 @@ public struct ModelGenerator: Generator {
                 .addMethodSpec(MethodGenerator.generateJsonParsingInit(service, model: model))
                 .addMethodSpec(MethodGenerator.modelToJson(service, model: model))
 
-            dict[PoetUtil.cleanCammelCaseString(model.name)] = sb.build()
-            return dict
+            return sb.build().toFile()
         }
     }
 

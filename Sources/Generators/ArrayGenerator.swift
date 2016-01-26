@@ -73,7 +73,7 @@ public struct ArrayGenerator {
 
     private static func generateParseArrayApidocType(cammelCaseName: String, typeName: String, fieldName: String, required: Bool, isModel: Bool, canThrow: Bool) -> CodeBlock {
         let cb = CodeBlock.builder()
-        let mustTryStr = canThrow || required ? "try" : ""
+        let mustTryStr = canThrow || required ? " try" : ""
         let canThrowStr = canThrow ? "try " : ""
         let requiredStr = required ? "required" : "optional"
         let closureVarName = isModel ? "json" : "rawValue"
@@ -82,14 +82,16 @@ public struct ArrayGenerator {
         let initParamName = isModel ? "payload" : "rawValue"
         let convertClosureType = isModel ? "" : " as String"
 
-        cb.addCodeLine("let \(cammelCaseName) = \(mustTryStr) payload.\(requiredStr)ArrayWithType(\"\(fieldName)\")")
+        cb.addCodeLine("let \(cammelCaseName) =\(mustTryStr) payload.\(requiredStr)ArrayWithType(\"\(fieldName)\")")
 
-        cb.addCodeBlock(ControlFlow.closureControlFlow("\(closureVarName): \(closureType)",
+        let closure = ControlFlow.closureControlFlow("\(closureVarName): \(closureType)",
             canThrow: canThrow,
             returnType: returnType) {
             return CodeBlock.builder().addLiteral("\(canThrowStr)\(typeName)(\(initParamName): \(closureVarName)\(convertClosureType))"
                 ).build()
-        })
+        }
+
+        cb.addEmitObjects(closure.emittableObjects)
 
         return cb.build()
     }

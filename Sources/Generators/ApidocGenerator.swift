@@ -24,8 +24,8 @@ public struct ApidocGenerator: Generator {
 }
 
 public struct GeneratorApplication {
-    let enums: [Apidoc.FileName : EnumSpec]?
-    let models: [Apidoc.FileName : StructSpec]?
-    let resources: [Apidoc.FileName : ClassSpec]?
-    let unions: [Apidoc.FileName : PrintableList]?
+    let enums: [PoetFile]?
+    let models: [PoetFile]?
+    let resources: [PoetFile]?
+    let unions: [PoetFile]?
 }
