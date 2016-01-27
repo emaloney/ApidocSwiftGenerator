@@ -44,9 +44,9 @@ public struct UnionGenerator: Generator {
         return service.unions?.map { union in
             let file = PoetFile(list: [], framework: service.name)
 
-            file.add(UnionGenerator.generateProtocol(union))
-            file.add(UnionGenerator.unionImpl(union, service: service))
-            UnionGenerator.unionTypeExtensions(union).forEach { file.add($0) }
+            file.append(UnionGenerator.generateProtocol(union))
+            file.append(UnionGenerator.unionImpl(union, service: service))
+            UnionGenerator.unionTypeExtensions(union).forEach { file.append($0) }
 
             return file
         }

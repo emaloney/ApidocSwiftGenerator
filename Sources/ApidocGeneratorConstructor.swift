@@ -14,19 +14,13 @@ public class ApidocGeneratorConstructor {
 
     let loader: ApidocURLLoader
 
-    public init () {
-
-        let token = "9Rcw92CkB9FqnkI4u4AAHP5V7zZrNaOmmdZsya4ObAzX91NiPhaoJCgLVHIRppgKA7NyLJqQZk1sGUet"
-        let email = "swift-generator-test@googlegroups.com"
-        let password = "swiftgeneratortest"
-
-
-        let projectUrl = URLConstructor.create("swift-test", applicationKey: "apidoc-api-swift-test", version: nil)!
+    public init (token: String, email: String, password: String, organizationKey: String, applicationKey: String, version: String? = nil) {
+        let projectUrl = URLConstructor.create(organizationKey, applicationKey: applicationKey, version: version)!
 
         loader = ApidocURLLoader(url: projectUrl, token: token, email: email, password: password)
     }
 
-    public func generate(callback: () -> Void) {
+    public func generate(atPath filePath: String, forFile fileName: String, callback: () -> Void) {
         loader.load { result in
             switch result {
             case .Failed(_):
@@ -42,18 +36,18 @@ public class ApidocGeneratorConstructor {
                         let folderBuilder = FolderBuilder()
 
                         do {
-                            try folderBuilder.deleteFolder("/Users/kdorman/Documents/" + "SwiftGenerationTest")
+                            try folderBuilder.deleteFolder(filePath + fileName)
                             print("Removed root folder")
-                            try folderBuilder.createFolder("SwiftGenerationTest", atPath: "/Users/kdorman/Documents", overwriteStyle: .Overwrite)
+                            try folderBuilder.createFolder(fileName, atPath: filePath, overwriteStyle: .Overwrite)
                             print("Created root folder")
 
-                            ApidocGeneratorConstructor.generateFiles(app.enums, type: .Enum)
+                            ApidocGeneratorConstructor.generateFiles(filePath, fileName: fileName, files: app.enums, type: .Enum)
 
-                            ApidocGeneratorConstructor.generateFiles(app.models, type: .Model)
+                            ApidocGeneratorConstructor.generateFiles(filePath, fileName: fileName,files: app.models, type: .Model)
 
-                            ApidocGeneratorConstructor.generateFiles(app.unions, type: .Union)
+                            ApidocGeneratorConstructor.generateFiles(filePath, fileName: fileName, files: app.unions, type: .Union)
 
-                            ApidocGeneratorConstructor.generateFiles(app.resources, type: .Resource)
+                            ApidocGeneratorConstructor.generateFiles(filePath, fileName: fileName, files: app.resources, type: .Resource)
                         } catch {
                             print("\(error)")
                         }
@@ -68,7 +62,7 @@ public class ApidocGeneratorConstructor {
         
     }
 
-    private static func generateFiles(files: [PoetFile]?, type: ApidocRepresentation) {
+    private static func generateFiles(filePath: String, fileName: String, files: [PoetFile]?, type: ApidocRepresentation) {
         guard let files = files where !files.isEmpty else {
             print("Exiting early. Found an empty dataset for \(type.rawValue)")
             return
@@ -78,7 +72,7 @@ public class ApidocGeneratorConstructor {
         let fileBuilder = FileBuilder()
 
         do {
-            let typeFolder = try folderBuilder.createFolder(type.rawValue, atPath: "/Users/kdorman/Documents/SwiftGenerationTest", overwriteStyle: .Overwrite)
+            let typeFolder = try folderBuilder.createFolder(type.rawValue, atPath: filePath + fileName, overwriteStyle: .Overwrite)
             print("Created \(type.rawValue) folder")
 
             try files.forEach { file in

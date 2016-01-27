@@ -80,8 +80,8 @@ class ApiEndpointTests: XCTestCase {
     func testIntegration() {
         let readyExpectation = expectationWithDescription("ready")
 
-        let g = ApidocGeneratorConstructor()
-        g.generate {
+        let g = ApidocGeneratorConstructor(token: token, email: email, password: password, organizationKey: "swift-test", applicationKey: "apidoc-api-swift-test")
+        g.generate(atPath: "/Users/kdorman/Documents/", forFile: "SwiftGenerationTest") {
             readyExpectation.fulfill()
         }
 

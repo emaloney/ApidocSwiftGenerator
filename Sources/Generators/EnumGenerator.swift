@@ -23,7 +23,7 @@ public struct EnumGenerator: Generator {
                 .addFieldSpecs(
                     e.values.map { value in
                         return FieldSpec.builder(value.name)
-                            .addInitializer(CodeBlock.builder().addEmitObject(.EscapedString, any: value.name).build())
+                            .addInitializer(CodeBlock.builder().addLiteral("\"\(value.name)\"").build())
                             .addDescription(value.deprecation)
                             .build()
                     }

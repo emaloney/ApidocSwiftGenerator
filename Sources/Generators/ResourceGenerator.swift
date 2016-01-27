@@ -23,6 +23,7 @@ public struct ResourceGenerator: Generator {
         return service.resources?.reduce([PoetFile]()) { (var list, resource) in
             let transactionList: [PoetFile] = resource.operations.map { operation in
                 let classBuilder = ClassSpec.builder(resource.cleanTypeName(operation))
+                    .addFramework(service.name)
                     .addModifier(.Public)
                     .addSuperType(TypeName(keyword: "DelegatingDataTransaction"))
                     .addImport("GiltDataLoading")
