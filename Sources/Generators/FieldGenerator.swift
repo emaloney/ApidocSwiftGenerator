@@ -47,7 +47,7 @@ public struct FieldGenerator {
             if service.contains(.Enum, typeName: typeName) {
                 return EnumGenerator.generateEnumParseJsonBlock(field)
             } else if service.contains(.Model, typeName: typeName)  {
-                return ModelGenerator.generateParseModelJson(field, rootJson: rootJson)
+                return ModelGenerator.generateParseModelJson(field, service: service, rootJson: rootJson)
             } else if service.contains(.Union, typeName: typeName) {
                 return UnionGenerator.generateParseUnionJson(field)
             } else {
@@ -59,7 +59,7 @@ public struct FieldGenerator {
             if service.contains(.Enum, typeName: typeName, namespace: namespace) {
                 return EnumGenerator.generateEnumParseJsonBlock(importedField)
             } else if service.contains(.Model, typeName: typeName, namespace: namespace) {
-                return ModelGenerator.generateParseModelJson(importedField, rootJson: rootJson)
+                return ModelGenerator.generateParseModelJson(importedField, service: service, rootJson: rootJson)
             } else {
                 fatalError()
             }

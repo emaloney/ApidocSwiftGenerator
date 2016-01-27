@@ -110,7 +110,7 @@ class ArrayGeneratorTest: XCTestCase {
 
     func testRequiredModelParseJson() {
         let field = Field(name: "test_field_name", type: "test_type", description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
-        let cb = ModelGenerator.generateParseModelJson(field)
+        let cb = ModelGenerator.generateParseModelJson(field, service: nil)
         let result =
         "\nlet testFieldNameJson = try payload.requiredDictionary(\"test_field_name\")\n" +
         "let testFieldName = try TestType(payload: testFieldNameJson)"
@@ -124,14 +124,14 @@ class ArrayGeneratorTest: XCTestCase {
     func testOptionalModelParseJson() {
         let field = Field(name: "test_field_name", type: "test_type", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
 
-        let cb = ModelGenerator.generateParseModelJson(field)
+        let cb = ModelGenerator.generateParseModelJson(field, service: nil)
         let result =
         "\nvar testFieldName: TestType? = nil\n" +
         "if let testFieldNameJson = payload[\"test_field_name\"] as? NSDictionary {\n" +
-        "    testFieldName = TestType(payload: testFieldNameJson)\n}"
+        "    testFieldName = try TestType(payload: testFieldNameJson)\n}"
 
-//        print(result)
-//        print(ModelGenerator.generateParseModelJson(field).toString())
+        print(result)
+        print(cb.toString())
 
         XCTAssertEqual(cb.toString(), result)
     }

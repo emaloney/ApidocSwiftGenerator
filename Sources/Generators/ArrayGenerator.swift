@@ -97,7 +97,12 @@ public struct ArrayGenerator {
     }
 
     /*
-    resultJSON["file_name"] = fieldName.map { return innerType.toJSON() }
+    switch fieldName.toJson() {
+    case .Succeeded(let json):
+        resultJSON[OrderPayloadKey.PaymentMethods.rawValue] = json
+    case .Failed:
+        return .Failed(DataTransactionError.FormatError("Invalid FieldType data"))
+    }
     OR
     resultJSON["file_name"] = fieldName.map { return innerType.rawValue }
     OR
@@ -112,24 +117,20 @@ public struct ArrayGenerator {
             case .ImportedType(let namespace, let typeName):
                 if service.contains(.Enum, typeName: typeName, namespace: namespace) {
                     return ArrayGenerator.toJsonCodeBlock(field) {
-                        return ArrayGenerator.rightSideWithMap(field) { return EnumGenerator.toJsonCodeBlock(field.name) }
+                        return ArrayGenerator.rightSideWithMap(field) { return EnumGenerator.toJsonCodeBlock() }
                     }
                 } else if service.contains(.Model, typeName: typeName, namespace: namespace) {
-                    return ArrayGenerator.toJsonCodeBlock(field) {
-                        return ArrayGenerator.rightSideWithMap(field) { return CodeBlock.builder().addLiteral("$0.toJSON()").build() }
-                    }
+                    return ArrayGenerator.toJsonCodeBlockArray(field)
                 } else {
                     fatalError()
                 }
             case .ExternalType(let typeName):
                 if service.contains(.Enum, typeName: typeName) {
                     return ArrayGenerator.toJsonCodeBlock(field) {
-                        return ArrayGenerator.rightSideWithMap(field) { return EnumGenerator.toJsonCodeBlock(field.name) }
+                        return ArrayGenerator.rightSideWithMap(field) { return EnumGenerator.toJsonCodeBlock() }
                     }
                 } else if service.contains(.Model, typeName: typeName) {
-                    return ArrayGenerator.toJsonCodeBlock(field) {
-                        return ArrayGenerator.rightSideWithMap(field) { return CodeBlock.builder().addLiteral("$0.toJSON()").build() }
-                    }
+                    return ArrayGenerator.toJsonCodeBlockArray(field)
                 } else {
                     fatalError()
                 }
@@ -154,5 +155,20 @@ public struct ArrayGenerator {
     private static func rightSideWithMap(field: Field, innerFn: () -> CodeBlock) -> CodeBlock {
         return CodeBlock.builder().addLiteral("\(field.cammelCaseName).map { return \(innerFn().toString()) }"
         ).build()
+    }
+
+    /*
+    switch fieldName.toJson() {
+    case .Succeeded(let json):
+        result["field_name"] = json
+    case .Failed:
+        return .Failed(DataTransactionError.FormatError("Invalid FieldType data"))
+    }
+    */
+    private static func toJsonCodeBlockArray(field: Field) -> CodeBlock {
+        return ControlFlow.switchControlFlow("\(field.cammelCaseName).toJSON()", cases:
+            [(".Succeeded(let json)", CodeBlock.builder().addLiteral("\(MethodGenerator.toJSONVarName)[\"\(field.name)\"] = json").build()),
+            (".Failed", CodeBlock.builder().addLiteral("return .Failed(DataTransactionError.FormatError(\"Invalid \(field.cleanTypeName) data\"))").build())]
+        )
     }
 }

@@ -53,7 +53,7 @@ public struct EnumGenerator: Generator {
 
         let cb = CodeBlock.builder()
 
-        cb.addCodeLine("let \(strVariable) = try payload.requiredString(\(field.name))")
+        cb.addCodeLine("let \(strVariable) = try payload.requiredString(\"\(field.name)\")")
         cb.addCodeLine("let \(optionalVariable) = \(field.cleanTypeName)(rawValue: \(strVariable))")
 
         let left = CodeBlock.builder().addLiteral("let \(field.cammelCaseName)").build()
@@ -68,7 +68,7 @@ public struct EnumGenerator: Generator {
 
     /*
     let fieldNameStr = payload["field_name"] as? String
-    let fieldName: FieldType? = nil
+    var fieldName: FieldType? = nil
     if let fieldNameStr = fieldNameStr {
         fieldName = FieldType(rawValue: fieldNameStr)
     }
@@ -77,32 +77,31 @@ public struct EnumGenerator: Generator {
         let strVariable = "\(field.cammelCaseName)Str"
         let cb = CodeBlock.builder()
 
-        cb.addCodeLine("let \(strVariable) = try payload[\"\(field.name)\"] as? String")
-        cb.addCodeLine("let \(field.cammelCaseName): \(field.cleanTypeName)? = nil")
+        cb.addCodeLine("let \(strVariable) = payload[\"\(field.name)\"] as? String")
+        cb.addCodeLine("var \(field.cammelCaseName): \(field.cleanTypeName)? = nil")
 
         let left = CodeBlock.builder().addLiteral("let \(strVariable)").build()
         let right = CodeBlock.builder().addLiteral(strVariable).build()
 
         cb.addCodeBlock(
             ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
-                return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = \(field.cleanTypeName)(rawValue: \(strVariable))").build()
+                return CodeBlock.builder().addLiteral("\(field.cammelCaseName) = \(field.cleanTypeName)(rawValue: \(strVariable))").build()
             })
 
         return cb.build()
     }
 
-    /*
-    resultJSON["field_name"] = json.rawValue
-    */
     public static func toJsonFunction(field: Field) -> CodeBlock {
         return ToJsonFunctionGenerator.generate(field) { field in
-            return EnumGenerator.toJsonCodeBlock(field.name)
+            return CodeBlock.builder().addLiteral("\(MethodGenerator.toJSONVarName)[\"\(field.name)\"] = ").addLiteral(EnumGenerator.toJsonCodeBlock(field.name).toString()).build()
         }
     }
 
-    internal static func toJsonCodeBlock(fieldName: String) -> CodeBlock {
-        let cammelCaseName = PoetUtil.cleanCammelCaseString(fieldName)
-        return CodeBlock.builder().addLiteral("\(MethodGenerator.toJSONVarName)[\(fieldName)] = \(cammelCaseName).rawValue"
-            ).build()
+    /*
+    $0.rawValue
+    */
+    internal static func toJsonCodeBlock(fieldName: String? = nil) -> CodeBlock {
+        let cleanName = fieldName != nil ? PoetUtil.cleanCammelCaseString(fieldName!) : "$0"
+        return CodeBlock.builder().addLiteral("\(cleanName).rawValue").build()
     }
 }

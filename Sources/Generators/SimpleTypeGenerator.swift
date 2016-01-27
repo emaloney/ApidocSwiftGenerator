@@ -35,7 +35,7 @@ public struct SimpleTypeGenerator {
         case .UUID:
             return SimpleTypeGenerator.generateParseJsonGuid(field)
         case .Dictionary:
-            return SimpleTypeGenerator.generateParseJsonObject(field)
+            return SimpleTypeGenerator.generateParseJsonDictionary(field)
         default: return CodeBlock.builder().build()
         }
     }
@@ -65,7 +65,7 @@ public struct SimpleTypeGenerator {
         /*
         let fieldName = payload.optionalBool(field_name)
         */
-            return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = try payload.optional\(requiredType)(\"\(field.name)\")").build()
+            return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = payload.optional\(requiredType)(\"\(field.name)\")").build()
         }
     }
 
@@ -120,7 +120,7 @@ public struct SimpleTypeGenerator {
             let right = CodeBlock.builder().addLiteral(fieldNameStr).build()
 
             cb.addCodeBlock(ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
-                return CodeBlock.builder().addLiteral("\(field.cammelCaseName) = NSUUID(string: \(fieldNameStr))").build()
+                return CodeBlock.builder().addLiteral("\(field.cammelCaseName) = NSUUID(UUIDString: \(fieldNameStr))").build()
             })
 
             return cb.build()
@@ -149,9 +149,21 @@ public struct SimpleTypeGenerator {
 
     public static func generateParseJsonObject(field: Field) -> CodeBlock {
         if field.required {
-            return SimpleTypeGenerator.generateParseJsonObjectRequired(field)
+            return CodeBlock.builder()
+                .addLiteral("let \(field.cammelCaseName) = try payload.requiredDictionary(\"\(field.name)\")")
+                .build()
         } else {
-            return SimpleTypeGenerator.generateParseJsonObjectOptional(field)
+            return CodeBlock.builder()
+                .addLiteral("let \(field.cammelCaseName) = payload[\"\(field.name)\"] as? NSDictionary")
+                .build()
+        }
+    }
+
+    public static func generateParseJsonDictionary(field: Field) -> CodeBlock {
+        if field.required {
+            return SimpleTypeGenerator.generateParseJsonDictionaryRequired(field)
+        } else {
+            return SimpleTypeGenerator.generateParseJsonDictionaryOptional(field)
         }
     }
 
@@ -165,7 +177,7 @@ public struct SimpleTypeGenerator {
         }
     }
     */
-    private static func generateParseJsonObjectRequired(field: Field) -> CodeBlock {
+    private static func generateParseJsonDictionaryRequired(field: Field) -> CodeBlock {
         let cb = CodeBlock.builder()
         let capitalizedType: String
         switch SwiftType(apidocType: field.type, imports: nil)! {
@@ -177,7 +189,7 @@ public struct SimpleTypeGenerator {
 
         cb.addCodeLine("var \(field.cammelCaseName) = [\(capitalizedType) : \(capitalizedType)]()")
 
-        cb.addCodeBlock(ControlFlow.forInControlFlow("(key, value)", iterable: "try payload.requiredDictionary(\(field.name))") {
+        cb.addCodeBlock(ControlFlow.forInControlFlow("(key, value)", iterable: "try payload.requiredDictionary(\"\(field.name)\")") {
             let innerCB = CodeBlock.builder()
             let leftOne = CodeBlock.builder().addLiteral("let kType").build()
             let rightOne = CodeBlock.builder().addLiteral("key as? \(capitalizedType)").build()
@@ -197,7 +209,7 @@ public struct SimpleTypeGenerator {
                 })
                 // ELSE
                 .addCodeBlock(ControlFlow.elseControlFlow(nil) {
-                    return CodeBlock.builder().addLiteral("throw DataTransactionError.FormatError(\"Error creating field \(field.name). Expected a \(capitalizedType) found \\(key) and\\(value)\"").build()
+                    return CodeBlock.builder().addLiteral("throw DataTransactionError.FormatError(\"Error creating field \(field.name). Expected a \(capitalizedType) found \\(key) and\\(value)\")").build()
                 })
 
             return innerCB.build()
@@ -209,6 +221,7 @@ public struct SimpleTypeGenerator {
     /*
     var fieldName: [Type : Type]? = nil
     if let dict = payload["field_name"] as? NSDictionary {
+        fieldName = [TypeName : TypeName]()
         for (key, value) in dict {
             if let kType = key as? Type, let vType = value as? Type {
                 fieldName[kType] = vType
@@ -216,7 +229,7 @@ public struct SimpleTypeGenerator {
         }
     }
     */
-    private static func generateParseJsonObjectOptional(field: Field) -> CodeBlock {
+    private static func generateParseJsonDictionaryOptional(field: Field) -> CodeBlock {
         let cb = CodeBlock.builder()
         let capitalizedType: String
         switch SwiftType(apidocType: field.type, imports: nil)! {
@@ -226,16 +239,18 @@ public struct SimpleTypeGenerator {
             capitalizedType = field.cleanTypeName
         }
 
-        cb.addCodeLine("var \(field.cammelCaseName) = [\(capitalizedType) : \(capitalizedType)]? = nil")
+        cb.addCodeLine("var \(field.cammelCaseName): [\(capitalizedType) : \(capitalizedType)]? = nil")
 
         let left = CodeBlock.builder().addLiteral("let dict").build()
         let right = CodeBlock.builder().addLiteral("payload[\"\(field.name)\"] as? NSDictionary").build()
 
         // if let dict = payload["field_name"] as? NSDictionary
         cb.addCodeBlock(ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
+            let cb = CodeBlock.builder()
+                .addCodeLine("\(field.cammelCaseName) = [\(capitalizedType) : \(capitalizedType)]()")
 
             //for (key, value) in dict {
-            return ControlFlow.forInControlFlow("(key, value)", iterable: "dict") {
+            cb.addCodeBlock(ControlFlow.forInControlFlow("(key, value)", iterable: "dict") {
 
                 let leftOne = CodeBlock.builder().addLiteral("let kType").build()
                 let rightOne = CodeBlock.builder().addLiteral("key as? \(capitalizedType)").build()
@@ -250,10 +265,11 @@ public struct SimpleTypeGenerator {
                 // if let kType = key as? Type, let vType = value as? Type
                 return ControlFlow.ifControlFlow(comparisons) {
                     //  fieldName[kType] = vType
-                    CodeBlock.builder().addLiteral("\(field.cammelCaseName)[kType] = vType").build()
+                    CodeBlock.builder().addLiteral("\(field.cammelCaseName)?[kType] = vType").build()
                 }
+            })
 
-            }
+            return cb.build()
         })
 
         return cb.build()
@@ -262,7 +278,9 @@ public struct SimpleTypeGenerator {
     public static func toJsonCodeBlock(field: Field, swiftType: SwiftType) -> CodeBlock {
         let rightSide = SimpleTypeGenerator.toString(swiftType)
         let rightSideStr = rightSide == nil ? field.cammelCaseName : "\(field.cammelCaseName).\(rightSide!)"
-        return SimpleTypeGenerator.requiredToJsonCodeBlock(field.name, rightSide: rightSideStr)
+        return ToJsonFunctionGenerator.generate(field) { field in
+            return SimpleTypeGenerator.requiredToJsonCodeBlock(field.name, rightSide: rightSideStr)
+        }
     }
 
     private static func requiredToJsonCodeBlock(fieldName: String, rightSide: String) -> CodeBlock {

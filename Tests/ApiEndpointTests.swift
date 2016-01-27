@@ -15,6 +15,10 @@ class ApiEndpointTests: XCTestCase {
     let token = "9Rcw92CkB9FqnkI4u4AAHP5V7zZrNaOmmdZsya4ObAzX91NiPhaoJCgLVHIRppgKA7NyLJqQZk1sGUet"
     let email = "swift-generator-test@googlegroups.com"
     let password = "swiftgeneratortest"
+    let organizationKey = "swift-test"
+    let applicationKey = "apidoc-api-swift-test"
+    let path = "/Users/kdorman/Documents/"
+    let folderName = "SwiftGenerationTest"
 
     override func setUp() {
         super.setUp()
@@ -80,11 +84,10 @@ class ApiEndpointTests: XCTestCase {
     func testIntegration() {
         let readyExpectation = expectationWithDescription("ready")
 
-        let g = ApidocGeneratorConstructor(token: token, email: email, password: password, organizationKey: "swift-test", applicationKey: "apidoc-api-swift-test")
-        g.generate(atPath: "/Users/kdorman/Documents/", forFile: "SwiftGenerationTest") {
+        let g = ApidocGeneratorConstructor(token: token, email: email, password: password, organizationKey: organizationKey, applicationKey: applicationKey)
+        g.generate(atPath: path, forFile: folderName) {
             readyExpectation.fulfill()
         }
-
 
         waitForExpectationsWithTimeout(10) { error in
             XCTAssertNil(error, "Error")

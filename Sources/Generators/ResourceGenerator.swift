@@ -26,8 +26,9 @@ public struct ResourceGenerator: Generator {
                     .addFramework(service.name)
                     .addModifier(.Public)
                     .addSuperType(TypeName(keyword: "DelegatingDataTransaction"))
-                    .addImport("GiltDataLoading")
+//                    .addImport("GiltDataLoading")
                     .addImport("Foundation")
+                    .addImport("CleanroomConcurrency")
                     .addDescription(StringUtil.concat(resource.description, right: operation.description))
                     .addFieldSpecs(ResourceGenerator.typealiasFields(operation, service: service))
                     .addFieldSpecs(ResourceGenerator.transactionFields())
@@ -124,13 +125,13 @@ public struct ResourceGenerator: Generator {
             .addModifier(.Public)
             .canThrowError()
             .addParameters(operation.parameters.map { param in
-                return ParameterSpec.builder(param.name, type: TypeName(keyword:param.type))
+                return ParameterSpec.builder(param.name, type: TypeName(keyword: SwiftType(apidocType: param.type, imports: service.imports)!.swiftTypeString, optional: !param.required))
                     .addDescription(param.description)
                     .build()
             })
 
         if let body = operation.body {
-            mb.addParameter(ParameterSpec.builder(body.type, type: TypeName(keyword: body.type))
+            mb.addParameter(ParameterSpec.builder("body", type: TypeName(keyword: body.type))
                 .addDescription(body.description).build())
         }
 
@@ -141,7 +142,17 @@ public struct ResourceGenerator: Generator {
             cb.addCodeLine("let queryParams: [String : AnyObject?]? = [")
             cb.addEmitObject(.IncreaseIndentation)
             cb.addCodeBlock(CodeBlock.builder().addLiteral((operation.queryParams.map { param in
-                return "\"\(param.cammelCaseName) : \(param.cammelCaseName) \""
+                let swiftType = SwiftType(apidocType: param.type, imports: service.imports)!
+                let stringCleaner = ".stringByReplacingOccurrencesOfString(\" \", withString: \"+\")"
+                let cleanStringFn: String
+                if swiftType.swiftTypeString == "String" && param.required {
+                    cleanStringFn = stringCleaner
+                } else if swiftType.swiftTypeString == "String" {
+                    cleanStringFn = "?" + stringCleaner
+                } else {
+                    cleanStringFn = ""
+                }
+                return "\"\(param.cammelCaseName)\" : \(swiftType.toString(param.cammelCaseName, optional: !param.required))\(cleanStringFn)"
             }).joinWithSeparator(", ")).build())
             cb.addLiteral("]")
             cb.addEmitObject(.DecreaseIndentation)
@@ -152,19 +163,27 @@ public struct ResourceGenerator: Generator {
 
         cb.addCodeBlock(ControlFlow.doCatchControlFlow({
             let cb = CodeBlock.builder()
-            cb.addLiteral("let request = NSMutableURLRequest(URL: try)")
+            cb.addLiteral("let request = NSMutableURLRequest(URL: try")
             cb.addLiteral("\(resource.cleanTypeName(operation)).getUrl(")
-            cb.addLiteral((operation.pathParams.map { param in
-                    return "\(param.cammelCaseName): \(param.cammelCaseName)"
-                    }).joinWithSeparator(", "))
-            cb.addLiteral("queryParams : queryParams))")
+            for (index, param) in operation.pathParams.enumerate() {
+                if index == 0 {
+                    cb.addLiteral("\(param.cammelCaseName),")
+                } else {
+                    cb.addLiteral("\(param.cammelCaseName): \(param.cammelCaseName),")
+                }
+            }
+            if operation.pathParams.isEmpty {
+                cb.addLiteral("queryParams))")
+            } else {
+                cb.addLiteral("queryParams : queryParams))")
+            }
             cb.addCodeLine("request.HTTPRequestMethod = .\(PoetUtil.cleanTypeName(operation.method.rawValue.lowercaseString))")
             cb.addCodeLine("request.addValue(\"application/json\", forHTTPHeaderField: \"Content-Type\")")
             cb.addEmitObject(.NewLine)
 
-            if let body = operation.body {
+            if let _ = operation.body {
                 cb.addCodeLine("let binaryData: NSData?")
-                cb.addCodeBlock(ControlFlow.switchControlFlow("\(PoetUtil.cleanCammelCaseString(body.type)).toBinaryData()", cases: [
+                cb.addCodeBlock(ControlFlow.switchControlFlow("body.toBinaryData()", cases: [
                     (".Succeeded(let data)", CodeBlock.builder().addLiteral("binaryData = data").build()),
                     (".Failed(let error)", CodeBlock.builder().addLiteral("throw error").build())
                 ]))
@@ -196,7 +215,7 @@ public struct ResourceGenerator: Generator {
         let mb = MethodSpec.builder("getBaseUrl")
             .addModifiers([.Private, .Static])
             .addParameters(operation.pathParams.map { param in
-                return ParameterSpec.builder(param.name, type: TypeName(keyword: param.type))
+                return ParameterSpec.builder(param.name, type: TypeName(keyword: SwiftType(apidocType: param.type, imports: service.imports)!.swiftTypeString, optional: !param.required))
                     .addDescription(param.description)
                     .build()
             })
@@ -204,7 +223,7 @@ public struct ResourceGenerator: Generator {
 
         var pathString = operation.path
         operation.pathParams.forEach { param in
-            let paramTypeToString: String = SwiftType(apidocType: param.type, imports: service.imports)!.toString(param.name)
+            let paramTypeToString: String = SwiftType(apidocType: param.type, imports: service.imports)!.toString(param.cammelCaseName)
             pathString = pathString.stringByReplacingOccurrencesOfString(":\(param.name)", withString: "\\(\(paramTypeToString))")
         }
 
@@ -214,12 +233,12 @@ public struct ResourceGenerator: Generator {
     }
 
     /*
-    private static func getUrl(pahParam: PathParamType, queryParams: [String : AnyObject?]?) throws -> NSURL {
+    private static func getUrl(pathParam: PathParamType, queryParams: [String : AnyObject?]?) throws -> NSURL {
         let urlString: String
         let baseUrlString = CheckoutSessionGetByGuid.getBaseUrl(guid)
         let queryParamStrings: [String]? = queryParams?.flatMap { k, v in
             if (v != nil) {
-                return "\(k):\(v)"
+                return "\(k)=\(v!))"
             }
             return nil
         }
@@ -238,7 +257,7 @@ public struct ResourceGenerator: Generator {
     private static func getUrlFn(operation: Operation, resource: Resource, service: Service) -> MethodSpec {
         let mb = MethodSpec.builder("getUrl")
             .addParameters((operation.pathParams.map { parameter in
-                return ParameterSpec.builder(parameter.name, type: TypeName(keyword: parameter.type, optional: !parameter.required)).addDescription(parameter.description).build()
+                return ParameterSpec.builder(parameter.name, type: TypeName(keyword: SwiftType(apidocType: parameter.type, imports: service.imports)!.swiftTypeString, optional: !parameter.required)).addDescription(parameter.description).build()
                 }))
             .addParameter(ParameterSpec.builder("queryParams", type: TypeName(keyword: "[String : AnyObject?]?")).build())
             .canThrowError()
@@ -250,20 +269,27 @@ public struct ResourceGenerator: Generator {
         cb.addCodeLine("let urlString: String").addEmitObject(.NewLine)
 
         // Calling functions with an unknown number of params is a pain :( . Can probably find a cleaner way
-        cb.addCodeLine("let baseUrlString = \(resource.cleanTypeName(operation)).getBaseUrl(" +
-            (operation.pathParams.map { param in
-                return "\(param.cammelCaseName): \(param.cammelCaseName)"
-                }).joinWithSeparator(", ")
-            + ")"
-        ).addEmitObject(.NewLine)
-
+        cb.addCodeLine("let baseUrlString = \(resource.cleanTypeName(operation)).getBaseUrl(")
+        for (index, param) in operation.pathParams.enumerate() {
+            if index == 0 && operation.pathParams.count > 1 {
+                cb.addLiteral("\(param.cammelCaseName),")
+            } else if index == 0 {
+                cb.addLiteral("\(param.cammelCaseName)")
+            }else if index == operation.pathParams.count - 1 {
+                cb.addLiteral("\(param.cammelCaseName): \(param.cammelCaseName)")
+            } else {
+                cb.addLiteral("\(param.cammelCaseName): \(param.cammelCaseName),")
+            }
+        }
+        cb.addLiteral(")")
+        cb.addEmitObject(.NewLine)
         cb.addCodeLine("let queryParamStrings: [String]? = queryParams?.flatMap")
-        cb.addEmitObjects((ControlFlow.closureControlFlow("k, v", canThrow: false, returnType: nil) {
+        cb.addEmitObjects((ControlFlow.closureControlFlow("k, v", canThrow: false, returnType: TypeName.StringOptional) {
             let cb = CodeBlock.builder()
             let left = CodeBlock.builder().addLiteral("v").build()
             let right = CodeBlock.builder().addLiteral("nil").build()
             cb.addCodeBlock(ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .NotEquals, rhs: right)) {
-                return CodeBlock.builder().addLiteral("return \"\\(k):\\(v)\"").build()
+                return CodeBlock.builder().addLiteral("return \"\\(k)=\\(v!)\"").build()
             })
             return cb.addCodeLine("return nil").build()
         }).emittableObjects).addEmitObject(.NewLine)
@@ -318,6 +344,7 @@ public struct ResourceGenerator: Generator {
 
         if swiftType.swiftTypeString == "Void" {
             successCB.addLiteral("// Take no action")
+            successCB.addCodeLine("return")
         } else {
             let jsonParseCode: CodeBlock
 
@@ -325,12 +352,20 @@ public struct ResourceGenerator: Generator {
             case .Array(let innerType):
                 field = field.clone(withTypeName: innerType.swiftTypeString)
 
-                jsonParseCode = CodeBlock.builder().addLiteral("let model = payload.map")
+                jsonParseCode = CodeBlock.builder().addLiteral("let model = try payload.map")
                     .addEmitObjects((ControlFlow.closureControlFlow("payload", canThrow: true, returnType: field.cleanTypeName) {
-                        CodeBlock.builder()
-                            .addEmitObjects(ModelGenerator.generateParseModelJson(field, rootJson: true).emittableObjects)
-                            .addCodeLine("return model")
-                            .build()
+                        let cb = CodeBlock.builder()
+                        let left = CodeBlock.builder().addLiteral("let payload").build()
+                        let right = CodeBlock.builder().addLiteral("payload as? NSDictionary").build()
+                        cb.addEmitObjects((ControlFlow.guardControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
+                            return CodeBlock.builder().addLiteral("throw DataTransactionError.FormatError(\"Invalid conversion from array to [dictionary]\")").build()
+                        }).emittableObjects)
+                        cb.addEmitObjects(CodeBlock.builder()
+                                .addEmitObjects(ModelGenerator.generateParseModelJson(field, service: service, rootJson: true).emittableObjects)
+                                .addCodeLine("return model")
+                                .build().emittableObjects)
+
+                        return cb.build()
                     }).emittableObjects)
                     .build()
             default:

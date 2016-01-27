@@ -48,9 +48,10 @@ class SimpleGeneratorTest: XCTestCase {
     func testBoolOptionalGeneration() {
         let field = Field(name: "test_field_name", type: "bool", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
         let result = SimpleTypeGenerator.generateParseJsonBool(field).toString()
-        let test = "let testFieldName = try payload.optionalBool(\"test_field_name\")"
+        let test = "let testFieldName = payload.optionalBool(\"test_field_name\")"
 
 //        print(result)
+//        print(test)
 
         XCTAssertEqual(result, test)
     }
@@ -143,11 +144,11 @@ class SimpleGeneratorTest: XCTestCase {
         "\nlet testFieldNameStr = payload[\"test_field_name\"] as? String\n" +
         "var testFieldName: NSUUID? = nil\n" +
         "if let testFieldNameStr = testFieldNameStr {\n" +
-        "    testFieldName = NSUUID(string: testFieldNameStr)\n" +
+        "    testFieldName = NSUUID(UUIDString: testFieldNameStr)\n" +
         "}"
 
-//        print(result)
-//        print(test)
+        print(result)
+        print(test)
 
         XCTAssertEqual(result, test)
     }

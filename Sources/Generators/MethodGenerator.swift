@@ -48,8 +48,8 @@ public struct MethodGenerator {
 
     public static func modelToJson(service: Service, model: Model) -> MethodSpec {
         let mb = MethodSpec.builder(ToJsonFunctionGenerator.functionName)
-
-        mb.addReturnType(TypeName(keyword: "JSONEncoderResult<AnyObject>"))
+            .addReturnType(TypeName(keyword: "JSONEncoderResult<AnyObject>"))
+            .addModifier(.Public)
 
         let cb = CodeBlock.builder()
 
