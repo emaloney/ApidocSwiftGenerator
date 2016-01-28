@@ -44,7 +44,7 @@ public struct EnumGenerator: Generator {
     let fieldNameStr = try payload.requiredString(fieldName)
     let fieldNameOptional = Enum(rawValue: fieldNameStr)
     guard let fieldName = fieldNameOptional else {
-        throw DataTransactionError.FormatError("Error creating Enum with key \(fieldNameStr)")
+        throw DataTransactionError.DataFormatError("Error creating Enum with key \(fieldNameStr)")
     }
     */
     private static func generateEnumParseJsonBlockRequired(field: Field) -> CodeBlock {
@@ -60,7 +60,7 @@ public struct EnumGenerator: Generator {
         let right = CodeBlock.builder().addLiteral(optionalVariable).build()
 
         cb.addCodeBlock(ControlFlow.guardControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
-            return CodeBlock.builder().addLiteral("throw DataTransactionError.FormatError(\"Error creating \(field.cleanTypeName) with key \\(\(strVariable))\")").build()
+            return CodeBlock.builder().addLiteral("throw DataTransactionError.DataFormatError(\"Error creating \(field.cleanTypeName) with key \\(\(strVariable))\")").build()
         })
 
         return cb.build()

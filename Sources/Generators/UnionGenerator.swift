@@ -32,7 +32,7 @@ public struct UnionGenerator: Generator {
             catch {
                 // Do nothing
             }
-            throw DataTransactionError.FormatError("Invalid Union")
+            throw DataTransactionError.DataFormatError("Invalid Union")
         }
     }
 
@@ -56,7 +56,7 @@ public struct UnionGenerator: Generator {
         return StructSpec.builder("\(union.name)Impl")
             .addModifier(.Internal)
             .addFramework(service.name)
-            .addImport("Foundation")
+            .addImports(["Foundation", "CleanroomDataTransactions"])
             .addMethodSpec(UnionGenerator.toModelFunction(union, service: service))
             .build()
     }
@@ -78,7 +78,7 @@ public struct UnionGenerator: Generator {
                 }
             }
         }
-        cb.addCodeLine("throw DataTransactionError.FormatError(\"Invalid \(union.name)\")")
+        cb.addCodeLine("throw DataTransactionError.DataFormatError(\"Invalid \(union.name)\")")
         mb.addCode(cb.build())
 
         return mb.build()

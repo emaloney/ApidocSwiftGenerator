@@ -26,9 +26,7 @@ public struct ResourceGenerator: Generator {
                     .addFramework(service.name)
                     .addModifier(.Public)
                     .addSuperType(TypeName(keyword: "DelegatingDataTransaction"))
-//                    .addImport("GiltDataLoading")
-                    .addImport("Foundation")
-                    .addImport("CleanroomConcurrency")
+                    .addImports(["Foundation", "CleanroomConcurrency", "CleanroomDataTransactions"])
                     .addDescription(StringUtil.concat(resource.description, right: operation.description))
                     .addFieldSpecs(ResourceGenerator.typealiasFields(operation, service: service))
                     .addFieldSpecs(ResourceGenerator.transactionFields())
@@ -102,7 +100,7 @@ public struct ResourceGenerator: Generator {
 
         do {
             let request = NSMutableURLRequest(URL: try CheckoutSessionGetByGuid.getUrl(checkoutGuid, queryParams: queryParams))
-            request.HTTPRequestMethod = .Put
+            request.HTTPMethod = "PUT"
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
             let binaryData: NSData?
@@ -177,7 +175,7 @@ public struct ResourceGenerator: Generator {
             } else {
                 cb.addLiteral("queryParams : queryParams))")
             }
-            cb.addCodeLine("request.HTTPRequestMethod = .\(PoetUtil.cleanTypeName(operation.method.rawValue.lowercaseString))")
+            cb.addCodeLine("request.HTTPMethod = \"\(operation.method.rawValue.uppercaseString)\"")
             cb.addCodeLine("request.addValue(\"application/json\", forHTTPHeaderField: \"Content-Type\")")
             cb.addEmitObject(.NewLine)
 
@@ -358,7 +356,7 @@ public struct ResourceGenerator: Generator {
                         let left = CodeBlock.builder().addLiteral("let payload").build()
                         let right = CodeBlock.builder().addLiteral("payload as? NSDictionary").build()
                         cb.addEmitObjects((ControlFlow.guardControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
-                            return CodeBlock.builder().addLiteral("throw DataTransactionError.FormatError(\"Invalid conversion from array to [dictionary]\")").build()
+                            return CodeBlock.builder().addLiteral("throw DataTransactionError.DataFormatError(\"Invalid conversion from array to [dictionary]\")").build()
                         }).emittableObjects)
                         cb.addEmitObjects(CodeBlock.builder()
                                 .addEmitObjects(ModelGenerator.generateParseModelJson(field, service: service, rootJson: true).emittableObjects)

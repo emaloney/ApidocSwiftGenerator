@@ -101,7 +101,7 @@ public struct ArrayGenerator {
     case .Succeeded(let json):
         resultJSON[OrderPayloadKey.PaymentMethods.rawValue] = json
     case .Failed:
-        return .Failed(DataTransactionError.FormatError("Invalid FieldType data"))
+        return .Failed(DataTransactionError.DataFormatError("Invalid FieldType data"))
     }
     OR
     resultJSON["file_name"] = fieldName.map { return innerType.rawValue }
@@ -162,13 +162,13 @@ public struct ArrayGenerator {
     case .Succeeded(let json):
         result["field_name"] = json
     case .Failed:
-        return .Failed(DataTransactionError.FormatError("Invalid FieldType data"))
+        return .Failed(DataTransactionError.DataFormatError("Invalid FieldType data"))
     }
     */
     private static func toJsonCodeBlockArray(field: Field) -> CodeBlock {
         return ControlFlow.switchControlFlow("\(field.cammelCaseName).toJSON()", cases:
             [(".Succeeded(let json)", CodeBlock.builder().addLiteral("\(MethodGenerator.toJSONVarName)[\"\(field.name)\"] = json").build()),
-            (".Failed", CodeBlock.builder().addLiteral("return .Failed(DataTransactionError.FormatError(\"Invalid \(field.cleanTypeName) data\"))").build())]
+            (".Failed", CodeBlock.builder().addLiteral("return .Failed(DataTransactionError.DataFormatError(\"Invalid \(field.cleanTypeName) data\"))").build())]
         )
     }
 }

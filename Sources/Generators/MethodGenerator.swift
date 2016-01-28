@@ -14,8 +14,9 @@ public struct MethodGenerator {
 
     public static func generateJsonParsingInit(service: Service, model: Model) -> MethodSpec {
         let mb = MethodSpec.builder("init")
+            .addModifier(.Public)
+            .addParameter(ParameterSpec.builder("payload", type: TypeName.NSDictionary).build())
 
-        mb.addParameter(ParameterSpec.builder("payload", type: TypeName.NSDictionary).build())
         if model.canThrow(service) {
             mb.canThrowError()
         }

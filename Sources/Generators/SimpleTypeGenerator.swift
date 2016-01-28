@@ -173,7 +173,7 @@ public struct SimpleTypeGenerator {
         if let kType = key as? Type, vType = value as? Type {
                 fieldName[keyStr] = valueStr
         } else {
-            throw DataTransactionError.FormatError("Error creating for fieldName. Expected a string found \(key) and \(value)")
+            throw DataTransactionError.DataFormatError("Error creating for fieldName. Expected a string found \(key) and \(value)")
         }
     }
     */
@@ -209,7 +209,7 @@ public struct SimpleTypeGenerator {
                 })
                 // ELSE
                 .addCodeBlock(ControlFlow.elseControlFlow(nil) {
-                    return CodeBlock.builder().addLiteral("throw DataTransactionError.FormatError(\"Error creating field \(field.name). Expected a \(capitalizedType) found \\(key) and\\(value)\")").build()
+                    return CodeBlock.builder().addLiteral("throw DataTransactionError.DataFormatError(\"Error creating field \(field.name). Expected a \(capitalizedType) found \\(key) and\\(value)\")").build()
                 })
 
             return innerCB.build()

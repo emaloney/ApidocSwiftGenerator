@@ -16,12 +16,11 @@ public struct ModelGenerator: Generator {
         var models: [PoetFile]? = service.models?.map { model in
             let sb = StructSpec.builder(model.name)
                 .addFramework(service.name)
-
                 .addModifier(.Public)
                 .addDescription(model.description)
                 .addProtocol(TypeName(keyword: "JSONDataModel"))
                 .addProtocol(TypeName(keyword: "BinaryDataModel"))
-                .addImport("Foundation")
+                .addImports(["Foundation", "CleanroomDataTransactions"])
                 .addFieldSpecs(FieldGenerator.generate(model.fields, imports: service.imports))
                 .addMethodSpec(MethodGenerator.modelToJson(service, model: model))
                 .addMethodSpec(MethodGenerator.generateJsonParsingInit(service, model: model))
@@ -107,7 +106,7 @@ public struct ModelGenerator: Generator {
     case .Succeeded(let json):
         resultJSON["field_name"] = json
     case .Failed:
-        return .Failed(DataTransactionError.FormatError("Invalid FieldName data"))
+        return .Failed(DataTransactionError.DataFormatError("Invalid FieldName data"))
     }
     */
     public static func toJsonFunction(field: Field) -> CodeBlock {
@@ -129,7 +128,7 @@ public struct ModelGenerator: Generator {
     }
 
     private static func toJsonFailedCodeBlock(field: Field) -> CodeBlock {
-        return CodeBlock.builder().addLiteral("return .Failed(DataTransactionError.FormatError(\"Invalid \(field.cammelCaseName) data\"))"
+        return CodeBlock.builder().addLiteral("return .Failed(DataTransactionError.DataFormatError(\"Invalid \(field.cammelCaseName) data\"))"
             ).build()
     }
 }
