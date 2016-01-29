@@ -127,6 +127,8 @@ public struct FieldGenerator {
 
         case .Array(let innerType):
             cb.addCodeBlock(ArrayGenerator.toJsonCodeBlock(field, innerType: innerType, service: service))
+        case .Dictionary(_, let rightType):
+            cb.addCodeBlock(DictionaryGenerator.toJsonCodeBlock(field, rightType: rightType))
         default:
             cb.addCodeBlock(SimpleTypeGenerator.toJsonCodeBlock(field, swiftType: swiftType))
         }

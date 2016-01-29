@@ -66,6 +66,10 @@
 		59AA6AAE1C3B3DE3003CD1A2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6AA11C3B3D6F003CD1A2 /* Alamofire.framework */; };
 		59AA6AB11C3B3DF2003CD1A2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6AA51C3B3D6F003CD1A2 /* Alamofire.framework */; };
 		59AA6AB21C3B402D003CD1A2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59AA6A9D1C3B3D6F003CD1A2 /* Alamofire.framework */; };
+		59B2D5201C5AD50F00C0BA10 /* DictionaryGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B2D51F1C5AD50F00C0BA10 /* DictionaryGenerator.swift */; };
+		59B2D5211C5AD50F00C0BA10 /* DictionaryGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B2D51F1C5AD50F00C0BA10 /* DictionaryGenerator.swift */; };
+		59B2D5221C5AD50F00C0BA10 /* DictionaryGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B2D51F1C5AD50F00C0BA10 /* DictionaryGenerator.swift */; };
+		59B2D5231C5AD50F00C0BA10 /* DictionaryGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B2D51F1C5AD50F00C0BA10 /* DictionaryGenerator.swift */; };
 		59DE1E341C46F3B8002B1AFA /* FieldGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E321C46F3B8002B1AFA /* FieldGenerator.swift */; };
 		59DE1E421C46F9CB002B1AFA /* MethodGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E401C46F9CB002B1AFA /* MethodGenerator.swift */; };
 		59DE1E631C47136A002B1AFA /* SimpleTypeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DE1E611C47136A002B1AFA /* SimpleTypeGenerator.swift */; };
@@ -415,6 +419,7 @@
 		59AA6A311C3B2D75003CD1A2 /* SwiftPoet.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SwiftPoet.xcodeproj; path = SwiftPoet/SwiftPoet.xcodeproj; sourceTree = "<group>"; };
 		59AA6A491C3B2D7D003CD1A2 /* CleanroomLogger.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CleanroomLogger.xcodeproj; path = CleanroomLogger/CleanroomLogger.xcodeproj; sourceTree = "<group>"; };
 		59AA6A8E1C3B3D6F003CD1A2 /* Alamofire.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Alamofire.xcodeproj; path = Alamofire/Alamofire.xcodeproj; sourceTree = "<group>"; };
+		59B2D51F1C5AD50F00C0BA10 /* DictionaryGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryGenerator.swift; sourceTree = "<group>"; };
 		59DE1E321C46F3B8002B1AFA /* FieldGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FieldGenerator.swift; sourceTree = "<group>"; };
 		59DE1E401C46F9CB002B1AFA /* MethodGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MethodGenerator.swift; sourceTree = "<group>"; };
 		59DE1E611C47136A002B1AFA /* SimpleTypeGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleTypeGenerator.swift; sourceTree = "<group>"; };
@@ -660,6 +665,7 @@
 				59DE1EC81C503585002B1AFA /* ToJsonFunctionGenerator.swift */,
 				595ECF7A1C51460F002A43E1 /* ResourceGenerator.swift */,
 				5915043A1C56B1BB00A9844A /* UnionGenerator.swift */,
+				59B2D51F1C5AD50F00C0BA10 /* DictionaryGenerator.swift */,
 			);
 			path = Generators;
 			sourceTree = "<group>";
@@ -920,6 +926,7 @@
 		3BCBACE21BA369AD007F1C90 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0720;
 				LastUpgradeCheck = 0710;
 				TargetAttributes = {
 					3B00E55C1BA3782D0011486D = {
@@ -1192,6 +1199,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				59B2D5201C5AD50F00C0BA10 /* DictionaryGenerator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1235,6 +1243,7 @@
 				599D0DF71C459522003DCCF0 /* ModelGenerator.swift in Sources */,
 				590260591C3D9A0100FB39E8 /* Unions.swift in Sources */,
 				590260C01C4021B600FB39E8 /* URLLoader.swift in Sources */,
+				59B2D5211C5AD50F00C0BA10 /* DictionaryGenerator.swift in Sources */,
 				595ECF8A1C5160D7002A43E1 /* StringUtil.swift in Sources */,
 				590260C91C4021DD00FB39E8 /* Either.swift in Sources */,
 				590260451C3D97BB00FB39E8 /* Body.swift in Sources */,
@@ -1271,6 +1280,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				59B2D5221C5AD50F00C0BA10 /* DictionaryGenerator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1285,6 +1295,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				59B2D5231C5AD50F00C0BA10 /* DictionaryGenerator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1762,6 +1773,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = 3;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1933,6 +1945,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = 4;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";

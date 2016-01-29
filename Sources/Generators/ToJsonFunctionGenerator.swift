@@ -20,21 +20,26 @@ public struct ToJsonFunctionGenerator {
         requiredBlock
     }
     */
+    internal static func generate(fieldName: String, required: Bool, requiredBlockGen: () -> CodeBlock) -> CodeBlock {
+        let requiredCodeBlock = requiredBlockGen()
+        let optionalCodeBlock = ToJsonFunctionGenerator.optionalGenerator(requiredCodeBlock, cammelCaseName: fieldName)
+
+        return ToJsonFunctionGenerator.dualGenerator(required, requiredCodeBlock: requiredCodeBlock, optionalCodeBlock: optionalCodeBlock)
+    }
+
     internal static func generate(field: Field, requiredBlockGen: (Field) -> CodeBlock) -> CodeBlock {
         let requiredCodeBlock = requiredBlockGen(field)
         let optionalCodeBlock = ToJsonFunctionGenerator.optionalGenerator(requiredCodeBlock, cammelCaseName: field.cammelCaseName)
 
-        return ToJsonFunctionGenerator.dualGenerator(field, requiredCodeBlock: requiredCodeBlock, optionalCodeBlock: optionalCodeBlock)
+        return ToJsonFunctionGenerator.dualGenerator(field.required, requiredCodeBlock: requiredCodeBlock, optionalCodeBlock: optionalCodeBlock)
     }
 
-    private static func dualGenerator(field: Field, requiredCodeBlock: CodeBlock, optionalCodeBlock: CodeBlock) -> CodeBlock {
-        let cb = CodeBlock.builder()
-        if field.required {
-            cb.addCodeBlock(requiredCodeBlock)
+    private static func dualGenerator(required: Bool, requiredCodeBlock: CodeBlock, optionalCodeBlock: CodeBlock) -> CodeBlock {
+        if required {
+            return requiredCodeBlock
         } else {
-            cb.addCodeBlock(optionalCodeBlock)
+            return optionalCodeBlock
         }
-        return cb.build()
     }
 
     private static func optionalGenerator(body: CodeBlock, cammelCaseName: String) -> CodeBlock {

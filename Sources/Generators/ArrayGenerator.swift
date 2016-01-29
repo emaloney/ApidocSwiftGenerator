@@ -134,14 +134,14 @@ public struct ArrayGenerator {
                 } else {
                     fatalError()
                 }
-            default:
-                guard let rightSide = SimpleTypeGenerator.toString(innerType) else {
-                    return ArrayGenerator.toJsonCodeBlock(field) {
-                        return CodeBlock.builder().addLiteral(field.cammelCaseName).build()
-                    }
-                }
+            case .SwiftString, .Long, .Integer, .Boolean, .Decimal, .Double:
                 return ArrayGenerator.toJsonCodeBlock(field) {
-                    return ArrayGenerator.rightSideWithMap(field) { return CodeBlock.builder().addLiteral("\(field.cammelCaseName).\(rightSide)").build() }
+                    return CodeBlock.builder().addLiteral("\(field.cammelCaseName)").build()
+                }
+            default:
+                let fieldToString = innerType.toString(nil, optional: !field.required)
+                return ArrayGenerator.toJsonCodeBlock(field) {
+                    return ArrayGenerator.rightSideWithMap(field) { return CodeBlock.builder().addLiteral("\(fieldToString)").build() }
                 }
             }
         }

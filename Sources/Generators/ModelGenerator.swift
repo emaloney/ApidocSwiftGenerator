@@ -102,13 +102,25 @@ public struct ModelGenerator: Generator {
 
 
     /*
-    switch fieldName.toJSON() {
+    switch mapValue.toJSON() {
     case .Succeeded(let json):
-        resultJSON["field_name"] = json
+        mapParam[mapKey] = json
     case .Failed:
-        return .Failed(DataTransactionError.DataFormatError("Invalid FieldName data"))
+        return .Failed(DataTransactionError.DataFormatError("Invalid FieldType data"))
     }
     */
+    public static func toJsonFunction(mapParam: String, mapValue: String, mapKey: String, fieldType: String, required: Bool) -> CodeBlock {
+        let field = Field.init(name: "Type", type: fieldType, description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
+        return ToJsonFunctionGenerator.generate(mapValue, required: required) {
+            return ControlFlow.switchControlFlow(
+                "\(mapValue).toJSON()",
+                cases: [
+                    (".Succeeded(let json)", CodeBlock.builder().addLiteral("\(mapParam)[\(mapKey)] = json").build()),
+                    (".Failed", ModelGenerator.toJsonFailedCodeBlock(field))
+                ])
+        }
+    }
+
     public static func toJsonFunction(field: Field) -> CodeBlock {
         return ToJsonFunctionGenerator.generate(field) { field in
             let cammelCaseName = PoetUtil.cleanCammelCaseString(field.name)

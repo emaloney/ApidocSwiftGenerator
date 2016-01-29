@@ -33,7 +33,7 @@ public indirect enum SwiftType {
             let startIndex = apidocType.rangeOfString("[")!.endIndex
             let innerTypeStr = apidocType.substringWithRange(Range(start: startIndex, end: endIndex))
 
-            self = .Dictionary(SwiftType(apidocType: innerTypeStr, imports: imports)!, SwiftType(apidocType: innerTypeStr, imports: imports)!)
+            self = .Dictionary(SwiftType.SwiftString, SwiftType(apidocType: innerTypeStr, imports: imports)!)
         }
         else if SwiftType.isArray(apidocType) {
             let chars = apidocType.characters
@@ -102,17 +102,18 @@ public indirect enum SwiftType {
         }
     }
 
-    public func toString(name: String, optional: Bool = false) -> String {
+    public func toString(name: String?, optional: Bool = false) -> String {
+        let paramName = name ?? "$0"
         let optionalStr = optional ? "?" : ""
         switch self {
         case .UUID:
-            return "\(name)\(optionalStr).UUIDString"
+            return "\(paramName)\(optionalStr).UUIDString"
         case .DateISO8601, .DateTimeISO8601:
-            return "\(name)\(optionalStr).asISO8601()"
+            return "\(paramName)\(optionalStr).asISO8601()"
         case .Unit:
             return "nil"
         default:
-            return name
+            return paramName
         }
     }
 
