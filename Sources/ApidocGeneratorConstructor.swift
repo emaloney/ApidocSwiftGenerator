@@ -12,9 +12,9 @@ import SwiftPoet
 
 public class ApidocGeneratorConstructor {
 
-    let loader: ApidocURLLoader
+    internal let loader: ApidocURLLoader
 
-    public init (token: String, email: String, password: String, organizationKey: String, applicationKey: String, version: String? = nil) {
+    public init(token: String, email: String, password: String, organizationKey: String, applicationKey: String, version: String? = nil) {
         let projectUrl = URLConstructor.create(organizationKey, applicationKey: applicationKey, version: version)!
 
         loader = ApidocURLLoader(url: projectUrl, token: token, email: email, password: password)
@@ -89,10 +89,4 @@ public class ApidocGeneratorConstructor {
         }
     }
 
-}
-
-public struct Apidoc {
-    public typealias Result = TransactionResult<AnyObject?>
-    public typealias ApidocJsonHandler = (Result) -> Void
-    public typealias FileName = String
 }

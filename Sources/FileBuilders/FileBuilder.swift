@@ -9,18 +9,18 @@
 import Foundation
 import SwiftPoet
 
-public class FileBuilder {
+internal class FileBuilder {
 
-    public init() {}
+    internal init() {}
 
-    public func createFile(fileName: String, atPath path: String, contents: String) throws {
+    internal func createFile(fileName: String, atPath path: String, contents: String) throws {
         guard let urlPath = NSURL(string: path) else {
             throw FileSystemError.InvalidFolderName(path)
         }
         try createFile(fileName, atUrlPath: urlPath, contents: contents)
     }
 
-    public func createFile(fileName: String, atUrlPath path: NSURL, contents: String) throws {
+    internal func createFile(fileName: String, atUrlPath path: NSURL, contents: String) throws {
         let fullFileName = PoetUtil.cleanTypeName(fileName) + ".swift"
         guard let fileUrl = NSURL(string: fullFileName, relativeToURL: path) else {
             throw FileSystemError.InvalidFileName(fullFileName)

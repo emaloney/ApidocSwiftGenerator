@@ -10,10 +10,10 @@ import CleanroomLogger
 import SwiftPoet
 import Foundation
 
-public struct ApidocGenerator: Generator {
-    public typealias ResultType = GeneratorApplication
+internal struct ApidocGenerator: Generator {
+    internal typealias ResultType = GeneratorApplication
 
-    public static func generate(service: Service) -> GeneratorApplication {
+    internal static func generate(service: Service) -> GeneratorApplication {
         return GeneratorApplication(
             enums: EnumGenerator.generate(service),
             models: ModelGenerator.generate(service),
@@ -23,7 +23,7 @@ public struct ApidocGenerator: Generator {
     }
 }
 
-public struct GeneratorApplication {
+internal struct GeneratorApplication {
     let enums: [PoetFile]?
     let models: [PoetFile]?
     let resources: [PoetFile]?

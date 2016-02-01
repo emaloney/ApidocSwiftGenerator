@@ -9,10 +9,8 @@
 import Foundation
 import SwiftPoet
 
-public struct MethodGenerator {
-    public static let toJSONVarName = "resultJSON"
-
-    public static func generateJsonParsingInit(service: Service, model: Model) -> MethodSpec {
+internal struct MethodGenerator {
+    internal static func jsonParsingInit(model: Model, service: Service) -> MethodSpec {
         let mb = MethodSpec.builder("init")
             .addModifier(.Public)
             .addParameter(ParameterSpec.builder("payload", type: TypeName.NSDictionary).build())
@@ -24,43 +22,35 @@ public struct MethodGenerator {
         let cb = CodeBlock.builder()
 
         model.fields.forEach { field in
-            cb.addCodeBlock(FieldGenerator.generateJsonParse(field, service: service))
+            cb.addCodeBlock(FieldGenerator.jsonParseCodeBlock(field, service: service))
         }
 
-        let lastLineCB = CodeBlock.builder()
-        lastLineCB.addLiteral("self.init(")
+        cb.addEmitObject(.NewLine)
+        cb.addCodeLine("self.init(")
 
-        var first = true
-        model.fields.forEach { field in
-            if !first {
-                lastLineCB.addLiteral(",")
-            }
-            lastLineCB.addLiteral(field.cammelCaseName)
-            lastLineCB.addLiteral(":")
-            lastLineCB.addLiteral(field.cammelCaseName)
-            first = false
+        let paramStrings: [String] = model.fields.map { field -> String in
+            return "\(field.cammelCaseName) : \(field.cammelCaseName)"
         }
 
-        lastLineCB.addLiteral(")")
-        cb.addCodeBlock(lastLineCB.build())
+        cb.addLiteral(paramStrings.joinWithSeparator(", ")).addLiteral(")")
+
         mb.addCode(cb.build())
         return mb.build()
     }
 
-    public static func modelToJson(service: Service, model: Model) -> MethodSpec {
+    internal static func toJsonFunction(model: Model, service: Service) -> MethodSpec {
         let mb = MethodSpec.builder(ToJsonFunctionGenerator.functionName)
-            .addReturnType(TypeName(keyword: "JSONEncoderResult<AnyObject>"))
+            .addReturnType(TypeName(keyword: "ApidocJSONEncoderResult<AnyObject>"))
             .addModifier(.Public)
 
         let cb = CodeBlock.builder()
-
-        cb.addCodeLine("var \(MethodGenerator.toJSONVarName) = [String : AnyObject]()")
+            .addCodeLine("var \(ToJsonFunctionGenerator.varName) = [String : AnyObject]()")
 
         model.fields.forEach { field in
             cb.addCodeBlock(FieldGenerator.toJsonCodeBlock(field, service: service))
         }
 
-        cb.addCodeLine("return .Succeeded(\(MethodGenerator.toJSONVarName))")
+        cb.addCodeLine("return .Succeeded(\(ToJsonFunctionGenerator.varName))")
 
         mb.addCode(cb.build())
         return mb.build()

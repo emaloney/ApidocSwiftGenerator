@@ -9,11 +9,11 @@
 import Foundation
 import SwiftPoet
 
-public struct Namespace {
+internal struct Namespace {
     let fullyQuallified: String
     let swiftFramework: String
 
-    public init(namespace: String, applicationKey: String) {
+    internal init(namespace: String, applicationKey: String) {
         var components = namespace.componentsSeparatedByString(".")
         components.removeLast()
 
@@ -21,7 +21,7 @@ public struct Namespace {
         swiftFramework = PoetUtil.cleanTypeName(applicationKey)
     }
 
-    public func match(namesapce: String) -> Bool {
+    internal func match(namesapce: String) -> Bool {
         do {
             let regex = try NSRegularExpression(pattern: fullyQuallified, options: NSRegularExpressionOptions.CaseInsensitive)
             if regex.matchesInString(namesapce, options: [], range: NSMakeRange(0, namesapce.characters.count)).count > 0 {

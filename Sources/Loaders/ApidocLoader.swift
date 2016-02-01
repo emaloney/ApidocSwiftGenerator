@@ -8,6 +8,6 @@
 
 import Foundation
 
-public protocol ApidocLoader {
+internal protocol ApidocLoader {
     func load() -> NSDictionary?
 }

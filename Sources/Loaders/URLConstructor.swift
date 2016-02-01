@@ -8,8 +8,8 @@
 
 import Foundation
 
-public struct URLConstructor {
-    public static func create(organizationKey: String, applicationKey: String, version optionalVersion: String?) -> NSURL? {
+internal struct URLConstructor {
+    internal static func create(organizationKey: String, applicationKey: String, version optionalVersion: String?) -> NSURL? {
         var version: String
         if (optionalVersion == nil) {
             version = "latest"

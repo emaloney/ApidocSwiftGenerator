@@ -9,64 +9,68 @@
 import Foundation
 import SwiftPoet
 
-public struct FieldGenerator {
-    public typealias ResultType = FieldSpec
+internal struct FieldGenerator {
+    internal typealias ResultType = FieldSpec
 
-    public static func generate(fields: [Field], imports: [Import]?) -> [ResultType] {
+    internal static func generate(fields: [Field], service: Service) -> [ResultType] {
         return fields.map { field in
-            FieldGenerator.generate(field, imports: imports)
+            FieldGenerator.generate(field, service: service)
         }
     }
 
-    public static func generate(field: Field, imports: [Import]?) -> ResultType {
-        let swiftType = SwiftType(apidocType: field.type, imports: imports)
-        let typeStr = swiftType?.swiftTypeString ?? "nil"
-        let typeName = TypeName(keyword: typeStr, optional: !field.required)
-        let fb = FieldSpec.builder(field.name, type: typeName)
+    internal static func generate(field: Field, service: Service) -> ResultType {
+        let swiftType = SwiftType(apidocType: field.type, service: service, required: field.required)
+
+        let fb = FieldSpec.builder(field.name, type: TypeName(keyword: swiftType.swiftTypeString, optional: !field.required, imports: nil))
             .addDescription(field.description)
             .addModifier(.Public)
 
-        if let swiftType = swiftType {
-            switch swiftType {
-            case .ImportedType(let namespace, _):
-                fb.addImport(namespace.swiftFramework)
-            default: break;
-            }
+        switch swiftType.type {
+        case .ImportedType(let namespace, _):
+            fb.addImport(namespace.swiftFramework)
+        default: break;
         }
+
         return fb.build()
     }
+}
 
-    public static func generateJsonParse(field: Field, service: Service, rootJson: Bool = false) -> CodeBlock {
-        guard let swiftType = SwiftType(apidocType: field.type, imports: service.imports) else {
-            return CodeBlock.builder().build()
-        }
 
-        switch swiftType {
+// MARK: parseJSON
+extension FieldGenerator {
 
-        case .ExternalType(let typeName):
+    internal static func jsonParseCodeBlock(field: Field, service: Service) -> CodeBlock {
+        let swiftType = SwiftType(apidocType: field.type, service: service)
+
+        switch swiftType.type {
+
+        case .ServiceDefinedType(let typeName):
             if service.contains(.Enum, typeName: typeName) {
-                return EnumGenerator.generateEnumParseJsonBlock(field)
+                return EnumGenerator.jsonParseCodeBlock(field)
             } else if service.contains(.Model, typeName: typeName)  {
-                return ModelGenerator.generateParseModelJson(field, service: service, rootJson: rootJson)
+                return ModelGenerator.jsonParseCodeBlock(field, service: service)
             } else if service.contains(.Union, typeName: typeName) {
-                return UnionGenerator.generateParseUnionJson(field)
+                return UnionGenerator.jsonParseCodeBlock(field)
             } else {
                 fatalError()
             }
         case .ImportedType(let namespace, let typeName):
-            let importedField = field.clone(withTypeName: typeName)
-
             if service.contains(.Enum, typeName: typeName, namespace: namespace) {
-                return EnumGenerator.generateEnumParseJsonBlock(importedField)
+                return EnumGenerator.jsonParseCodeBlock(field)
             } else if service.contains(.Model, typeName: typeName, namespace: namespace) {
-                return ModelGenerator.generateParseModelJson(importedField, service: service, rootJson: rootJson)
+                return ModelGenerator.jsonParseCodeBlock(field, service: service)
+            } else if service.contains(.Union, typeName: typeName, namespace: namespace) {
+                return UnionGenerator.jsonParseCodeBlock(field)
             } else {
                 fatalError()
             }
 
+        case .Dictionary(_, let valueType):
+            return DictionaryGenerator.jsonParseCodeBlock(field, swiftType: valueType)
+
         case .Array(let innerType):
-            switch innerType {
-            case .ExternalType(let typeName):
+            switch innerType.type {
+            case .ServiceDefinedType(let typeName):
 
                 if service.contains(.Enum, typeName: typeName) {
                     return ArrayGenerator.generateParseArrayEnumJson(typeName, fieldName: field.name, required: field.required)
@@ -93,46 +97,61 @@ public struct FieldGenerator {
                 return ArrayGenerator.generateParseArraySimpleTypeJson(innerType.swiftTypeString, fieldName: field.name, required: field.required)
             }
         default:
-            return SimpleTypeGenerator.generateParseJson(field, swiftType: swiftType)
+            return SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: swiftType)
         }
         print(field.cammelCaseName)
         fatalError()
     }
+}
 
-    public static func toJsonCodeBlock(field: Field, service: Service) -> CodeBlock {
-        let cb = CodeBlock.builder()
+// MARK: toJSON
+extension FieldGenerator {
 
-        guard let swiftType = SwiftType(apidocType: field.type, imports: service.imports) else {
-            return cb.build()
-        }
+    internal static func toJsonCodeBlock(field: Field, service: Service) -> CodeBlock {
 
-        switch swiftType {
-        case .ExternalType(let typeName):
-            if let _ = service.getEnum(typeName) {
-                cb.addCodeBlock(EnumGenerator.toJsonFunction(field))
-            } else if let _ = service.getModel(typeName) {
-                cb.addCodeBlock(ModelGenerator.toJsonFunction(field))
+        let swiftType = SwiftType(apidocType: field.type, service: service, required: field.required)
+
+        switch swiftType.type {
+
+        case .ServiceDefinedType(let typeName):
+            if service.contains(.Enum, typeName: typeName) {
+                return EnumGenerator.toJsonCodeBlock(field)
+            } else if service.contains(.Model, typeName: typeName) {
+                return ModelGenerator.toJsonCodeBlock(field)
+            } else if service.contains(.Union, typeName: typeName) {
+                return UnionGenerator.toJsonCodeBlock(field)
+            } else {
+                fatalError()
             }
-            break
-        case .ImportedType(let namespace, let typeName):
-            let importedField = field.clone(withTypeName: typeName)
 
+        case .ImportedType(let namespace, let typeName):
             if service.contains(.Enum, typeName: typeName, namespace: namespace) {
-                cb.addCodeBlock(EnumGenerator.toJsonFunction(importedField))
+
+                return EnumGenerator.toJsonCodeBlock(field.cammelCaseName,
+                    dictName: ToJsonFunctionGenerator.varName,
+                    keyName: field.name,
+                    required: field.required)
+                
             } else if service.contains(.Model, typeName: typeName, namespace: namespace) {
-                cb.addCodeBlock(ModelGenerator.toJsonFunction(importedField))
+
+                return ModelGenerator.toJsonCodeBlock(field.cammelCaseName,
+                    dictName: ToJsonFunctionGenerator.varName,
+                    keyName: field.name,
+                    required: field.required,
+                    typeName: typeName)
+
             } else {
                 fatalError()
             }
 
         case .Array(let innerType):
-            cb.addCodeBlock(ArrayGenerator.toJsonCodeBlock(field, innerType: innerType, service: service))
-        case .Dictionary(_, let rightType):
-            cb.addCodeBlock(DictionaryGenerator.toJsonCodeBlock(field, rightType: rightType))
-        default:
-            cb.addCodeBlock(SimpleTypeGenerator.toJsonCodeBlock(field, swiftType: swiftType))
-        }
+            return ArrayGenerator.toJsonCodeBlock(field, innerType: innerType, service: service)
 
-        return cb.build()
+        case .Dictionary(_, let rightType):
+            return DictionaryGenerator.toJsonCodeBlock(field, rightType: rightType, service: service)
+            
+        default:
+            return SimpleTypeGenerator.toJsonCodeBlock(field, swiftType: swiftType)
+        }
     }
 }

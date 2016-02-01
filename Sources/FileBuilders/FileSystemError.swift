@@ -6,7 +6,7 @@
 //
 //
 
-public enum FileSystemError: ErrorType {
+internal enum FileSystemError: ErrorType {
     case DirectoryCollision
     case DirectoryNotFound(ErrorType)
     case OSXError(ErrorType)
@@ -15,7 +15,7 @@ public enum FileSystemError: ErrorType {
     case InvalidFileContents
     case FileCreationError(String)
 
-    public var description: String {
+    internal var description: String {
         switch self {
         case .DirectoryCollision: return "Directory collision"
         case .DirectoryNotFound(let error): return "Directory not found \(error)"

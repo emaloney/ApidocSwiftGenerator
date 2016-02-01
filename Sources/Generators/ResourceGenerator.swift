@@ -9,25 +9,25 @@
 import Foundation
 import SwiftPoet
 
-public struct ResourceGenerator: Generator {
-    public static var defaultTypeAliases: [(String, String)] {
+internal struct ResourceGenerator: Generator {
+    internal static var defaultTypeAliases: [(String, String)] {
         return [
-            ("MetadataType"           , "DelegateTransactionType.MetadataType"),
-            ("Result"                 , "TransactionResult<DataType, MetadataType>"),
-            ("Callback"               , "(Result) -> Void")]
+            ("MetadataType", "WrappedTransactionType.MetadataType"),
+            ("Result"      , "TransactionResult<DataType, MetadataType>"),
+            ("Callback"    , "(Result) -> Void")]
     }
-    public typealias ResultType = [PoetFile]?
+    internal typealias ResultType = [PoetFile]?
 
-    public static func generate(service: Service) -> ResultType {
+    internal static func generate(service: Service) -> ResultType {
 
         return service.resources?.reduce([PoetFile]()) { (var list, resource) in
             let transactionList: [PoetFile] = resource.operations.map { operation in
-                let classBuilder = ClassSpec.builder(resource.cleanTypeName(operation))
+                let classBuilder = ClassSpec.builder(resource.capitalizedName(operation))
                     .addFramework(service.name)
                     .addModifier(.Public)
-                    .addSuperType(TypeName(keyword: "DelegatingDataTransaction"))
-                    .addImports(["Foundation", "CleanroomConcurrency", "CleanroomDataTransactions"])
-                    .addDescription(StringUtil.concat(resource.description, right: operation.description))
+                    .addSuperType(TypeName(keyword: "WrappingDataTransaction"))
+                    .addImports(["CleanroomConcurrency", "CleanroomDataTransactions", "Foundation"])
+                    .addDescription(resource.description(operation))
                     .addFieldSpecs(ResourceGenerator.typealiasFields(operation, service: service))
                     .addFieldSpecs(ResourceGenerator.transactionFields())
                     .addMethodSpec(ResourceGenerator.getInitFn(operation, resource: resource, service: service))
@@ -43,14 +43,15 @@ public struct ResourceGenerator: Generator {
     }
 
     static func typealiasFields(operation: Operation, service: Service) -> [FieldSpec] {
-        guard let successReturnType = operation.successReturnType,
-            let swiftType = SwiftType(apidocType: successReturnType, imports: service.imports) else {
+        guard let successReturnType = operation.successReturnType else {
             fatalError()
         }
 
+        let swiftType = SwiftType(apidocType: successReturnType, service: service)
+
         var typeAliases = ResourceGenerator.defaultTypeAliases
         typeAliases.append(("DataType", swiftType.swiftTypeString))
-        typeAliases.append(("DelegateTransactionType", ResourceGenerator.getTransationType(swiftType)))
+        typeAliases.append(("WrappedTransactionType", ResourceGenerator.getTransationType(swiftType)))
 
         return typeAliases.map { ta in
             FieldSpec.builder(ta.0, construct: Construct.TypeAlias)
@@ -60,8 +61,8 @@ public struct ResourceGenerator: Generator {
         }
     }
 
-    private static func getTransationType(type: SwiftType) -> String {
-        switch type {
+    private static func getTransationType(swiftType: SwiftType) -> String {
+        switch swiftType.type {
         case .Unit:
             return "ApiDocOptionalDictionaryTransaction"
         case .Array:
@@ -74,14 +75,14 @@ public struct ResourceGenerator: Generator {
     static func transactionFields() -> [FieldSpec] {
         var result = [FieldSpec]()
 
-        let delegate = FieldSpec.builder("delegateTransaction", type: TypeName(keyword: "DelegateTransactionType?"), construct: Construct.MutableParam)
-            .addInitializer(CodeBlock.builder().addLiteral("return innerTransaction").build())
-            .addModifier(.Public)
-            .build()
+//        let delegate = FieldSpec.builder("delegateTransaction", type: TypeName(keyword: "DelegateTransactionType?"), construct: Construct.MutableParam)
+//            .addInitializer(CodeBlock.builder().addLiteral("return innerTransaction").build())
+//            .addModifier(.Public)
+//            .build()
+//
+//        result.append(delegate)
 
-        result.append(delegate)
-
-        let inner = FieldSpec.builder("innerTransaction", type: TypeName(keyword: "DelegateTransactionType?"), construct: Construct.Field)
+        let inner = FieldSpec.builder("innerTransaction", type: TypeName(keyword: "WrappedTransactionType?"), construct: Construct.Field)
             .addModifier(.Private)
             .build()
 
@@ -123,7 +124,7 @@ public struct ResourceGenerator: Generator {
             .addModifier(.Public)
             .canThrowError()
             .addParameters(operation.parameters.map { param in
-                return ParameterSpec.builder(param.name, type: TypeName(keyword: SwiftType(apidocType: param.type, imports: service.imports)!.swiftTypeString, optional: !param.required))
+                return ParameterSpec.builder(param.name, type: TypeName(keyword: SwiftType(apidocType: param.type, service: service, required: param.required).swiftTypeString, optional: !param.required))
                     .addDescription(param.description)
                     .build()
             })
@@ -134,13 +135,13 @@ public struct ResourceGenerator: Generator {
         }
 
         let cb = CodeBlock.builder()
-        let swiftType = SwiftType(apidocType: operation.successReturnType!, imports: service.imports)!
+        let swiftType = SwiftType(apidocType: operation.successReturnType!, service: service)
 
         if operation.queryParams.count > 0 {
             cb.addCodeLine("let queryParams: [String : AnyObject?]? = [")
             cb.addEmitObject(.IncreaseIndentation)
             cb.addCodeBlock(CodeBlock.builder().addLiteral((operation.queryParams.map { param in
-                let swiftType = SwiftType(apidocType: param.type, imports: service.imports)!
+                let swiftType = SwiftType(apidocType: param.type, service: service, required: param.required)
                 let stringCleaner = ".stringByReplacingOccurrencesOfString(\" \", withString: \"+\")"
                 let cleanStringFn: String
                 if swiftType.swiftTypeString == "String" && param.required {
@@ -150,7 +151,7 @@ public struct ResourceGenerator: Generator {
                 } else {
                     cleanStringFn = ""
                 }
-                return "\"\(param.cammelCaseName)\" : \(swiftType.toString(param.cammelCaseName, optional: !param.required))\(cleanStringFn)"
+                return "\"\(param.cammelCaseName)\" : \(swiftType.toString(param.cammelCaseName))\(cleanStringFn)"
             }).joinWithSeparator(", ")).build())
             cb.addLiteral("]")
             cb.addEmitObject(.DecreaseIndentation)
@@ -162,7 +163,7 @@ public struct ResourceGenerator: Generator {
         cb.addCodeBlock(ControlFlow.doCatchControlFlow({
             let cb = CodeBlock.builder()
             cb.addLiteral("let request = NSMutableURLRequest(URL: try")
-            cb.addLiteral("\(resource.cleanTypeName(operation)).getUrl(")
+            cb.addLiteral("\(resource.capitalizedName(operation)).getUrl(")
             for (index, param) in operation.pathParams.enumerate() {
                 if index == 0 {
                     cb.addLiteral("\(param.cammelCaseName),")
@@ -213,7 +214,7 @@ public struct ResourceGenerator: Generator {
         let mb = MethodSpec.builder("getBaseUrl")
             .addModifiers([.Private, .Static])
             .addParameters(operation.pathParams.map { param in
-                return ParameterSpec.builder(param.name, type: TypeName(keyword: SwiftType(apidocType: param.type, imports: service.imports)!.swiftTypeString, optional: !param.required))
+                return ParameterSpec.builder(param.name, type: TypeName(keyword: SwiftType(apidocType: param.type, service: service).swiftTypeString, optional: !param.required))
                     .addDescription(param.description)
                     .build()
             })
@@ -221,11 +222,11 @@ public struct ResourceGenerator: Generator {
 
         var pathString = operation.path
         operation.pathParams.forEach { param in
-            let paramTypeToString: String = SwiftType(apidocType: param.type, imports: service.imports)!.toString(param.cammelCaseName)
+            let paramTypeToString: String = SwiftType(apidocType: param.type, service: service).toString(param.cammelCaseName)
             pathString = pathString.stringByReplacingOccurrencesOfString(":\(param.name)", withString: "\\(\(paramTypeToString))")
         }
 
-        mb.addCode(CodeBlock.builder().addLiteral("return \(service.cleanTypeName).baseUrl + \"\(pathString)\"").build())
+        mb.addCode(CodeBlock.builder().addLiteral("return \(service.capitalizedName).baseUrl + \"\(pathString)\"").build())
 
         return mb.build()
     }
@@ -255,7 +256,7 @@ public struct ResourceGenerator: Generator {
     private static func getUrlFn(operation: Operation, resource: Resource, service: Service) -> MethodSpec {
         let mb = MethodSpec.builder("getUrl")
             .addParameters((operation.pathParams.map { parameter in
-                return ParameterSpec.builder(parameter.name, type: TypeName(keyword: SwiftType(apidocType: parameter.type, imports: service.imports)!.swiftTypeString, optional: !parameter.required)).addDescription(parameter.description).build()
+                return ParameterSpec.builder(parameter.name, type: TypeName(keyword: SwiftType(apidocType: parameter.type, service: service).swiftTypeString, optional: !parameter.required)).addDescription(parameter.description).build()
                 }))
             .addParameter(ParameterSpec.builder("queryParams", type: TypeName(keyword: "[String : AnyObject?]?")).build())
             .canThrowError()
@@ -267,7 +268,7 @@ public struct ResourceGenerator: Generator {
         cb.addCodeLine("let urlString: String").addEmitObject(.NewLine)
 
         // Calling functions with an unknown number of params is a pain :( . Can probably find a cleaner way
-        cb.addCodeLine("let baseUrlString = \(resource.cleanTypeName(operation)).getBaseUrl(")
+        cb.addCodeLine("let baseUrlString = \(resource.capitalizedName(operation)).getBaseUrl(")
         for (index, param) in operation.pathParams.enumerate() {
             if index == 0 && operation.pathParams.count > 1 {
                 cb.addLiteral("\(param.cammelCaseName),")
@@ -322,10 +323,30 @@ public struct ResourceGenerator: Generator {
                 completion(.Failed(error))
 
             case .Succeeded(let payload, let meta):
+                // Void
+                // Take not action
+                return
+
+                // Array OR Model OR SimpleType
                 async {
                     do {
-                        let model = try CheckoutSession(jsonData: payload) ********************
+                        // Array
+                        let model = try payload.map { payload in
+                            let model = try TypeName(payload: payload as! NSDictionary)
+                            return model
+                        }
                         completion(.Succeeded(model, meta))
+                        
+                        // Model
+                        let model = try TypeName(payload: payload)
+                        completion(.Succeeded(model, meta))
+    
+                        // SimpleType
+                        guard let model = payload as? TypeName else {
+                            throw DataTransactionError.DataFormatError("Invalid TypeName data")
+                        }
+                        completion(.Succeeded(model, meta))
+
                     }
                     catch {
                         completion(.Failed(.wrap(error)))
@@ -337,58 +358,67 @@ public struct ResourceGenerator: Generator {
     */
     private static func executeTransactionFn(operation: Operation, service: Service) -> MethodSpec {
         let successCB = CodeBlock.builder()
-        let swiftType = SwiftType(apidocType: operation.successReturnType!, imports: service.imports)!
-        var field = Field(name: "model", type: operation.successReturnType!, description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
+        var jsonParseCode: CodeBlock? = nil
+        let swiftType = SwiftType(apidocType: operation.successReturnType!, service: service)
 
-        if swiftType.swiftTypeString == "Void" {
-            successCB.addLiteral("// Take no action")
-            successCB.addCodeLine("return")
-        } else {
-            let jsonParseCode: CodeBlock
+        switch swiftType.type {
+        case .Unit:
+            successCB
+                .addLiteral("// Take no action")
+                .addCodeLine("return")
+            break
+        case .Array(let typeName):
+            jsonParseCode = CodeBlock.builder()
+                .addLiteral("let model = try payload.map")
+                .addCodeBlock(ControlFlow.closureControlFlow("payload", canThrow: true, returnType: typeName.swiftTypeString) {
+                    return CodeBlock.builder()
+                        .addCodeBlock(ModelGenerator.toModelCodeBlock("model", typeName: typeName.swiftTypeString, jsonParamName: "(payload as! NSDictionary)", service: service, initalize: true))
+                        .addCodeLine("return model")
+                        .build()
+                })
+                .addCodeLine("completion(.Succeeded(model, meta))")
+                .build()
 
-            switch swiftType {
-            case .Array(let innerType):
-                field = field.clone(withTypeName: innerType.swiftTypeString)
+        case .ServiceDefinedType(let typeName):
+            let cleanTypeName = PoetUtil.cleanTypeName(typeName)
+            jsonParseCode = CodeBlock.builder()
+                .addCodeBlock(ModelGenerator.toModelCodeBlock("model", typeName: cleanTypeName, jsonParamName: "payload", service: service, initalize: true))
+                .addCodeLine("completion(.Succeeded(model, meta))")
+                .build()
+        case .ImportedType(_, let typeName):
+            let cleanTypeName = PoetUtil.cleanTypeName(typeName)
+            jsonParseCode = CodeBlock.builder()
+                .addCodeBlock(ModelGenerator.toModelCodeBlock("model", typeName: cleanTypeName, jsonParamName: "payload", service: service, initalize: true))
+                .addCodeLine("completion(.Succeeded(model, meta))")
+                .build()
+        case .Dictionary, .DateISO8601, .DateTimeISO8601, .Object, .Undefined, .UUID:
+            fatalError()
+        default:
+            jsonParseCode = CodeBlock.builder()
+                .addCodeBlock(ControlFlow.guardControlFlow(ComparisonList(lhs: "let model".toCodeBlock(), comparator: .OptionalCheck, rhs: "payload as? \(swiftType.swiftTypeString)".toCodeBlock())) {
+                    return "throw DataTransactionError.DataFormatError(\"Invalid \(swiftType.swiftTypeString) data\")".toCodeBlock()
+                })
+                .addCodeLine("completion(.Succeeded(model, meta))")
+                .build()
+        }
 
-                jsonParseCode = CodeBlock.builder().addLiteral("let model = try payload.map")
-                    .addEmitObjects((ControlFlow.closureControlFlow("payload", canThrow: true, returnType: field.cleanTypeName) {
-                        let cb = CodeBlock.builder()
-                        let left = CodeBlock.builder().addLiteral("let payload").build()
-                        let right = CodeBlock.builder().addLiteral("payload as? NSDictionary").build()
-                        cb.addEmitObjects((ControlFlow.guardControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
-                            return CodeBlock.builder().addLiteral("throw DataTransactionError.DataFormatError(\"Invalid conversion from array to [dictionary]\")").build()
-                        }).emittableObjects)
-                        cb.addEmitObjects(CodeBlock.builder()
-                                .addEmitObjects(ModelGenerator.generateParseModelJson(field, service: service, rootJson: true).emittableObjects)
-                                .addCodeLine("return model")
-                                .build().emittableObjects)
-
-                        return cb.build()
-                    }).emittableObjects)
-                    .build()
-            default:
-                jsonParseCode = FieldGenerator.generateJsonParse(field, service: service, rootJson: true)
-            }
-
+        if let jsonParseCode = jsonParseCode {
             successCB
                 .addLiteral("async")
                 .addEmitObject(.BeginStatement)
                 .addCodeBlock(ControlFlow.doCatchControlFlow({
-                    return CodeBlock.builder()
-                        .addCodeBlock(jsonParseCode)
-                        .addCodeLine("completion(.Succeeded(model, meta))").build()
-                    }) {
-                        return CodeBlock.builder().addLiteral("completion(.Failed(.wrap(error)))").build()
-                    })
+                    return jsonParseCode
+                }) {
+                    return "completion(.Failed(.wrap(error)))".toCodeBlock()
+                })
                 .addEmitObject(.EndStatement)
         }
-
 
         let cb = CodeBlock.builder()
             .addLiteral("innerTransaction?.executeTransaction()")
             .addEmitObjects(ControlFlow.closureControlFlow("result", canThrow: false, returnType: nil) {
                 return ControlFlow.switchControlFlow("result", cases: [
-                    (".Failed(let error)", CodeBlock.builder().addLiteral("completion(.Failed(error))").build()),
+                    (".Failed(let error)", "completion(.Failed(error))".toCodeBlock()),
                     (".Succeeded(let payload, let meta)", successCB.build())])
                 }.emittableObjects).build()
 

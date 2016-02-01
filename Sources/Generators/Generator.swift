@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol Generator {
+internal protocol Generator {
     typealias ResultType
 
     static func generate(service: Service) -> ResultType

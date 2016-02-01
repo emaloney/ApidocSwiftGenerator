@@ -10,14 +10,14 @@ import Foundation
 import Alamofire
 import CleanroomLogger
 
-public class ApidocURLLoader: ApidocLoader {
+internal class ApidocURLLoader: ApidocLoader {
     private static let registrationURL: NSURL = NSURL(string: "http://api.apidoc.me/users/authenticate")!
 
-    public let url: NSURL
-    public let token: String?
-    public let email: String?
-    public let password: String?
-    public var userGuid: NSUUID? = nil
+    internal let url: NSURL
+    internal let token: String?
+    internal let email: String?
+    internal let password: String?
+    internal var userGuid: NSUUID? = nil
 
     private var headers: [String : String] {
         var h = [String : String]()
@@ -35,18 +35,18 @@ public class ApidocURLLoader: ApidocLoader {
         return h
     }
 
-    public init(url: NSURL, token: String? = nil, email: String? = nil, password: String? = nil) {
+    internal init(url: NSURL, token: String? = nil, email: String? = nil, password: String? = nil) {
         self.url = url
         self.token = token
         self.email = email
         self.password = password
     }
 
-    public func load() -> NSDictionary? {
+    internal func load() -> NSDictionary? {
         return nil
     }
 
-    public func load(handler: Apidoc.ApidocJsonHandler) {
+    internal func load(handler: ApidocJsonHandler) {
         guard let _ = email, _ = password else {
             loadApidocJSON { result in
                 switch result {
@@ -73,7 +73,7 @@ public class ApidocURLLoader: ApidocLoader {
         }
     }
 
-    private func registerThenLoad(handler: Apidoc.ApidocJsonHandler) {
+    private func registerThenLoad(handler: ApidocJsonHandler) {
         self.register { [weak self] result in
             switch result {
             case .Failed(let error):
@@ -86,7 +86,7 @@ public class ApidocURLLoader: ApidocLoader {
         }
     }
 
-    private func loadApidocJSON(handler: Apidoc.ApidocJsonHandler) {
+    private func loadApidocJSON(handler: ApidocJsonHandler) {
         Alamofire.request(.GET, url.URLString, headers: headers)
             .response { request, response, data, error in
 
@@ -107,7 +107,7 @@ public class ApidocURLLoader: ApidocLoader {
 
     }
 
-    private func register(handler: Apidoc.ApidocJsonHandler) {
+    private func register(handler: ApidocJsonHandler) {
         guard let email = email, password = password else {
             handler(.Failed(ApidocServerError.MissingEmailOrPassword))
             return
@@ -137,20 +137,6 @@ public class ApidocURLLoader: ApidocLoader {
                 }
         }
     }
-}
-
-public enum ApidocServerError: ErrorType {
-    case InvalidToken
-    case MissingEmailOrPassword
-    case InvalidEmailOrPassword
-    case RequiresLogin
-    case AlamofireError(NSError)
-    case AlamofireResponseError(ErrorType)
-}
-
-public enum TransactionResult<DataType> {
-    case Succeeded(DataType)
-    case Failed(ApidocServerError)
 }
 
 extension String {

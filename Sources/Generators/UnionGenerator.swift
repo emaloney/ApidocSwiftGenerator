@@ -9,8 +9,8 @@
 import Foundation
 import SwiftPoet
 
-public struct UnionGenerator: Generator {
-    public typealias ResultType = [PoetFile]?
+internal struct UnionGenerator: Generator {
+    internal typealias ResultType = [PoetFile]?
 
     /*
     public protocol Union {}
@@ -40,7 +40,7 @@ public struct UnionGenerator: Generator {
 
     extension ResponseCodeOption: ResponseCode {}
     */
-    public static func generate(service: Service) -> ResultType {
+    internal static func generate(service: Service) -> ResultType {
         return service.unions?.map { union in
             let file = PoetFile(list: [], framework: service.name)
 
@@ -69,13 +69,12 @@ public struct UnionGenerator: Generator {
 
         let cb = CodeBlock.builder()
         union.types.forEach { unionType in
-            if let swiftType = SwiftType(apidocType: unionType.type, imports: service.imports) {
-                switch swiftType {
-                case .ExternalType, .ImportedType:
-                    cb.addCodeBlock(UnionGenerator.externalTypeCodeBlock(unionType, swiftType: swiftType, service: service))
-                default:
-                    cb.addCodeBlock(UnionGenerator.simpleTypeCodeBlock(unionType))
-                }
+            let swiftType = SwiftType(apidocType: unionType.type, service: service)
+            switch swiftType.type {
+            case .ServiceDefinedType, .ImportedType:
+                cb.addCodeBlock(UnionGenerator.externalTypeCodeBlock(unionType, swiftType: swiftType, service: service))
+            default:
+                cb.addCodeBlock(UnionGenerator.simpleTypeCodeBlock(unionType))
             }
         }
         cb.addCodeLine("throw DataTransactionError.DataFormatError(\"Invalid \(union.name)\")")
@@ -108,7 +107,7 @@ public struct UnionGenerator: Generator {
     private static func externalTypeCodeBlock(unionType: UnionType, swiftType: SwiftType, service: Service) -> CodeBlock {
         let field = Field(name: unionType.type, type: unionType.type, description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
 
-        let doBlock = FieldGenerator.generateJsonParse(field, service: service)
+        let doBlock = FieldGenerator.jsonParseCodeBlock(field, service: service)
 
         return ControlFlow.doCatchControlFlow({
             return CodeBlock.builder()
@@ -132,23 +131,82 @@ public struct UnionGenerator: Generator {
             .addModifier(.Public)
             .build()
     }
+}
 
-    public static func generateParseUnionJson(field: Field) -> CodeBlock {
-        if field.required {
-            return CodeBlock.builder()
-                .addLiteral("let \(field.cammelCaseName)Json = try payload.requiredDictionary(\"\(field.name)\")")
-                .addCodeLine("let \(field.cammelCaseName) = try \(field.cleanTypeName)Impl.toModel(payload: \(field.cammelCaseName)Json)")
-                .build()
+// MARK jsonParse
+extension UnionGenerator {
+
+    // Convienience
+    internal static func jsonParseCodeBlock(field: Field) -> CodeBlock {
+        return UnionGenerator.jsonParseCodeBlock(field.cammelCaseName,
+            typeName: field.typeName,
+            keyName: field.name.escapedString(),
+            required: field.required)
+    }
+
+    internal static func jsonParseCodeBlock(paramName: String, typeName: String, keyName: String, required: Bool) -> CodeBlock {
+        if required {
+            return UnionGenerator.jsonParseCodeBlockRequired(paramName, typeName: typeName, keyName: keyName)
         } else {
-            let left = CodeBlock.builder().addLiteral("\(field.cammelCaseName)Json").build()
-            let right = CodeBlock.builder().addLiteral("pauload[\"\(field.name)\"]").build()
+            return UnionGenerator.jsonParseCodeBlockOptional(paramName, typeName: typeName, keyName: keyName)
+        }
+    }
 
-            return CodeBlock.builder()
-                .addLiteral("var \(field.cammelCaseName): \(field.cleanTypeName)? = nil")
-                .addCodeBlock(ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
-                    return CodeBlock.builder().addLiteral("\(field.cammelCaseName) = \(field.cleanTypeName)(payload: \(field.cammelCaseName)Json)").build()
-                })
-                .build()
+    /*
+    let paramNameJson = try payload.requiredDictionary(keyName)
+    let paramName = try TypeNameImpl.toModel(payload: paramNameJson)
+    */
+    internal static func jsonParseCodeBlockRequired(paramName: String, typeName: String, keyName: String) -> CodeBlock {
+        let paramNameJson = "\(paramName)Json"
+        return CodeBlock.builder()
+            .addLiteral("let \(paramNameJson) = try payload.requiredDictionary(\(keyName))")
+            .addLiteral(UnionGenerator.toUnionCodeBlock(paramName, typeName: typeName, paramNameJson: paramNameJson).toString())
+            .build()
+    }
+
+    /*
+    let paramName: TypeName? = nil
+    if let paramNameJson = payload[keyName] as? NSDictionary {
+        paramName = try TypeNameImpl.toModel(payload: paramNameJson)
+    }
+
+    */
+    internal static func jsonParseCodeBlockOptional(paramName: String, typeName: String, keyName: String) -> CodeBlock {
+        let paramNameJson = "\(paramName)Json"
+        let cb = CodeBlock.builder()
+            .addLiteral("let \(paramName): \(typeName)? = nil")
+
+        let left = "let \(paramNameJson)".toCodeBlock()
+        let right = "payload[\(keyName)] as? NSDictionary".toCodeBlock()
+
+        cb.addCodeBlock(ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
+            return UnionGenerator.toUnionCodeBlock(paramName, typeName: typeName, paramNameJson: paramNameJson, initalize: false)
+        })
+
+        return cb.build()
+    }
+
+    // (let) paramName = try TypeNameImpl.toModel(payload: paramNameJson)
+    internal static func toUnionCodeBlock(paramName: String, typeName: String, paramNameJson: String, initalize: Bool = true) -> CodeBlock {
+        let initalizeStr = initalize ? "let " : ""
+        return "\(initalizeStr)\(paramName) = try \(typeName)Impl.toModel(payload: \(paramNameJson))".toCodeBlock()
+    }
+}
+
+// MARK: toJSON
+extension UnionGenerator {
+    internal static func toJsonCodeBlock(field: Field) -> CodeBlock {
+        return UnionGenerator.toJsonCodeBlock(field.cammelCaseName,
+            dictName: ToJsonFunctionGenerator.varName,
+            keyName: field.name.escapedString(),
+            required: field.required,
+            typeName: field.typeName)
+    }
+
+    internal static func toJsonCodeBlock(paramName: String, dictName: String, keyName: String, required: Bool, typeName: String) -> CodeBlock {
+        // TODO how should this work?
+        return ToJsonFunctionGenerator.generate(paramName, required: required) {
+            return paramName.toCodeBlock()
         }
     }
 }

@@ -10,11 +10,11 @@ import Foundation
 import SwiftPoet
 
 public extension Service {
-    public var cleanTypeName: String {
+    internal var capitalizedName: String {
         return PoetUtil.cleanTypeName(self.name)
     }
 
-    public func contains(type: ApidocRepresentation, typeName: String) -> Bool {
+    internal func contains(type: ApidocRepresentation, typeName: String) -> Bool {
         switch type {
         case .Enum:
             return (enums?.filter { $0.name == typeName })?.count == 1
@@ -27,7 +27,11 @@ public extension Service {
         }
     }
 
-    public func contains(type: ApidocRepresentation, typeName: String, namespace: Namespace) -> Bool {
+    internal func contains(typeName: String) -> Bool {
+        return (enums?.contains { $0.name == typeName }) == true || (models?.contains { $0.name == typeName }) == true || (unions?.contains { $0.name == typeName }) == true
+    }
+
+    internal func contains(type: ApidocRepresentation, typeName: String, namespace: Namespace) -> Bool {
         guard let importModel = (imports?.filter { namespace.match($0.namespace) })?.first else {
             return false
         }
@@ -55,22 +59,15 @@ public extension Service {
         return result
     }
 
-    public func getEnum(typeName: String) -> Enum? {
+    internal func getEnum(typeName: String) -> Enum? {
         return self.enums?.filter { $0.name == typeName }.first
     }
 
-    public func getModel(typeName: String) -> Model? {
+    internal func getModel(typeName: String) -> Model? {
         return self.models?.filter { $0.name == typeName }.first
     }
 
-    public func getUnion(typeName: String) -> Union? {
+    internal func getUnion(typeName: String) -> Union? {
         return self.unions?.filter { $0.name == typeName }.first
     }
-}
-
-public enum ApidocRepresentation: String {
-    case Enum = "Enum"
-    case Model = "Model"
-    case Union = "Union"
-    case Resource = "Resource"
 }

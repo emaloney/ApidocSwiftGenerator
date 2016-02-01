@@ -9,10 +9,10 @@
 import Foundation
 import SwiftPoet
 
-public struct ModelGenerator: Generator {
-    public typealias ResultType = [PoetFile]?
+internal struct ModelGenerator: Generator {
+    internal typealias ResultType = [PoetFile]?
 
-    public static func generate(service: Service) -> ResultType {
+    internal static func generate(service: Service) -> ResultType {
         var models: [PoetFile]? = service.models?.map { model in
             let sb = StructSpec.builder(model.name)
                 .addFramework(service.name)
@@ -20,127 +20,136 @@ public struct ModelGenerator: Generator {
                 .addDescription(model.description)
                 .addProtocol(TypeName(keyword: "JSONDataModel"))
                 .addProtocol(TypeName(keyword: "BinaryDataModel"))
-                .addImports(["Foundation", "CleanroomDataTransactions"])
-                .addFieldSpecs(FieldGenerator.generate(model.fields, imports: service.imports))
-                .addMethodSpec(MethodGenerator.modelToJson(service, model: model))
-                .addMethodSpec(MethodGenerator.generateJsonParsingInit(service, model: model))
+                .addImports(["CleanroomDataTransactions", "Foundation"])
+                .addFieldSpecs(FieldGenerator.generate(model.fields, service: service))
+                .addMethodSpec(MethodGenerator.toJsonFunction(model, service: service))
+                .addMethodSpec(MethodGenerator.jsonParsingInit(model, service: service))
                 .includeDefaultInit()
 
-            if !(model.fields.filter { $0.type == "date-iso8601" || $0.type == "date-time-iso8601" }).isEmpty {
+            if model.fields.contains({ $0.type == "date-iso8601" || $0.type == "date-time-iso8601" }) {
                 sb.addImport("CleanroomDateTime")
             }
 
             return sb.build().toFile()
         }
+
+        // include global service struct with baseUrl information
+        let baseUrlValue = (service.baseUrl ?? "").escapedString()
         models?.append(StructSpec.builder(service.name)
             .addFramework(service.name)
             .addModifier(.Public)
             .addDescription(service.description)
             .addImport("Foundation")
             .addFieldSpec(FieldSpec.builder("baseUrl", type: TypeName.StringType, construct: .MutableField)
-                .addModifiers([.Public, .Static])
-                .addInitializer(CodeBlock.builder().addLiteral("\"\(service.baseUrl ?? "")\"").build())
+                .addModifiers([.Static, .Public])
+                .addInitializer(baseUrlValue.toCodeBlock())
                 .build())
             .build().toFile())
 
         return models
     }
+}
 
-    public static func generateParseModelJson(field: Field, service: Service?, rootJson: Bool = false) -> CodeBlock {
-        if rootJson || field.required {
-            return ModelGenerator.generateParseRequiredModelJson(field, service: service, rootJson: rootJson)
+// MARK: JSONParse
+extension ModelGenerator {
+
+    // convinience
+    internal static func jsonParseCodeBlock(field: Field, service: Service) -> CodeBlock {
+        return ModelGenerator.jsonParseCodeBlock(field.cammelCaseName,
+            keyName: field.name.escapedString(),
+            typeName: field.typeName,
+            required: field.required,
+            service: service)
+    }
+
+    internal static func jsonParseCodeBlock(paramName: String, keyName: String, typeName: String, required: Bool, service: Service) -> CodeBlock {
+        if required {
+            return ModelGenerator.jsonParseCodeBlockRequired(paramName, keyName: keyName, typeName: typeName, service: service)
         } else {
-            return ModelGenerator.generateParseOptionalModelJson(field, service: service)
+            return ModelGenerator.jsonParseCodeBlockOptional(paramName, keyName: keyName, typeName: typeName, service: service)
         }
     }
 
-    public static func generateParseModelJson(name: String, type: String, required: Bool, service: Service) -> CodeBlock {
-        return ModelGenerator.generateParseModelJson(Field(name: name, type: type, description: nil, deprecation: nil, _default: nil, required: required, minimum: nil, maximum: nil, example: nil), service: service)
+    /*
+    let paramNameJson = try payload.requiredDictionary(keyName)
+    (let) paramName = (try) TypeName(payload: paramNameJson)
+    */
+    private static func jsonParseCodeBlockRequired(paramName: String, keyName: String, typeName: String, service: Service) -> CodeBlock {
+        let paramNameJson = "\(paramName)Json"
+
+        return CodeBlock.builder()
+            .addLiteral("let \(paramNameJson) = try payload.requiredDictionary(\(keyName))")
+            .addCodeBlock(ModelGenerator.toModelCodeBlock(paramName, typeName: typeName, jsonParamName: paramNameJson, service: service))
+            .build()
     }
 
     /*
-    let fieldNameJson = try payload.requiredDictionary("field_name")
-    let fieldName = (try) FieldType(payload: fieldNameJson)
-    */
-    private static func generateParseRequiredModelJson(field: Field, service: Service?, rootJson: Bool = false) -> CodeBlock {
-        let model = service?.getModel(field.type)
-        let jsonVarName = rootJson ? "payload" : "\(field.cammelCaseName)Json"
-        let cb = CodeBlock.builder()
-        let canThrowStr = service != nil && model?.canThrow(service!) == false ? "" : " try" // by default use try
-        // TODO
-        if !rootJson {
-            cb.addCodeLine("let \(jsonVarName) = try payload.requiredDictionary(\"\(field.name)\")")
-        }
-        cb.addCodeLine("let \(field.cammelCaseName) =\(canThrowStr) \(field.cleanTypeName)(payload: \(jsonVarName))")
-
-        return cb.build()
-    }
-
-    /*
-    var fieldName: FieldType? = nil
-    if let fieldNameJson = payload["field_name"] as? NSDictionary {
-        fieldName = (try) FieldType([payload: fieldNameJson)
+    var paramName: TypeName? = nil
+    if let paramNameJson = payload[keyName] as? NSDictionary {
+        paramName = (try) TypeName(payload: paramNameJson)
     }
     */
-    private static func generateParseOptionalModelJson(field: Field, service: Service?) -> CodeBlock {
-        let model = service?.getModel(field.type)
-        let jsonVarName = "\(field.cammelCaseName)Json"
+    private static func jsonParseCodeBlockOptional(paramName: String, keyName: String, typeName: String, service: Service) -> CodeBlock {
+        let paramNameJson = "\(paramName)Json"
+        let requiredType = TypeName(keyword: typeName.substringToIndex(typeName.characters.endIndex.predecessor())).literalValue()
+
         let cb = CodeBlock.builder()
-        let canThrowStr = service != nil && model?.canThrow(service!) == false ? "" : " try" // by default use try
+            .addCodeLine("var \(paramName): \(typeName) = nil")
 
-        cb.addCodeLine("var \(field.cammelCaseName): \(field.cleanTypeName)? = nil")
-
-        let left = CodeBlock.builder().addLiteral("let \(jsonVarName)").build()
-        let right = CodeBlock.builder().addLiteral("payload[\"\(field.name)\"] as? NSDictionary").build()
+        let left = "let \(paramNameJson)".toCodeBlock()
+        let right = "payload[\(keyName)] as? NSDictionary".toCodeBlock()
 
         cb.addCodeBlock(ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
-            return CodeBlock.builder().addLiteral("\(field.cammelCaseName) =\(canThrowStr) \(field.cleanTypeName)(payload: \(jsonVarName))").build()
+            return ModelGenerator.toModelCodeBlock(paramName, typeName: requiredType, jsonParamName: paramNameJson, service: service, initalize: false)
         })
 
         return cb.build()
     }
 
+    // (let) paramName = (try) TypeName(payload: jsonParamName)
+    internal static func toModelCodeBlock(paramName: String, typeName: String, jsonParamName: String, service: Service, initalize: Bool = true) -> CodeBlock {
+        let canThrow = service.getModel(typeName)?.canThrow(service) != false
+        let tryStr = canThrow ? "try " : ""
+        let initializeStr = initalize ? "let " : ""
 
+        return "\(initializeStr)\(paramName) = \(tryStr)\(typeName)(payload: \(jsonParamName))".toCodeBlock()
+    }
+}
+
+// MARK: toJSON
+extension ModelGenerator {
     /*
-    switch mapValue.toJSON() {
+    switch paramName.toJSON() {
     case .Succeeded(let json):
-        mapParam[mapKey] = json
+        dictName[keyName] = json
     case .Failed:
-        return .Failed(DataTransactionError.DataFormatError("Invalid FieldType data"))
+        return .Failed(DataTransactionError.DataFormatError("Invalid typeName data"))
     }
     */
-    public static func toJsonFunction(mapParam: String, mapValue: String, mapKey: String, fieldType: String, required: Bool) -> CodeBlock {
-        let field = Field.init(name: "Type", type: fieldType, description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
-        return ToJsonFunctionGenerator.generate(mapValue, required: required) {
+    internal static func toJsonCodeBlock(paramName: String, dictName: String, keyName: String, required: Bool, typeName: String) -> CodeBlock {
+        return ToJsonFunctionGenerator.generate(paramName, required: required) {
             return ControlFlow.switchControlFlow(
-                "\(mapValue).toJSON()",
+                "\(paramName).toJSON()",
                 cases: [
-                    (".Succeeded(let json)", CodeBlock.builder().addLiteral("\(mapParam)[\(mapKey)] = json").build()),
-                    (".Failed", ModelGenerator.toJsonFailedCodeBlock(field))
+                    (".Succeeded(let json)", ModelGenerator.toJsonSucceededCodeBlock(dictName, keyName: keyName)),
+                    (".Failed", ModelGenerator.toJsonFailedCodeBlock(typeName))
                 ])
         }
     }
 
-    public static func toJsonFunction(field: Field) -> CodeBlock {
-        return ToJsonFunctionGenerator.generate(field) { field in
-            let cammelCaseName = PoetUtil.cleanCammelCaseString(field.name)
-
-            return ControlFlow.switchControlFlow(
-                "\(cammelCaseName).toJSON()",
-                cases: [
-                    (".Succeeded(let json)", ModelGenerator.toJsonSucceededCodeBlock(field)),
-                    (".Failed", ModelGenerator.toJsonFailedCodeBlock(field))
-                ])
-        }
+    internal static func toJsonCodeBlock(field: Field) -> CodeBlock {
+        return ModelGenerator.toJsonCodeBlock(field.cammelCaseName,
+            dictName: ToJsonFunctionGenerator.varName,
+            keyName: field.name.escapedString(),
+            required: field.required,
+            typeName: field.typeName)
     }
 
-    private static func toJsonSucceededCodeBlock(field: Field) -> CodeBlock {
-        return CodeBlock.builder().addLiteral("\(MethodGenerator.toJSONVarName)[\"\(field.name)\"] = json"
-        ).build()
+    private static func toJsonSucceededCodeBlock(dictName: String, keyName: String) -> CodeBlock {
+        return "\(dictName)[\(keyName)] = json".toCodeBlock()
     }
 
-    private static func toJsonFailedCodeBlock(field: Field) -> CodeBlock {
-        return CodeBlock.builder().addLiteral("return .Failed(DataTransactionError.DataFormatError(\"Invalid \(field.cammelCaseName) data\"))"
-            ).build()
+    private static func toJsonFailedCodeBlock(typeName: String) -> CodeBlock {
+        return "return .Failed(DataTransactionError.DataFormatError(\"Invalid \(typeName) data\"))".toCodeBlock()
     }
 }

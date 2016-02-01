@@ -20,21 +20,21 @@ class SwiftTypeTest: XCTestCase {
     }
     
     func testDictionary() {
-        let type = SwiftType(apidocType: "map[string]", imports: nil)!
+        let type = SwiftType(apidocType: "map[string]", service: nil)
 
-        switch type {
+        switch type.type {
         case .Dictionary(let leftType, let rightType):
-            XCTAssertEqual(leftType.swiftTypeString, SwiftType.SwiftString.swiftTypeString)
-            XCTAssertEqual(rightType.swiftTypeString, SwiftType.SwiftString.swiftTypeString)
+            XCTAssertEqual(leftType.swiftTypeString, SwiftType.StringType.swiftTypeString)
+            XCTAssertEqual(rightType.swiftTypeString, SwiftType.StringType.swiftTypeString)
         default:
             XCTAssertTrue(false, "unexpected type \(type.swiftTypeString)")
         }
     }
 
     func testArray() {
-        let type = SwiftType(apidocType: "[integer]", imports: nil)!
+        let type = SwiftType(apidocType: "[integer]", service: nil)
 
-        switch type {
+        switch type.type {
         case .Array(let innerType):
             XCTAssertEqual(innerType.swiftTypeString, SwiftType.Integer.swiftTypeString)
         default:

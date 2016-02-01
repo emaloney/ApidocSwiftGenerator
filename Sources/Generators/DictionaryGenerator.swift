@@ -9,53 +9,127 @@
 import Foundation
 import SwiftPoet
 
-public struct DictionaryGenerator {
+internal struct DictionaryGenerator {}
 
+// MARK: toJSON
+extension DictionaryGenerator {
     /*
-    var fieldNameJson = [String: AnyObject]()
-    for (key, value) in try fieldName {
-        if let kType = key as? String, vType = value as? Type {
-            fieldName[kType] = vType
-        } else {
-            throw DataTransactionError.DataFormatError("Error creating for fieldName. Expected a string found \(key) and \(value)")
+    var paramNameJson = [String: AnyObject]()
+    for (key, value) in try paramName {
+        switch value.toJSON() {
+        case .Succeeded(let json):
+            dictName[key] = json
+        case .Failed:
+            return .Failed(DataTransactionError.DataFormatError("Invalid typeName data"))
         }
     }
     resultJson["field_name"] = fieldNameJson
     */
-    public static func toJsonCodeBlock(field: Field, rightType: SwiftType) -> CodeBlock {
-        let cb = CodeBlock.builder().addLiteral("var \(field.cammelCaseName)Json = [String: AnyObject]()")
+    internal static func toJsonCodeBlock(paramName: String, keyName: String, dictName: String, valueType: SwiftType, required: Bool, service: Service) -> CodeBlock {
 
-        cb.addCodeBlock(ControlFlow.forInControlFlow("(key, value)", iterable: field.cammelCaseName) {
-            switch rightType {
-            case .ExternalType(let typeName):
-                return ModelGenerator.toJsonFunction("\(field.cammelCaseName)Json", mapValue: "value", mapKey: "key", fieldType: typeName, required: true)
-            case .ImportedType(_, let typeName):
-                return ModelGenerator.toJsonFunction("\(field.cammelCaseName)Json", mapValue: "value", mapKey: "key", fieldType: typeName, required: true)
-            case .Array:
-                fatalError()
-            case .Dictionary:
-                fatalError()
-            default:
-                return SimpleTypeGenerator.toJsonCodeBlock("value", swiftType: rightType, required: true)
-            }
-        })
+        return ToJsonFunctionGenerator.generate(paramName, required: required) {
 
-        cb.addCodeLine("\(MethodGenerator.toJSONVarName)[\"\(field.name)\"] = \(field.cammelCaseName)Json")
-        return cb.build()
+            let paramNameJson = "\(paramName)Json"
 
+            return CodeBlock.builder().addLiteral("var \(paramNameJson) = [String: AnyObject]()")
+
+                .addCodeBlock(ControlFlow.forInControlFlow("(key, value)", iterable: paramName) {
+                    switch valueType.type {
+                    case .ServiceDefinedType(let typeName):
+
+                        if service.contains(.Enum, typeName: typeName) {
+                            return EnumGenerator.toJsonCodeBlock("value",
+                                dictName: paramNameJson,
+                                keyName: "key",
+                                required: !valueType.optional)
+                        } else if service.contains(.Model, typeName: typeName) {
+                            return ModelGenerator.toJsonCodeBlock("value",
+                                dictName: paramNameJson,
+                                keyName: "key",
+                                required: !valueType.optional,
+                                typeName: typeName)
+                        } else if service.contains(.Union, typeName: typeName) {
+                            return UnionGenerator.toJsonCodeBlock("value",
+                                dictName: paramNameJson,
+                                keyName: "key",
+                                required: !valueType.optional,
+                                typeName: typeName)
+
+                        } else {
+                            fatalError()
+                        }
+
+                    case .ImportedType(let namespace, let typeName):
+                        if service.contains(.Enum, typeName: typeName, namespace: namespace) {
+                            return EnumGenerator.toJsonCodeBlock("value",
+                                dictName: paramNameJson,
+                                keyName: "key",
+                                required: !valueType.optional)
+                        } else if service.contains(.Model, typeName: typeName, namespace: namespace) {
+                            return ModelGenerator.toJsonCodeBlock("value",
+                                dictName: paramNameJson,
+                                keyName: "key",
+                                required: !valueType.optional,
+                                typeName: typeName)
+                        } else if service.contains(.Union, typeName: typeName, namespace: namespace) {
+                            return UnionGenerator.toJsonCodeBlock("value",
+                                dictName: paramNameJson,
+                                keyName: "key",
+                                required: !valueType.optional,
+                                typeName: typeName)
+
+                        } else {
+                            fatalError()
+                        }
+
+                    case .Array:
+                        fatalError()
+                    case .Dictionary:
+                        fatalError()
+                    default:
+                        return SimpleTypeGenerator.toJsonCodeBlock("value", keyName: "key", swiftType: valueType, mapName: paramNameJson)
+                    }
+                })
+                .addCodeLine("\(dictName)[\(keyName.escapedString())] = \(paramNameJson)")
+                .build()
+        }
     }
 
-    public static func generateParseJsonDictionary(field: Field, swiftType: SwiftType) -> CodeBlock {
+    // Convenience
+    internal static func toJsonCodeBlock(field: Field, rightType: SwiftType, service: Service) -> CodeBlock {
+        return DictionaryGenerator.toJsonCodeBlock(field.cammelCaseName,
+            keyName: field.name,
+            dictName: ToJsonFunctionGenerator.varName,
+            valueType: rightType,
+            required: field.required,
+            service: service)
+    }
+
+}
+
+
+// MARK: parseJSON
+extension DictionaryGenerator {
+
+    internal static func jsonParseCodeBlock(field: Field, swiftType: SwiftType) -> CodeBlock {
         if field.required {
-            return DictionaryGenerator.generateParseJsonDictionaryRequired(field, swiftType: swiftType)
+            return DictionaryGenerator.jsonParseCodeBlockRequired(field, swiftType: swiftType)
         } else {
-            return DictionaryGenerator.generateParseJsonDictionaryOptional(field, swiftType: swiftType)
+            return DictionaryGenerator.jsonParseCodeBlockOptional(field, swiftType: swiftType)
         }
     }
 
     /*
     var fieldName = [String : Type]()
     for (key, value) in try payload.requiredDictionary(field_name) {
+    
+        guard let kType = key as? String else {
+            throw DataTransactionError.DataFormatError("Unexpected key type. Expected String for value \(key)")
+        }
+    
+        TODO!!!
+        fieldName[kType] =
+
         if let kType = key as? String, vType = value as? Type {
             fieldName[kType] = vType
         } else {
@@ -63,19 +137,13 @@ public struct DictionaryGenerator {
         }
     }
     */
-    private static func generateParseJsonDictionaryRequired(field: Field, swiftType: SwiftType) -> CodeBlock {
+    private static func jsonParseCodeBlockRequired(field: Field, swiftType: SwiftType) -> CodeBlock {
         let cb = CodeBlock.builder()
-        let capitalizedType: String
-        switch swiftType {
-        case .Dictionary(_, let rightType):
-            capitalizedType = PoetUtil.cleanTypeName(rightType.swiftTypeString)
-        default:
-            capitalizedType = field.cleanTypeName
-        }
+        let capitalizedType = swiftType.swiftTypeString
 
         cb.addCodeLine("var \(field.cammelCaseName) = [String : \(capitalizedType)]()")
 
-        cb.addCodeBlock(ControlFlow.forInControlFlow("(key, value)", iterable: "try payload.requiredDictionary(\"\(field.name)\")") {
+        cb.addCodeBlock(ControlFlow.forInControlFlow("(key, value)", iterable: "try payload.requiredDictionary(\(field.name.escapedString()))") {
             let innerCB = CodeBlock.builder()
             let leftOne = CodeBlock.builder().addLiteral("let kType").build()
             let rightOne = CodeBlock.builder().addLiteral("key as? String").build()
@@ -95,7 +163,7 @@ public struct DictionaryGenerator {
                     })
                 // ELSE
                 .addCodeBlock(ControlFlow.elseControlFlow(nil) {
-                    return CodeBlock.builder().addLiteral("throw DataTransactionError.DataFormatError(\"Error creating field \(field.name). Expected a \(capitalizedType) found \\(key) and\\(value)\")").build()
+                    return CodeBlock.builder().addLiteral("throw DataTransactionError.DataFormatError(\"Error creating field \(field.name). Expected a \(capitalizedType) found \\(key) and \\(value)\")").build()
                     })
 
             return innerCB.build()
@@ -115,15 +183,9 @@ public struct DictionaryGenerator {
         }
     }
     */
-    private static func generateParseJsonDictionaryOptional(field: Field, swiftType: SwiftType) -> CodeBlock {
+    private static func jsonParseCodeBlockOptional(field: Field, swiftType: SwiftType) -> CodeBlock {
         let cb = CodeBlock.builder()
-        let capitalizedType: String
-        switch swiftType {
-        case .Dictionary(let leftType, _):
-            capitalizedType = PoetUtil.cleanTypeName(leftType.swiftTypeString)
-        default:
-            capitalizedType = field.cleanTypeName
-        }
+        let capitalizedType = swiftType.swiftTypeString
 
         cb.addCodeLine("var \(field.cammelCaseName): [String : \(capitalizedType)]? = nil")
 
@@ -139,7 +201,7 @@ public struct DictionaryGenerator {
             cb.addCodeBlock(ControlFlow.forInControlFlow("(key, value)", iterable: "dict") {
 
                 let leftOne = CodeBlock.builder().addLiteral("let kType").build()
-                let rightOne = CodeBlock.builder().addLiteral("key as? String)").build()
+                let rightOne = CodeBlock.builder().addLiteral("key as? String").build()
                 let comparisonOne = ComparisonListItem(comparison: Comparison(lhs: leftOne, comparator: .OptionalCheck, rhs: rightOne))
 
                 let leftTwo = CodeBlock.builder().addLiteral("let vType").build()

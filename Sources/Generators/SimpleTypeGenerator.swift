@@ -9,175 +9,165 @@
 import Foundation
 import SwiftPoet
 
-public struct SimpleTypeGenerator {
-    public static func generateParseJson(field: Field, swiftType: SwiftType) -> CodeBlock {
-        switch swiftType {
+internal struct SimpleTypeGenerator {}
+
+// MARK: parseJSON
+extension SimpleTypeGenerator {
+    internal static func parseJsonCodeBlock(field: Field, swiftType: SwiftType) -> CodeBlock {
+        switch swiftType.type {
         case .Boolean:
-            return SimpleTypeGenerator.generateParseJsonBool(field)
+            return SimpleTypeGenerator.parseJsonCodeBlockBool(field.cammelCaseName,
+                keyName: field.name.escapedString(),
+                required: field.required)
         case .DateISO8601:
-            return SimpleTypeGenerator.generateParseJsonDate(field)
+            return SimpleTypeGenerator.parseJsonCodeBlockDate(field.cammelCaseName,
+                keyName: field.name.escapedString(),
+                required: field.required)
         case .DateTimeISO8601:
-            return SimpleTypeGenerator.generateParseJsonDate(field)
+            return SimpleTypeGenerator.parseJsonCodeBlockDateTime(field.cammelCaseName,
+                keyName: field.name.escapedString(),
+                required: field.required)
         case .Decimal:
-            return SimpleTypeGenerator.generateParseJsonDecimal(field)
+            return SimpleTypeGenerator.parseJsonCodeBlockGeneric(field.cammelCaseName,
+                keyName: field.name.escapedString(),
+                typeName: "Double",
+                required: field.required)
         case .Double:
-            return SimpleTypeGenerator.generateParseJsonDouble(field)
+            return SimpleTypeGenerator.parseJsonCodeBlockGeneric(field.cammelCaseName,
+                keyName: field.name.escapedString(),
+                typeName: "Double",
+                required: field.required)
         case .Integer:
-            return SimpleTypeGenerator.generateParseJsonInteger(field)
+            return SimpleTypeGenerator.parseJsonCodeBlockGeneric(field.cammelCaseName,
+                keyName: field.name.escapedString(),
+                typeName: "Int",
+                required: field.required)
         case .Long:
-            return SimpleTypeGenerator.generateParseJsonLong(field)
+            return SimpleTypeGenerator.parseJsonCodeBlockGeneric(field.cammelCaseName,
+                keyName: field.name.escapedString(),
+                typeName: "Int",
+                required: field.required)
         case .Object:
-            return SimpleTypeGenerator.generateParseJsonObject(field)
+            return SimpleTypeGenerator.parseJsonCodeBlockObject(field.cammelCaseName,
+                keyName: field.name.escapedString(),
+                required: field.required)
         case .SwiftString:
-            return SimpleTypeGenerator.generateParseJsonString(field)
+            return SimpleTypeGenerator.parseJsonCodeBlockGeneric(field.cammelCaseName,
+                keyName: field.name.escapedString(),
+                typeName: "String",
+                required: field.required)
         case .Unit:
-            return SimpleTypeGenerator.generateParseJsonObject(field)
+            return SimpleTypeGenerator.parseJsonCodeBlockUnit(field.cammelCaseName)
         case .UUID:
-            return SimpleTypeGenerator.generateParseJsonGuid(field)
-        case .Dictionary:
-            return DictionaryGenerator.generateParseJsonDictionary(field, swiftType: swiftType)
-        default: return CodeBlock.builder().build()
+            return SimpleTypeGenerator.parseJsonCodeBlockGuid(field.cammelCaseName,
+                keyName: field.name.escapedString(),
+                required: field.required)
+        default: fatalError()
         }
     }
 
-    private static func generateParseJsonGeneric(field: Field, requiredType: String, type: String) -> CodeBlock {
+    private static func parseJsonCodeBlockGeneric(paramName: String, keyName: String, typeName: String, required: Bool) -> CodeBlock {
         /*
-        let fieldName = try payload.required`requiredType`(field_name)
+        let paramName = try payload.required`TypeName`(keyName)
         */
-        if field.required {
-            return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = try payload.required\(requiredType)(\"\(field.name)\")").build()
+        if required {
+            return "let \(paramName) = try payload.required\(typeName)(\(keyName))".toCodeBlock()
         } else {
         /*
-        let fieldName = payload["field_name"] as? Type
+        let paramName = payload[keyName] as? Type
         */
-            return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = payload[\"\(field.name)\"] as? \(type)").build()
+            return "let \(paramName) = payload[\(keyName)] as? \(typeName)".toCodeBlock()
         }
     }
 
-    public static func generateParseJsonBool(field: Field) -> CodeBlock {
-        let requiredType = "Bool"
+    internal static func parseJsonCodeBlockBool(paramName: String, keyName: String, required: Bool) -> CodeBlock {
+        let functionType = required ? "required" : "optional"
+        let tryStr = required ? " try" : ""
         /*
-        let fieldName = try payload.requiredBool(field_name)
+        let paramName = try payload.requiredBool(keyName)
+        let paramName =     payload.optionalBool(keyName)
         */
-        if field.required {
-            return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = try payload.required\(requiredType)(\"\(field.name)\")").build()
-        } else {
-        /*
-        let fieldName = payload.optionalBool(field_name)
-        */
-            return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = payload.optional\(requiredType)(\"\(field.name)\")").build()
-        }
-    }
-
-    public static func generateParseJsonDouble(field: Field) -> CodeBlock {
-        return SimpleTypeGenerator.generateParseJsonGeneric(field, requiredType: "Double", type: "Double")
-    }
-
-    public static func generateParseJsonDecimal(field: Field) -> CodeBlock {
-        return SimpleTypeGenerator.generateParseJsonGeneric(field, requiredType: "Double", type: "Double")
-    }
-
-    public static func generateParseJsonInteger(field: Field) -> CodeBlock {
-        return SimpleTypeGenerator.generateParseJsonGeneric(field, requiredType: "Int", type: "Int")
-    }
-
-    public static func generateParseJsonLong(field: Field) -> CodeBlock {
-        return SimpleTypeGenerator.generateParseJsonGeneric(field, requiredType: "Int", type: "Int")
-    }
-
-    public static func generateParseJsonString(field: Field) -> CodeBlock {
-        return SimpleTypeGenerator.generateParseJsonGeneric(field, requiredType: "String", type: "String")
+        return "let \(paramName) =\(tryStr) payload.\(functionType)Bool(\(keyName))".toCodeBlock()
     }
 
     /*
         let fieldName = nil
     */
-    public static func generateParseJsonUnit(field: Field) -> CodeBlock {
-        return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = nil").build()
+    internal static func parseJsonCodeBlockUnit(paramName: String) -> CodeBlock {
+        return "let \(paramName) = nil".toCodeBlock()
     }
 
-    public static func generateParseJsonGuid(field: Field) -> CodeBlock {
-        let fieldNameStr = "\(field.cammelCaseName)Str"
+    internal static func parseJsonCodeBlockGuid(paramName: String, keyName: String, required: Bool) -> CodeBlock {
         /*
-        let fieldName = try payload.requiredGUID(field_name)
+        let paramName = try payload.requiredGUID(keyName)
         */
-        if field.required {
-            return CodeBlock.builder().addLiteral("let \(field.cammelCaseName) = try payload.requiredGUID(\"\(field.name)\")").build()
+        if required {
+            return "let \(paramName) = try payload.requiredGUID(\(keyName))".toCodeBlock()
         } else {
             /*
-            let fieldNameStr = payload["field_name"] as? String
-            var fieldName = NSUUID? = nil
-            if let fieldNameStr = fieldNameStr {
-                fieldName = NSUUID(string: fieldNameStr)
+            var paramName: NSUUID? = nil
+            if let paramNameStr = payload["field_name"] as? String {
+                paramName = NSUUID(UUIDString: paramName)
             }
             */
+            let paramNameStr = "\(paramName)Str"
             let cb = CodeBlock.builder()
-            cb.addCodeLine("let \(fieldNameStr) = payload[\"\(field.name)\"] as? String")
+                .addCodeLine("var \(paramName): NSUUID? = nil")
 
-            cb.addCodeLine("var \(field.cammelCaseName): NSUUID? = nil")
-
-            let left = CodeBlock.builder().addLiteral("let \(fieldNameStr)").build()
-            let right = CodeBlock.builder().addLiteral(fieldNameStr).build()
+            let left = "let \(paramNameStr)".toCodeBlock()
+            let right = "payload[\(keyName)] as? String".toCodeBlock()
 
             cb.addCodeBlock(ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
-                return CodeBlock.builder().addLiteral("\(field.cammelCaseName) = NSUUID(UUIDString: \(fieldNameStr))").build()
+                return "\(paramName) = NSUUID(UUIDString: \(paramNameStr))".toCodeBlock()
             })
 
             return cb.build()
         }
     }
 
-    public static func generateParseJsonDate(field: Field) -> CodeBlock {
-        let cammelCaseName = PoetUtil.cleanCammelCaseString(field.name)
-
-        if field.required {
+    internal static func parseJsonCodeBlockDate(paramName: String, keyName: String, required: Bool) -> CodeBlock {
+        if required {
             /*
-                let fieldName = try payload.requiredISO8601Date(field_name)
+                let paramName = try payload.requiredISO8601Date(keyName)
             */
-            return CodeBlock.builder().addLiteral("let \(cammelCaseName) = try payload.requiredISO8601Date(\"\(field.name)\")").build()
+            return "let \(paramName) = try payload.requiredISO8601Date(\(keyName))".toCodeBlock()
         } else {
             /*
-            let fieldName = (payload["field_name"] as? String)?.asDateISO8601()
+            let paramName = (payload[keyName] as? String)?.asDateISO8601()
             */
-            return CodeBlock.builder().addLiteral("let \(cammelCaseName) = (payload[\"\(field.name)\"] as? String)?.asDateISO8601()").build()
+            return "let \(paramName) = (payload[\(keyName)] as? String)?.asDateISO8601()".toCodeBlock()
         }
     }
 
-    public static func generateParseJsonDateTime(field: Field) -> CodeBlock {
-        return SimpleTypeGenerator.generateParseJsonDate(field) // TODO add DateTime to CleanroomDateTime
+    internal static func parseJsonCodeBlockDateTime(paramName: String, keyName: String, required: Bool) -> CodeBlock {
+        return SimpleTypeGenerator.parseJsonCodeBlockDate(paramName, keyName: keyName, required: required) // TODO add DateTime to CleanroomDateTime
     }
 
-    public static func generateParseJsonObject(field: Field) -> CodeBlock {
-        if field.required {
-            return CodeBlock.builder()
-                .addLiteral("let \(field.cammelCaseName) = try payload.requiredDictionary(\"\(field.name)\")")
-                .build()
+    internal static func parseJsonCodeBlockObject(paramName: String, keyName: String, required: Bool) -> CodeBlock {
+        if required {
+            return "let \(paramName) = try payload.requiredDictionary(\(keyName))".toCodeBlock()
         } else {
-            return CodeBlock.builder()
-                .addLiteral("let \(field.cammelCaseName) = payload[\"\(field.name)\"] as? NSDictionary")
-                .build()
+            return "let \(paramName) = payload[\(keyName)] as? NSDictionary".toCodeBlock()
+        }
+    }
+}
+
+
+// MARK: toJSON
+extension SimpleTypeGenerator {
+    internal static func toJsonCodeBlock(paramName: String, keyName: String, swiftType: SwiftType, mapName: String = ToJsonFunctionGenerator.varName) -> CodeBlock {
+        let rightSide = swiftType.asRequiredType().toString(paramName)
+
+        return ToJsonFunctionGenerator.generate(paramName, required: !swiftType.optional) {
+            return SimpleTypeGenerator.requiredtoJsonCodeBlock(keyName, rightSide: rightSide, mapName: mapName)
         }
     }
 
-    public static func toJsonCodeBlock(paramName: String, swiftType: SwiftType, required: Bool) -> CodeBlock {
-        let rightSide = swiftType.toString(paramName, optional: false)
-        return ToJsonFunctionGenerator.generate(paramName, required: required) {
-            return SimpleTypeGenerator.requiredToJsonCodeBlock(paramName, rightSide: rightSide)
-        }
+    private static func requiredtoJsonCodeBlock(keyName: String, rightSide: String, mapName: String = ToJsonFunctionGenerator.varName) -> CodeBlock {
+        return "\(mapName)[\(keyName)] = \(rightSide)".toCodeBlock()
     }
 
-    private static func requiredToJsonCodeBlock(fieldName: String, rightSide: String, mapName: String) -> CodeBlock {
-        return CodeBlock.builder().addLiteral("\(mapName)[\"\(fieldName)\"] = \(rightSide)").build()
-    }
-
-    public static func toJsonCodeBlock(field: Field, swiftType: SwiftType) -> CodeBlock {
-        let rightSide = swiftType.toString(field.cammelCaseName, optional: false)
-        return ToJsonFunctionGenerator.generate(field) { field in
-            return SimpleTypeGenerator.requiredToJsonCodeBlock(field.name, rightSide: rightSide)
-        }
-    }
-
-    private static func requiredToJsonCodeBlock(fieldName: String, rightSide: String) -> CodeBlock {
-        return CodeBlock.builder().addLiteral("\(MethodGenerator.toJSONVarName)[\"\(fieldName)\"] = \(rightSide)").build()
+    internal static func toJsonCodeBlock(field: Field, swiftType: SwiftType) -> CodeBlock {
+        return SimpleTypeGenerator.toJsonCodeBlock(field.cammelCaseName, keyName: field.name.escapedString(), swiftType: swiftType)
     }
 }

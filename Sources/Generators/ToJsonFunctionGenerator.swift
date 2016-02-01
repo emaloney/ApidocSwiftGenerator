@@ -9,29 +9,23 @@
 import Foundation
 import SwiftPoet
 
-public struct ToJsonFunctionGenerator {
+internal struct ToJsonFunctionGenerator {
     internal static let functionName = "toJSON"
+    internal static let varName = "resultJSON"
     /*
-    // if field.required
+    // required
     requiredBlock
 
-    // else
-    if let fieldName = fieldName {
+    // optional
+    if let paramName = paramName {
         requiredBlock
     }
     */
-    internal static func generate(fieldName: String, required: Bool, requiredBlockGen: () -> CodeBlock) -> CodeBlock {
+    internal static func generate(paramName: String, required: Bool, requiredBlockGen: () -> CodeBlock) -> CodeBlock {
         let requiredCodeBlock = requiredBlockGen()
-        let optionalCodeBlock = ToJsonFunctionGenerator.optionalGenerator(requiredCodeBlock, cammelCaseName: fieldName)
+        let optionalCodeBlock = ToJsonFunctionGenerator.optionalGenerator(requiredCodeBlock, paramName: paramName)
 
         return ToJsonFunctionGenerator.dualGenerator(required, requiredCodeBlock: requiredCodeBlock, optionalCodeBlock: optionalCodeBlock)
-    }
-
-    internal static func generate(field: Field, requiredBlockGen: (Field) -> CodeBlock) -> CodeBlock {
-        let requiredCodeBlock = requiredBlockGen(field)
-        let optionalCodeBlock = ToJsonFunctionGenerator.optionalGenerator(requiredCodeBlock, cammelCaseName: field.cammelCaseName)
-
-        return ToJsonFunctionGenerator.dualGenerator(field.required, requiredCodeBlock: requiredCodeBlock, optionalCodeBlock: optionalCodeBlock)
     }
 
     private static func dualGenerator(required: Bool, requiredCodeBlock: CodeBlock, optionalCodeBlock: CodeBlock) -> CodeBlock {
@@ -42,9 +36,9 @@ public struct ToJsonFunctionGenerator {
         }
     }
 
-    private static func optionalGenerator(body: CodeBlock, cammelCaseName: String) -> CodeBlock {
-        let left = CodeBlock.builder().addLiteral("let \(cammelCaseName)").build()
-        let right = CodeBlock.builder().addLiteral(cammelCaseName).build()
+    private static func optionalGenerator(body: CodeBlock, paramName: String) -> CodeBlock {
+        let left = CodeBlock.builder().addLiteral("let \(paramName)").build()
+        let right = CodeBlock.builder().addLiteral(paramName).build()
 
         return ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
             return body

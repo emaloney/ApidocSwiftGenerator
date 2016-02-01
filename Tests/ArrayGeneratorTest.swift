@@ -110,13 +110,13 @@ class ArrayGeneratorTest: XCTestCase {
 
     func testRequiredModelParseJson() {
         let field = Field(name: "test_field_name", type: "test_type", description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
-        let cb = ModelGenerator.generateParseModelJson(field, service: nil)
+        let cb = ModelGenerator.jsonParseCodeBlock(field, service: DummyService.create())
         let result =
-        "\nlet testFieldNameJson = try payload.requiredDictionary(\"test_field_name\")\n" +
+        "let testFieldNameJson = try payload.requiredDictionary(\"test_field_name\")\n" +
         "let testFieldName = try TestType(payload: testFieldNameJson)"
 
-//        print(result)
-//        print(cb.toString())
+        print(result)
+        print(cb.toString())
 
         XCTAssertEqual(cb.toString(), result)
     }
@@ -124,11 +124,12 @@ class ArrayGeneratorTest: XCTestCase {
     func testOptionalModelParseJson() {
         let field = Field(name: "test_field_name", type: "test_type", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
 
-        let cb = ModelGenerator.generateParseModelJson(field, service: nil)
+        let cb = ModelGenerator.jsonParseCodeBlock(field, service: DummyService.create())
         let result =
         "\nvar testFieldName: TestType? = nil\n" +
         "if let testFieldNameJson = payload[\"test_field_name\"] as? NSDictionary {\n" +
-        "    testFieldName = try TestType(payload: testFieldNameJson)\n}"
+        "    testFieldName = try TestType(payload: testFieldNameJson)\n" +
+        "}"
 
         print(result)
         print(cb.toString())

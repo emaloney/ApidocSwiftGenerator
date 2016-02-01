@@ -9,7 +9,7 @@
 import Foundation
 import SwiftPoet
 
-public struct ArrayGenerator {
+internal struct ArrayGenerator {
     /*
     [Model]
     let fieldName = try payload.requiredArrayWithType("field_name") { 
@@ -18,7 +18,7 @@ public struct ArrayGenerator {
     }
     
     [Model]?
-    let fieldName = try payload.optionalArrayWithType("field_name") {
+    let fieldName = (try) payload.optionalArrayWithType("field_name") {
         (json: NSDictionary) throws -> FieldType in
             try FieldType(payload: json)
     }
@@ -46,7 +46,7 @@ public struct ArrayGenerator {
     N/A
     */
 
-    public static func generateParseArraySimpleTypeJson(typeName: String, fieldName: String, required: Bool) -> CodeBlock {
+    internal static func generateParseArraySimpleTypeJson(typeName: String, fieldName: String, required: Bool) -> CodeBlock {
         let cammelCaseName = PoetUtil.cleanCammelCaseString(fieldName)
         let cleanTypeName = PoetUtil.cleanTypeName(typeName)
 
@@ -59,13 +59,13 @@ public struct ArrayGenerator {
         }
     }
 
-    public static func generateParseArrayEnumJson(typeName: String, fieldName: String, required: Bool) -> CodeBlock {
+    internal static func generateParseArrayEnumJson(typeName: String, fieldName: String, required: Bool) -> CodeBlock {
         let cammelCaseName = PoetUtil.cleanCammelCaseString(fieldName)
         let cleanTypeName = PoetUtil.cleanTypeName(typeName)
         return ArrayGenerator.generateParseArrayApidocType(cammelCaseName, typeName: cleanTypeName, fieldName: fieldName, required: required, isModel: false, canThrow: false)
     }
 
-    public static func generateParseArrayModelJson(typeName: String, fieldName: String, required: Bool, canThrow: Bool, rootJson: Bool = false) -> CodeBlock {
+    internal static func generateParseArrayModelJson(typeName: String, fieldName: String, required: Bool, canThrow: Bool, rootJson: Bool = false) -> CodeBlock {
         let cammelCaseName = PoetUtil.cleanCammelCaseString(fieldName)
         let cleanTypeName = PoetUtil.cleanTypeName(typeName)
         return ArrayGenerator.generateParseArrayApidocType(cammelCaseName, typeName: cleanTypeName, fieldName: fieldName, required: required, isModel: true, canThrow: canThrow)
@@ -95,13 +95,16 @@ public struct ArrayGenerator {
 
         return cb.build()
     }
+}
 
+// MARK: toJSON
+extension ArrayGenerator {
     /*
-    switch fieldName.toJson() {
+    switch paramName.toJSON() {
     case .Succeeded(let json):
-        resultJSON[OrderPayloadKey.PaymentMethods.rawValue] = json
+        dictName[keyName] = json
     case .Failed:
-        return .Failed(DataTransactionError.DataFormatError("Invalid FieldType data"))
+        return .Failed(DataTransactionError.DataFormatError("Invalid typeName data"))
     }
     OR
     resultJSON["file_name"] = fieldName.map { return innerType.rawValue }
@@ -110,65 +113,82 @@ public struct ArrayGenerator {
     OR
     resultJSON["field_name"] = fieldName
     */
-    public static func toJsonCodeBlock(field: Field, innerType: SwiftType, service: Service) -> CodeBlock {
-        return ToJsonFunctionGenerator.generate(field) { field in
-            switch innerType {
+    internal static func toJsonCodeBlock(field: Field, innerType: SwiftType, service: Service) -> CodeBlock {
+        return ToJsonFunctionGenerator.generate(field.cammelCaseName, required: field.required) {
+            switch innerType.type {
             case .Array: fatalError()
             case .ImportedType(let namespace, let typeName):
+
                 if service.contains(.Enum, typeName: typeName, namespace: namespace) {
-                    return ArrayGenerator.toJsonCodeBlock(field) {
-                        return ArrayGenerator.rightSideWithMap(field) { return EnumGenerator.toJsonCodeBlock() }
-                    }
+
+                    return ArrayGenerator.leftSide(ToJsonFunctionGenerator.varName,
+                        keyName: field.name.escapedString(),
+                        rightSide: "\(field.cammelCaseName).map { return \(EnumGenerator.toJsonCodeBlock(nil).toString()) }")
+
                 } else if service.contains(.Model, typeName: typeName, namespace: namespace) {
-                    return ArrayGenerator.toJsonCodeBlockArray(field)
+
+                    return ModelGenerator.toJsonCodeBlock(field.cammelCaseName,
+                        dictName: ToJsonFunctionGenerator.varName,
+                        keyName: field.name.escapedString(),
+                        required: true,
+                        typeName: typeName)
+
+                } else if service.contains(.Union, typeName: typeName, namespace: namespace) {
+                    return UnionGenerator.toJsonCodeBlock(field.cammelCaseName,
+                        dictName: ToJsonFunctionGenerator.varName,
+                        keyName: field.name.escapedString(),
+                        required: true,
+                        typeName: typeName)
                 } else {
                     fatalError()
                 }
-            case .ExternalType(let typeName):
+
+            case .ServiceDefinedType(let typeName):
+
                 if service.contains(.Enum, typeName: typeName) {
-                    return ArrayGenerator.toJsonCodeBlock(field) {
-                        return ArrayGenerator.rightSideWithMap(field) { return EnumGenerator.toJsonCodeBlock() }
-                    }
+                    return ArrayGenerator.leftSide(ToJsonFunctionGenerator.varName,
+                        keyName: field.name.escapedString(),
+                        rightSide: "\(field.cammelCaseName).map { return \(EnumGenerator.toJsonCodeBlock(nil).toString()) }")
+
                 } else if service.contains(.Model, typeName: typeName) {
-                    return ArrayGenerator.toJsonCodeBlockArray(field)
+
+                    return ModelGenerator.toJsonCodeBlock(field.cammelCaseName,
+                        dictName: ToJsonFunctionGenerator.varName,
+                        keyName: field.name.escapedString(),
+                        required: true,
+                        typeName: typeName)
+                } else if service.contains(.Union, typeName: typeName) {
+                    return UnionGenerator.toJsonCodeBlock(field.cammelCaseName,
+                        dictName: ToJsonFunctionGenerator.varName,
+                        keyName: field.name.escapedString(),
+                        required: true,
+                        typeName: typeName)
+
                 } else {
                     fatalError()
                 }
+
             case .SwiftString, .Long, .Integer, .Boolean, .Decimal, .Double:
-                return ArrayGenerator.toJsonCodeBlock(field) {
-                    return CodeBlock.builder().addLiteral("\(field.cammelCaseName)").build()
-                }
+
+                return ArrayGenerator.leftSide(ToJsonFunctionGenerator.varName,
+                    keyName: field.name.escapedString(),
+                    rightSide: field.cammelCaseName)
+
             default:
-                let fieldToString = innerType.toString(nil, optional: !field.required)
-                return ArrayGenerator.toJsonCodeBlock(field) {
-                    return ArrayGenerator.rightSideWithMap(field) { return CodeBlock.builder().addLiteral("\(fieldToString)").build() }
-                }
+                return ArrayGenerator.leftSide(ToJsonFunctionGenerator.varName,
+                    keyName: field.name.escapedString(),
+                    rightSide: ArrayGenerator.mapValue(field.cammelCaseName, swiftType: innerType))
             }
         }
     }
 
-    private static func toJsonCodeBlock(field: Field, innerFn: () -> CodeBlock) -> CodeBlock {
-        return CodeBlock.builder().addLiteral("\(MethodGenerator.toJSONVarName)[\"\(field.name)\"] = \(innerFn().toString())"
-        ).build()
+    // fieldName.map { return $0.toStringFn() }
+    private static func mapValue(paramName: String, swiftType: SwiftType) -> String {
+        return "\(paramName).map { return \(swiftType.toString(nil)) }"
     }
 
-    private static func rightSideWithMap(field: Field, innerFn: () -> CodeBlock) -> CodeBlock {
-        return CodeBlock.builder().addLiteral("\(field.cammelCaseName).map { return \(innerFn().toString()) }"
-        ).build()
-    }
-
-    /*
-    switch fieldName.toJson() {
-    case .Succeeded(let json):
-        result["field_name"] = json
-    case .Failed:
-        return .Failed(DataTransactionError.DataFormatError("Invalid FieldType data"))
-    }
-    */
-    private static func toJsonCodeBlockArray(field: Field) -> CodeBlock {
-        return ControlFlow.switchControlFlow("\(field.cammelCaseName).toJSON()", cases:
-            [(".Succeeded(let json)", CodeBlock.builder().addLiteral("\(MethodGenerator.toJSONVarName)[\"\(field.name)\"] = json").build()),
-            (".Failed", CodeBlock.builder().addLiteral("return .Failed(DataTransactionError.DataFormatError(\"Invalid \(field.cleanTypeName) data\"))").build())]
-        )
+    // resultJSON["field_name"] = `rightSide`
+    private static func leftSide(dictName: String, keyName: String, rightSide: String) -> CodeBlock {
+        return "\(dictName)[\(keyName)] = \(rightSide)".toCodeBlock()
     }
 }

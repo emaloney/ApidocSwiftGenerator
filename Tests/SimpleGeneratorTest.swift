@@ -22,22 +22,55 @@ class SimpleGeneratorTest: XCTestCase {
     
     func testObjectRequiredGeneration() {
         let field = Field(name: "test_field_name", type: "map[string]", description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
-        print(SimpleTypeGenerator.generateParseJsonObject(field).toString())
+        let type = SwiftType(apidocType: "string", service: DummyService.create()) // dictionary generator takes left type
+        let cb = DictionaryGenerator.jsonParseCodeBlock(field, swiftType: type)
 
-        XCTAssertTrue(true)
+        let result =
+        "\nvar testFieldName = [String : String]()\n" +
+        "for (key, value) in try payload.requiredDictionary(\"test_field_name\") {\n" +
+        "    \n" +
+        "    if let kType = key as? String, let vType = value as? String {\n" +
+        "        testFieldName[kType] = vType\n" +
+        "    }\n" +
+        "    else {\n" +
+        "        throw DataTransactionError.DataFormatError(\"Error creating field test_field_name. Expected a String found \\(key) and \\(value)\")\n" +
+        "    }\n" +
+        "}"
+
+        print(cb.toString())
+        print(result)
+
+        XCTAssertEqual(result, cb.toString())
     }
 
     func testObjectOptionalGeneration() {
         let field = Field(name: "test_field_name", type: "map[string]", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
-        print(SimpleTypeGenerator.generateParseJsonObject(field).toString())
+        let type = SwiftType(apidocType: "string", service: DummyService.create())
+        let cb = DictionaryGenerator.jsonParseCodeBlock(field, swiftType: type)
 
-        XCTAssertTrue(true)
+        let result =
+        "\nvar testFieldName: [String : String]? = nil\n" +
+        "if let dict = payload[\"test_field_name\"] as? NSDictionary {\n" +
+        "    \n" +
+        "    testFieldName = [String : String]()\n" +
+        "    for (key, value) in dict {\n" +
+        "        if let kType = key as? String, let vType = value as? String {\n" +
+        "            testFieldName?[kType] = vType\n" +
+        "        }\n" +
+        "    }\n" +
+        "}"
+
+        print(cb.toString())
+        print(result)
+
+        XCTAssertEqual(cb.toString(), result)
     }
 
 
     func testBoolRequiredGeneration() {
-        let field = Field(name: "test_field_name", type: "bool", description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
-        let result = SimpleTypeGenerator.generateParseJsonBool(field).toString()
+        let field = Field(name: "test_field_name", type: "boolean", description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
+        let type = SwiftType(apidocType: "boolean", service: DummyService.create())
+        let result = SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: type).toString()
         let test = "let testFieldName = try payload.requiredBool(\"test_field_name\")"
 
 //        print(result)
@@ -46,8 +79,9 @@ class SimpleGeneratorTest: XCTestCase {
     }
 
     func testBoolOptionalGeneration() {
-        let field = Field(name: "test_field_name", type: "bool", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
-        let result = SimpleTypeGenerator.generateParseJsonBool(field).toString()
+        let field = Field(name: "test_field_name", type: "boolean", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
+        let type = SwiftType(apidocType: "boolean", service: DummyService.create())
+        let result = SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: type).toString()
         let test = "let testFieldName = payload.optionalBool(\"test_field_name\")"
 
 //        print(result)
@@ -58,7 +92,8 @@ class SimpleGeneratorTest: XCTestCase {
 
     func testIntRequiredGeneration() {
         let field = Field(name: "test_field_name", type: "integer", description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
-        let result = SimpleTypeGenerator.generateParseJsonInteger(field).toString()
+        let type = SwiftType(apidocType: "integer", service: DummyService.create())
+        let result = SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: type).toString()
         let test = "let testFieldName = try payload.requiredInt(\"test_field_name\")"
 
 //        print(result)
@@ -68,7 +103,8 @@ class SimpleGeneratorTest: XCTestCase {
 
     func testIntOptionalGeneration() {
         let field = Field(name: "test_field_name", type: "integer", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
-        let result = SimpleTypeGenerator.generateParseJsonInteger(field).toString()
+        let type = SwiftType(apidocType: "integer", service: DummyService.create())
+        let result = SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: type).toString()
         let test = "let testFieldName = payload[\"test_field_name\"] as? Int"
 
 //        print(result)
@@ -78,7 +114,8 @@ class SimpleGeneratorTest: XCTestCase {
 
     func testDoubleRequiredGeneration() {
         let field = Field(name: "test_field_name", type: "double", description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
-        let result = SimpleTypeGenerator.generateParseJsonDouble(field).toString()
+        let type = SwiftType(apidocType: "double", service: DummyService.create())
+        let result = SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: type).toString()
         let test = "let testFieldName = try payload.requiredDouble(\"test_field_name\")"
 
 //        print(result)
@@ -88,7 +125,8 @@ class SimpleGeneratorTest: XCTestCase {
 
     func testDoubleOptionalGeneration() {
         let field = Field(name: "test_field_name", type: "double", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
-        let result = SimpleTypeGenerator.generateParseJsonDouble(field).toString()
+        let type = SwiftType(apidocType: "double", service: DummyService.create())
+        let result = SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: type).toString()
         let test = "let testFieldName = payload[\"test_field_name\"] as? Double"
 
 //        print(result)
@@ -98,7 +136,8 @@ class SimpleGeneratorTest: XCTestCase {
 
     func testStringRequiredGeneration() {
         let field = Field(name: "test_field_name", type: "string", description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
-        let result = SimpleTypeGenerator.generateParseJsonString(field).toString()
+        let type = SwiftType(apidocType: "string", service: DummyService.create())
+        let result = SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: type).toString()
         let test = "let testFieldName = try payload.requiredString(\"test_field_name\")"
 
 //        print(result)
@@ -108,7 +147,8 @@ class SimpleGeneratorTest: XCTestCase {
 
     func testStringOptionalGeneration() {
         let field = Field(name: "test_field_name", type: "string", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
-        let result = SimpleTypeGenerator.generateParseJsonString(field).toString()
+        let type = SwiftType(apidocType: "string", service: DummyService.create())
+        let result = SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: type).toString()
         let test = "let testFieldName = payload[\"test_field_name\"] as? String"
 
 //        print(result)
@@ -118,7 +158,8 @@ class SimpleGeneratorTest: XCTestCase {
 
     func testUnitGeneration() {
         let field = Field(name: "test_field_name", type: "unit", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
-        let result = SimpleTypeGenerator.generateParseJsonUnit(field).toString()
+        let type = SwiftType(apidocType: "unit", service: DummyService.create())
+        let result = SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: type).toString()
         let test = "let testFieldName = nil"
 
 //        print(result)
@@ -128,7 +169,8 @@ class SimpleGeneratorTest: XCTestCase {
 
     func testGuidRequiredGeneration() {
         let field = Field(name: "test_field_name", type: "uuid", description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
-        let result = SimpleTypeGenerator.generateParseJsonGuid(field).toString()
+        let type = SwiftType(apidocType: "uuid", service: DummyService.create())
+        let result = SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: type).toString()
         let test = "let testFieldName = try payload.requiredGUID(\"test_field_name\")"
 
 //        print(result)
@@ -138,12 +180,12 @@ class SimpleGeneratorTest: XCTestCase {
 
     func testGuidOptionalGeneration() {
         let field = Field(name: "test_field_name", type: "uuid", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
-        let result = SimpleTypeGenerator.generateParseJsonGuid(field).toString()
+        let type = SwiftType(apidocType: "uuid", service: DummyService.create())
+        let result = SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: type).toString()
 
         let test =
-        "\nlet testFieldNameStr = payload[\"test_field_name\"] as? String\n" +
-        "var testFieldName: NSUUID? = nil\n" +
-        "if let testFieldNameStr = testFieldNameStr {\n" +
+        "\nvar testFieldName: NSUUID? = nil\n" +
+        "if let testFieldNameStr = payload[\"test_field_name\"] as? String {\n" +
         "    testFieldName = NSUUID(UUIDString: testFieldNameStr)\n" +
         "}"
 
@@ -155,7 +197,8 @@ class SimpleGeneratorTest: XCTestCase {
 
     func testDateRequiredGeneration() {
         let field = Field(name: "test_field_name", type: "date-iso8601", description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
-        let result = SimpleTypeGenerator.generateParseJsonDate(field).toString()
+        let type = SwiftType(apidocType: "date-iso8601", service: DummyService.create())
+        let result = SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: type).toString()
         let test = "let testFieldName = try payload.requiredISO8601Date(\"test_field_name\")"
 
 //        print(result)
@@ -165,7 +208,8 @@ class SimpleGeneratorTest: XCTestCase {
 
     func testDateOptionalGeneration() {
         let field = Field(name: "test_field_name", type: "date-iso8601", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
-        let result = SimpleTypeGenerator.generateParseJsonDate(field).toString()
+        let type = SwiftType(apidocType: "date-iso8601", service: DummyService.create())
+        let result = SimpleTypeGenerator.parseJsonCodeBlock(field, swiftType: type).toString()
         let test = "let testFieldName = (payload[\"test_field_name\"] as? String)?.asDateISO8601()"
 
 //        print(result)

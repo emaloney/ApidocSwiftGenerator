@@ -1,43 +1,13 @@
 //
-//  FieldExtension.swift
+//  OperationExtension.swift
 //  ApidocSwiftGenerator
 //
-//  Created by Kyle Dorman on 1/20/16.
+//  Created by Kyle Dorman on 1/29/16.
 //
 //
 
 import Foundation
 import SwiftPoet
-
-extension Field {
-    public var cammelCaseName: String {
-        return PoetUtil.cleanCammelCaseString(self.name)
-    }
-
-    public var cleanTypeName: String {
-        return PoetUtil.cleanTypeName(self.type)
-    }
-
-    public func clone(withTypeName typeName: String) -> Field {
-        return Field(name: name, type: typeName, description: description, deprecation: deprecation, _default: _default, required: required, minimum: minimum, maximum: maximum, example: example)
-    }
-}
-
-extension Parameter {
-    public var cammelCaseName: String {
-        return PoetUtil.cleanCammelCaseString(self.name)
-    }
-
-    internal var cleanTypeName: String {
-        return TypeName(keyword: type, optional: !required).toString()
-    }
-}
-
-extension Resource {
-    internal func cleanTypeName(operation: Operation) -> String {
-        return PoetUtil.cleanTypeName(self.type) + operation.cleanTypeName
-    }
-}
 
 extension Operation {
     internal var queryParams: [Parameter] {
@@ -58,7 +28,7 @@ extension Operation {
         }
     }
 
-    internal var cleanTypeName: String {
+    internal var capitalizedName: String {
         let method = PoetUtil.cleanTypeName(self.method.rawValue.lowercaseString)
 
         let urlPathParts: String = splitPath.filter {
@@ -99,7 +69,7 @@ extension Operation {
                 return defaultCode == ResponseCodeOption.Default
             }
             return false
-        })?.first
+            })?.first
 
         guard let returnType = returnTypeOption else {
             return nil

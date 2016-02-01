@@ -8,16 +8,16 @@
 
 import Foundation
 
-public class FolderBuilder {
+internal class FolderBuilder {
 
-    public init() {}
+    internal init() {}
 
-    public func createFolder(folderName: String, atPath path: String, overwriteStyle: OverwriteStyle = .FailOnCollision) throws -> NSURL {
+    internal func createFolder(folderName: String, atPath path: String, overwriteStyle: OverwriteStyle = .FailOnCollision) throws -> NSURL {
         let folderURL = NSURL(fileURLWithPath: path, isDirectory: true)
         return try createFolder(folderName, atUrlPath: folderURL, overwriteStyle: overwriteStyle)
     }
 
-    public func createFolder(folderName: String, atUrlPath url: NSURL, overwriteStyle: OverwriteStyle = .FailOnCollision) throws -> NSURL {
+    internal func createFolder(folderName: String, atUrlPath url: NSURL, overwriteStyle: OverwriteStyle = .FailOnCollision) throws -> NSURL {
         let manager = NSFileManager.defaultManager()
 
         let contents = try discoverRootFolder(atUrlPath: url)
@@ -39,7 +39,7 @@ public class FolderBuilder {
         return newFolderURL
     }
 
-    public func discoverRootFolder(atUrlPath url: NSURL) throws -> [NSURL] {
+    internal func discoverRootFolder(atUrlPath url: NSURL) throws -> [NSURL] {
         do {
             let contents = try NSFileManager.defaultManager().contentsOfDirectoryAtURL(url, includingPropertiesForKeys: nil, options: NSDirectoryEnumerationOptions.SkipsSubdirectoryDescendants)
             return contents
@@ -49,14 +49,14 @@ public class FolderBuilder {
         }
     }
 
-    public func discoverRootFolder(atPath path: String) throws -> [NSURL] {
+    internal func discoverRootFolder(atPath path: String) throws -> [NSURL] {
         guard let url = NSURL(string: path) else {
             throw FileSystemError.InvalidFolderName(path)
         }
         return try discoverRootFolder(atUrlPath: url)
     }
 
-    public func deleteFiles(fileUrls: [NSURL]) throws {
+    internal func deleteFiles(fileUrls: [NSURL]) throws {
         let manager = NSFileManager.defaultManager()
 
         for url in fileUrls {
@@ -64,14 +64,14 @@ public class FolderBuilder {
         }
     }
 
-    public func deleteFolder(path: String) throws {
+    internal func deleteFolder(path: String) throws {
         let manager = NSFileManager.defaultManager()
         let url = NSURL(fileURLWithPath: path, isDirectory: true)
         try manager.removeItemAtURL(url)
     }
 }
 
-public enum OverwriteStyle {
+internal enum OverwriteStyle {
     case Overwrite
     case FailOnCollision
 }
