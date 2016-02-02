@@ -108,11 +108,16 @@ extension ModelGenerator {
 
     // (let) paramName = (try) TypeName(payload: jsonParamName)
     internal static func toModelCodeBlock(paramName: String, typeName: String, jsonParamName: String, service: Service, initalize: Bool = true) -> CodeBlock {
-        let canThrow = service.getModel(typeName)?.canThrow(service) != false
-        let tryStr = canThrow ? "try " : ""
         let initializeStr = initalize ? "let " : ""
 
-        return "\(initializeStr)\(paramName) = \(tryStr)\(typeName)(payload: \(jsonParamName))".toCodeBlock()
+        return "\(initializeStr)\(paramName) = \(ModelGenerator.jsonToModelCodeBlock(typeName, jsonParamName: jsonParamName, service: service))".toCodeBlock()
+    }
+
+    // (try) TypeName(payload: jsonParamName)
+    internal static func jsonToModelCodeBlock(typeName: String, jsonParamName: String, service: Service) -> String {
+        let canThrow = service.getModel(typeName)?.canThrow(service) != false
+        let tryStr = canThrow ? "try " : ""
+        return "\(tryStr)\(typeName)(payload: \(jsonParamName))"
     }
 }
 

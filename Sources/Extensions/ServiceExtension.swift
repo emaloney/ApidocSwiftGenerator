@@ -17,11 +17,11 @@ public extension Service {
     internal func contains(type: ApidocRepresentation, typeName: String) -> Bool {
         switch type {
         case .Enum:
-            return (enums?.filter { $0.name == typeName })?.count == 1
+            return (enums?.filter { PoetUtil.cleanTypeName($0.name) == PoetUtil.cleanTypeName(typeName) })?.count == 1
         case .Model:
-            return (models?.filter { $0.name == typeName })?.count == 1
+            return (models?.filter { PoetUtil.cleanTypeName($0.name) == PoetUtil.cleanTypeName(typeName) })?.count == 1
         case .Union:
-            return (unions?.filter { $0.name == typeName })?.count == 1
+            return (unions?.filter { PoetUtil.cleanTypeName($0.name) == PoetUtil.cleanTypeName(typeName) })?.count == 1
         default:
             return false
         }
@@ -40,17 +40,17 @@ public extension Service {
 
         switch type {
         case .Enum:
-            if (importModel.enums?.filter { PoetUtil.cleanTypeName($0) == typeName })?.count == 1 {
+            if (importModel.enums?.filter { PoetUtil.cleanTypeName($0) == PoetUtil.cleanTypeName(typeName) })?.count == 1 {
                 result = true
                 break
             }
         case .Model:
-            if (importModel.models?.filter { PoetUtil.cleanTypeName($0) == typeName })?.count == 1 {
+            if (importModel.models?.filter { PoetUtil.cleanTypeName($0) == PoetUtil.cleanTypeName(typeName) })?.count == 1 {
                 result = true
                 break
             }
         case .Union:
-            if (importModel.unions?.filter { PoetUtil.cleanTypeName($0) == typeName })?.count == 1 {
+            if (importModel.unions?.filter { PoetUtil.cleanTypeName($0) == PoetUtil.cleanTypeName(typeName) })?.count == 1 {
                 result = true
                 break
             }
@@ -60,14 +60,14 @@ public extension Service {
     }
 
     internal func getEnum(typeName: String) -> Enum? {
-        return self.enums?.filter { $0.name == typeName }.first
+        return self.enums?.filter { PoetUtil.cleanTypeName($0.name) == PoetUtil.cleanTypeName(typeName) }.first
     }
 
     internal func getModel(typeName: String) -> Model? {
-        return self.models?.filter { $0.name == typeName }.first
+        return self.models?.filter { PoetUtil.cleanTypeName($0.name) == PoetUtil.cleanTypeName(typeName) }.first
     }
 
     internal func getUnion(typeName: String) -> Union? {
-        return self.unions?.filter { $0.name == typeName }.first
+        return self.unions?.filter { PoetUtil.cleanTypeName($0.name) == PoetUtil.cleanTypeName(typeName) }.first
     }
 }

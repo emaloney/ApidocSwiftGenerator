@@ -106,13 +106,6 @@ internal indirect enum SimpleSwiftType {
         }
     }
 
-//    public var isArray: Bool {
-//        switch self {
-//        case .Array: return true
-//        default: return false
-//        }
-//    }
-
     private static func isOptional(keyword: String) -> Bool {
         guard let last = keyword.characters.last else { return false }
         return last == "?"

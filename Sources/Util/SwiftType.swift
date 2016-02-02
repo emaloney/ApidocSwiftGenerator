@@ -46,7 +46,7 @@ internal struct SwiftType {
         }
     }
 
-    func asRequiredType() -> SwiftType {
+    var asRequiredType: SwiftType {
         return SwiftType(simpleSwiftType: self.type, required: true)
     }
 }

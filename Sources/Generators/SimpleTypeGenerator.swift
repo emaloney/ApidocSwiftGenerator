@@ -156,7 +156,7 @@ extension SimpleTypeGenerator {
 // MARK: toJSON
 extension SimpleTypeGenerator {
     internal static func toJsonCodeBlock(paramName: String, keyName: String, swiftType: SwiftType, mapName: String = ToJsonFunctionGenerator.varName) -> CodeBlock {
-        let rightSide = swiftType.asRequiredType().toString(paramName)
+        let rightSide = swiftType.asRequiredType.toString(paramName)
 
         return ToJsonFunctionGenerator.generate(paramName, required: !swiftType.optional) {
             return SimpleTypeGenerator.requiredtoJsonCodeBlock(keyName, rightSide: rightSide, mapName: mapName)

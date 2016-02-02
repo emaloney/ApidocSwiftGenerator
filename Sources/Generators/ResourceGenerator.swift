@@ -67,6 +67,8 @@ internal struct ResourceGenerator: Generator {
             return "ApiDocOptionalDictionaryTransaction"
         case .Array:
             return "ApiDocArrayTransaction"
+        case .SwiftString, .Integer, .Long, .Double, .Boolean, .Decimal:
+            return "ApiDocTransaction<\(swiftType.swiftTypeString)>"
         default:
             return "ApiDocDictionaryTransaction"
         }
@@ -74,13 +76,6 @@ internal struct ResourceGenerator: Generator {
 
     static func transactionFields() -> [FieldSpec] {
         var result = [FieldSpec]()
-
-//        let delegate = FieldSpec.builder("delegateTransaction", type: TypeName(keyword: "DelegateTransactionType?"), construct: Construct.MutableParam)
-//            .addInitializer(CodeBlock.builder().addLiteral("return innerTransaction").build())
-//            .addModifier(.Public)
-//            .build()
-//
-//        result.append(delegate)
 
         let inner = FieldSpec.builder("innerTransaction", type: TypeName(keyword: "WrappedTransactionType?"), construct: Construct.Field)
             .addModifier(.Private)
@@ -326,6 +321,9 @@ internal struct ResourceGenerator: Generator {
                 // Void
                 // Take not action
                 return
+    
+                // SimpleType
+                completion(.Succeeded(payload, meta))
 
                 // Array OR Model OR SimpleType
                 async {
@@ -339,12 +337,6 @@ internal struct ResourceGenerator: Generator {
                         
                         // Model
                         let model = try TypeName(payload: payload)
-                        completion(.Succeeded(model, meta))
-    
-                        // SimpleType
-                        guard let model = payload as? TypeName else {
-                            throw DataTransactionError.DataFormatError("Invalid TypeName data")
-                        }
                         completion(.Succeeded(model, meta))
 
                     }
@@ -360,12 +352,17 @@ internal struct ResourceGenerator: Generator {
         let successCB = CodeBlock.builder()
         var jsonParseCode: CodeBlock? = nil
         let swiftType = SwiftType(apidocType: operation.successReturnType!, service: service)
+        var isUnit = false
 
         switch swiftType.type {
         case .Unit:
+            isUnit = true
             successCB
                 .addLiteral("// Take no action")
                 .addCodeLine("return")
+            break
+        case .SwiftString, .Integer, .Long, .Double, .Boolean, .Decimal:
+            successCB.addLiteral("completion(.Succeeded(payload, meta))")
             break
         case .Array(let typeName):
             jsonParseCode = CodeBlock.builder()
@@ -391,15 +388,8 @@ internal struct ResourceGenerator: Generator {
                 .addCodeBlock(ModelGenerator.toModelCodeBlock("model", typeName: cleanTypeName, jsonParamName: "payload", service: service, initalize: true))
                 .addCodeLine("completion(.Succeeded(model, meta))")
                 .build()
-        case .Dictionary, .DateISO8601, .DateTimeISO8601, .Object, .Undefined, .UUID:
-            fatalError()
         default:
-            jsonParseCode = CodeBlock.builder()
-                .addCodeBlock(ControlFlow.guardControlFlow(ComparisonList(lhs: "let model".toCodeBlock(), comparator: .OptionalCheck, rhs: "payload as? \(swiftType.swiftTypeString)".toCodeBlock())) {
-                    return "throw DataTransactionError.DataFormatError(\"Invalid \(swiftType.swiftTypeString) data\")".toCodeBlock()
-                })
-                .addCodeLine("completion(.Succeeded(model, meta))")
-                .build()
+            fatalError()
         }
 
         if let jsonParseCode = jsonParseCode {
@@ -414,12 +404,14 @@ internal struct ResourceGenerator: Generator {
                 .addEmitObject(.EndStatement)
         }
 
+        let successCase = isUnit ? ".Succeeded" : ".Succeeded(let payload, let meta)"
+
         let cb = CodeBlock.builder()
             .addLiteral("innerTransaction?.executeTransaction()")
             .addEmitObjects(ControlFlow.closureControlFlow("result", canThrow: false, returnType: nil) {
                 return ControlFlow.switchControlFlow("result", cases: [
                     (".Failed(let error)", "completion(.Failed(error))".toCodeBlock()),
-                    (".Succeeded(let payload, let meta)", successCB.build())])
+                    (successCase, successCB.build())])
                 }.emittableObjects).build()
 
         return MethodSpec.builder("executeTransaction")

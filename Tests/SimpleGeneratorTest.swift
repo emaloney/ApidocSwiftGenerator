@@ -23,22 +23,20 @@ class SimpleGeneratorTest: XCTestCase {
     func testObjectRequiredGeneration() {
         let field = Field(name: "test_field_name", type: "map[string]", description: nil, deprecation: nil, _default: nil, required: true, minimum: nil, maximum: nil, example: nil)
         let type = SwiftType(apidocType: "string", service: DummyService.create()) // dictionary generator takes left type
-        let cb = DictionaryGenerator.jsonParseCodeBlock(field, swiftType: type)
+        let cb = DictionaryGenerator.jsonParseCodeBlock(field, valueType: type, service: DummyService.create())
 
         let result =
         "\nvar testFieldName = [String : String]()\n" +
         "for (key, value) in try payload.requiredDictionary(\"test_field_name\") {\n" +
         "    \n" +
-        "    if let kType = key as? String, let vType = value as? String {\n" +
-        "        testFieldName[kType] = vType\n" +
-        "    }\n" +
-        "    else {\n" +
+        "    guard let kType = key as? String, let vType = value as? String else {\n" +
         "        throw DataTransactionError.DataFormatError(\"Error creating field test_field_name. Expected a String found \\(key) and \\(value)\")\n" +
         "    }\n" +
+        "    testFieldName[kType] = vType\n" +
         "}"
 
-        print(cb.toString())
-        print(result)
+//        print(cb.toString())
+//        print(result)
 
         XCTAssertEqual(result, cb.toString())
     }
@@ -46,7 +44,7 @@ class SimpleGeneratorTest: XCTestCase {
     func testObjectOptionalGeneration() {
         let field = Field(name: "test_field_name", type: "map[string]", description: nil, deprecation: nil, _default: nil, required: false, minimum: nil, maximum: nil, example: nil)
         let type = SwiftType(apidocType: "string", service: DummyService.create())
-        let cb = DictionaryGenerator.jsonParseCodeBlock(field, swiftType: type)
+        let cb = DictionaryGenerator.jsonParseCodeBlock(field, valueType: type, service: DummyService.create())
 
         let result =
         "\nvar testFieldName: [String : String]? = nil\n" +
@@ -60,8 +58,51 @@ class SimpleGeneratorTest: XCTestCase {
         "    }\n" +
         "}"
 
-        print(cb.toString())
-        print(result)
+//        print(cb.toString())
+//        print(result)
+
+        XCTAssertEqual(cb.toString(), result)
+    }
+
+    func testDictionaryModelGenerationRequired() {
+        let field = DummyField.create("test_field_name", type: "map[totally_awesome]")
+//        let type = SwiftType(apidocType: "string", service: DummyService.create())
+        let cb = FieldGenerator.jsonParseCodeBlock(field, service: DummyService.create())
+
+        let result =
+        "\nvar testFieldName = [String : TotallyAwesome]()\n" +
+            "for (key, value) in try payload.requiredDictionary(\"test_field_name\") {\n" +
+            "    \n" +
+            "    guard let kType = key as? String, let vType = value as? NSDictionary else {\n" +
+            "        throw DataTransactionError.DataFormatError(\"Error creating field test_field_name. Expected a NSDictionary found \\(key) and \\(value)\")\n" +
+            "    }\n" +
+            "    testFieldName[kType] = try TotallyAwesome(payload: vType)\n" +
+        "}"
+
+//                print(cb.toString())
+//                print(result)
+
+        XCTAssertEqual(cb.toString(), result)
+    }
+
+    func testDictionaryModelGenerationOptional() {
+        let field = DummyField.create("test_field_name", type: "map[totally_awesome]", required: false)
+        let cb = FieldGenerator.jsonParseCodeBlock(field, service: DummyService.create())
+
+        let result =
+        "\nvar testFieldName: [String : TotallyAwesome]? = nil\n" +
+            "if let dict = payload[\"test_field_name\"] as? NSDictionary {\n" +
+            "    \n" +
+            "    testFieldName = [String : TotallyAwesome]()\n" +
+            "    for (key, value) in dict {\n" +
+            "        if let kType = key as? String, let vType = value as? NSDictionary {\n" +
+            "            testFieldName?[kType] = try TotallyAwesome(payload: vType)\n" +
+            "        }\n" +
+            "    }\n" +
+        "}"
+
+//        print(cb.toString())
+//        print(result)
 
         XCTAssertEqual(cb.toString(), result)
     }
@@ -189,8 +230,8 @@ class SimpleGeneratorTest: XCTestCase {
         "    testFieldName = NSUUID(UUIDString: testFieldNameStr)\n" +
         "}"
 
-        print(result)
-        print(test)
+//        print(result)
+//        print(test)
 
         XCTAssertEqual(result, test)
     }

@@ -66,7 +66,7 @@ extension FieldGenerator {
             }
 
         case .Dictionary(_, let valueType):
-            return DictionaryGenerator.jsonParseCodeBlock(field, swiftType: valueType)
+            return DictionaryGenerator.jsonParseCodeBlock(field, valueType: valueType, service: service)
 
         case .Array(let innerType):
             switch innerType.type {

@@ -111,11 +111,11 @@ extension DictionaryGenerator {
 // MARK: parseJSON
 extension DictionaryGenerator {
 
-    internal static func jsonParseCodeBlock(field: Field, swiftType: SwiftType) -> CodeBlock {
+    internal static func jsonParseCodeBlock(field: Field, valueType: SwiftType, service: Service) -> CodeBlock {
         if field.required {
-            return DictionaryGenerator.jsonParseCodeBlockRequired(field, swiftType: swiftType)
+            return DictionaryGenerator.jsonParseCodeBlockRequired(field, valueType: valueType, service: service)
         } else {
-            return DictionaryGenerator.jsonParseCodeBlockOptional(field, swiftType: swiftType)
+            return DictionaryGenerator.jsonParseCodeBlockOptional(field, valueType: valueType, service: service)
         }
     }
 
@@ -123,25 +123,40 @@ extension DictionaryGenerator {
     var fieldName = [String : Type]()
     for (key, value) in try payload.requiredDictionary(field_name) {
     
-        guard let kType = key as? String else {
+        guard let kType = key as? String, let vType = (Type || NSDictionary) else {
             throw DataTransactionError.DataFormatError("Unexpected key type. Expected String for value \(key)")
         }
-    
-        TODO!!!
-        fieldName[kType] =
 
-        if let kType = key as? String, vType = value as? Type {
-            fieldName[kType] = vType
-        } else {
-            throw DataTransactionError.DataFormatError("Error creating for fieldName. Expected a string found \(key) and \(value)")
-        }
+        fieldName[kType] = (vType || try TypeName(payload: vType)
     }
     */
-    private static func jsonParseCodeBlockRequired(field: Field, swiftType: SwiftType) -> CodeBlock {
+    private static func jsonParseCodeBlockRequired(field: Field, valueType: SwiftType, service: Service) -> CodeBlock {
         let cb = CodeBlock.builder()
-        let capitalizedType = swiftType.swiftTypeString
 
-        cb.addCodeLine("var \(field.cammelCaseName) = [String : \(capitalizedType)]()")
+        let isModel: Bool
+
+        switch valueType.type {
+        case .Array, .Dictionary:
+            fatalError()
+        case .ServiceDefinedType(let typeName):
+            if service.contains(.Model, typeName: typeName) {
+                isModel = true
+            } else {
+                fatalError()
+            }
+        case .ImportedType(let namespace, let typeName):
+            if service.contains(.Model, typeName: typeName, namespace: namespace) {
+                isModel = true
+            } else {
+                fatalError()
+            }
+        default:
+            isModel = false
+        }
+
+        let guardValueType = isModel ? "NSDictionary" : valueType.asRequiredType.swiftTypeString
+
+        cb.addCodeLine("var \(field.cammelCaseName) = [String : \(valueType.asRequiredType.swiftTypeString)]()")
 
         cb.addCodeBlock(ControlFlow.forInControlFlow("(key, value)", iterable: "try payload.requiredDictionary(\(field.name.escapedString()))") {
             let innerCB = CodeBlock.builder()
@@ -150,21 +165,24 @@ extension DictionaryGenerator {
             let comparisonOne = ComparisonListItem(comparison: Comparison(lhs: leftOne, comparator: .OptionalCheck, rhs: rightOne))
 
             let leftTwo = CodeBlock.builder().addLiteral("let vType").build()
-            let rightTwo = CodeBlock.builder().addLiteral("value as? \(capitalizedType)").build()
+            let rightTwo = CodeBlock.builder().addLiteral("value as? \(guardValueType)").build()
             let comparisonTwo = ComparisonListItem(comparison: Comparison(lhs: leftTwo, comparator: .OptionalCheck, rhs: rightTwo), requirement: Requirement.OptionalList)
 
             let comparisons = ComparisonList(list: [comparisonOne, comparisonTwo])
 
 
-            innerCB
-                // IF
-                .addCodeBlock(ControlFlow.ifControlFlow(comparisons) {
-                    return CodeBlock.builder().addLiteral("\(field.cammelCaseName)[kType] = vType").build()
-                    })
-                // ELSE
-                .addCodeBlock(ControlFlow.elseControlFlow(nil) {
-                    return CodeBlock.builder().addLiteral("throw DataTransactionError.DataFormatError(\"Error creating field \(field.name). Expected a \(capitalizedType) found \\(key) and \\(value)\")").build()
-                    })
+            innerCB.addCodeBlock(ControlFlow.guardControlFlow(comparisons) {
+                return "throw DataTransactionError.DataFormatError(\"Error creating field \(field.name). Expected a \(guardValueType) found \\(key) and \\(value)\")".toCodeBlock()
+            })
+
+            innerCB.addCodeLine("\(field.cammelCaseName)[kType] =")
+
+            if isModel {
+                // (let) paramName = (try) TypeName(payload: jsonParamName)
+                innerCB.addLiteral(ModelGenerator.jsonToModelCodeBlock(valueType.asRequiredType.swiftTypeString, jsonParamName: "vType", service: service))
+            } else {
+                innerCB.addLiteral("vType")
+            }
 
             return innerCB.build()
             })
@@ -177,47 +195,76 @@ extension DictionaryGenerator {
     if let dict = payload["field_name"] as? NSDictionary {
         fieldName = [String : TypeName]()
         for (key, value) in dict {
-            if let kType = key as? String, let vType = value as? Type {
-                fieldName[kType] = vType
+            if let kType = key as? String, let vType = value as? (Type || NSDictionary) {
+                fieldName[kType] = (vType || try TypeName(payload: vType))
             }
         }
     }
     */
-    private static func jsonParseCodeBlockOptional(field: Field, swiftType: SwiftType) -> CodeBlock {
+    private static func jsonParseCodeBlockOptional(field: Field, valueType: SwiftType, service: Service) -> CodeBlock {
         let cb = CodeBlock.builder()
-        let capitalizedType = swiftType.swiftTypeString
 
-        cb.addCodeLine("var \(field.cammelCaseName): [String : \(capitalizedType)]? = nil")
+        let isModel: Bool
 
-        let left = CodeBlock.builder().addLiteral("let dict").build()
-        let right = CodeBlock.builder().addLiteral("payload[\"\(field.name)\"] as? NSDictionary").build()
+        switch valueType.type {
+        case .Array, .Dictionary:
+            fatalError()
+        case .ServiceDefinedType(let typeName):
+            if service.contains(.Model, typeName: typeName) {
+                isModel = true
+            } else {
+                fatalError()
+            }
+        case .ImportedType(let namespace, let typeName):
+            if service.contains(.Model, typeName: typeName, namespace: namespace) {
+                isModel = true
+            } else {
+                fatalError()
+            }
+        default:
+            isModel = false
+        }
+
+        let guardValueType = isModel ? "NSDictionary" : valueType.asRequiredType.swiftTypeString
+
+        cb.addCodeLine("var \(field.cammelCaseName): [String : \(valueType.asRequiredType.swiftTypeString)]? = nil")
+
+        let left = "let dict".toCodeBlock()
+        let right = "payload[\"\(field.name)\"] as? NSDictionary".toCodeBlock()
 
         // if let dict = payload["field_name"] as? NSDictionary
         cb.addCodeBlock(ControlFlow.ifControlFlow(ComparisonList(lhs: left, comparator: .OptionalCheck, rhs: right)) {
             let cb = CodeBlock.builder()
-                .addCodeLine("\(field.cammelCaseName) = [String : \(capitalizedType)]()")
+                .addCodeLine("\(field.cammelCaseName) = [String : \(valueType.asRequiredType.swiftTypeString)]()")
 
             //for (key, value) in dict {
             cb.addCodeBlock(ControlFlow.forInControlFlow("(key, value)", iterable: "dict") {
 
-                let leftOne = CodeBlock.builder().addLiteral("let kType").build()
-                let rightOne = CodeBlock.builder().addLiteral("key as? String").build()
+                let leftOne = "let kType".toCodeBlock()
+                let rightOne = "key as? String".toCodeBlock()
                 let comparisonOne = ComparisonListItem(comparison: Comparison(lhs: leftOne, comparator: .OptionalCheck, rhs: rightOne))
 
-                let leftTwo = CodeBlock.builder().addLiteral("let vType").build()
-                let rightTwo = CodeBlock.builder().addLiteral("value as? \(capitalizedType)").build()
+                let leftTwo = "let vType".toCodeBlock()
+                let rightTwo = "value as? \(guardValueType)".toCodeBlock()
                 let comparisonTwo = ComparisonListItem(comparison: Comparison(lhs: leftTwo, comparator: .OptionalCheck, rhs: rightTwo), requirement: Requirement.OptionalList)
 
-                let comparisons = ComparisonList(list: [comparisonOne, comparisonTwo])
+                // if let kType = key as? Type, let vType = value as? GuardValueType
+                return ControlFlow.ifControlFlow(ComparisonList(list: [comparisonOne, comparisonTwo])) {
+                    // fieldName[kType] = (vType || try TypeName(payload: vType))
+                    let innerCB = CodeBlock.builder()
+                        .addLiteral("\(field.cammelCaseName)?[kType] =")
 
-                // if let kType = key as? Type, let vType = value as? Type
-                return ControlFlow.ifControlFlow(comparisons) {
-                    //  fieldName[kType] = vType
-                    CodeBlock.builder().addLiteral("\(field.cammelCaseName)?[kType] = vType").build()
+                    if (isModel) {
+                        innerCB.addLiteral(ModelGenerator.jsonToModelCodeBlock(valueType.asRequiredType.swiftTypeString, jsonParamName: "vType", service: service))
+                    } else {
+                        innerCB.addLiteral("vType")
+                    }
+                    return innerCB.build()
                 }
-                })
+            })
             
             return cb.build()
+
             })
         
         return cb.build()
