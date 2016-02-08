@@ -172,7 +172,12 @@ internal struct ResourceGenerator: Generator {
                 cb.addLiteral("queryParams : queryParams))")
             }
             cb.addCodeLine("request.HTTPMethod = \"\(operation.method.rawValue.uppercaseString)\"")
-            cb.addCodeLine("request.addValue(\"application/json\", forHTTPHeaderField: \"Content-Type\")")
+
+            // No JSON header if no json body expected.
+            if let _ = operation.body {
+                cb.addCodeLine("request.addValue(\"application/json\", forHTTPHeaderField: \"Content-Type\")")
+            }
+
             cb.addEmitObject(.NewLine)
 
             if let _ = operation.body {
@@ -325,7 +330,7 @@ internal struct ResourceGenerator: Generator {
                 // SimpleType
                 completion(.Succeeded(payload, meta))
 
-                // Array OR Model OR SimpleType
+                // Array OR Model
                 async {
                     do {
                         // Array
@@ -337,6 +342,10 @@ internal struct ResourceGenerator: Generator {
                         
                         // Model
                         let model = try TypeName(payload: payload)
+                        completion(.Succeeded(model, meta))
+     
+                        // Dictionary
+                        see DictionaryGenerator.jsonParseCodeBlockRequired
                         completion(.Succeeded(model, meta))
 
                     }
@@ -364,6 +373,13 @@ internal struct ResourceGenerator: Generator {
         case .SwiftString, .Integer, .Long, .Double, .Boolean, .Decimal:
             successCB.addLiteral("completion(.Succeeded(payload, meta))")
             break
+
+        case .Dictionary(_, let valueType):
+            jsonParseCode = CodeBlock.builder()
+                .addCodeBlock(DictionaryGenerator.jsonParseCodeBlockRequired("model", valueType: valueType, dictionaryName: "payload", service: service))
+                .addCodeLine("completion(.Succeeded(model, meta))")
+                .build()
+
         case .Array(let typeName):
             jsonParseCode = CodeBlock.builder()
                 .addLiteral("let model = try payload.map")

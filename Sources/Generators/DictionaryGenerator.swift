@@ -121,16 +121,16 @@ extension DictionaryGenerator {
 
     /*
     var fieldName = [String : Type]()
-    for (key, value) in try payload.requiredDictionary(field_name) {
+    for (key, value) in dictionaryName {
     
         guard let kType = key as? String, let vType = (Type || NSDictionary) else {
-            throw DataTransactionError.DataFormatError("Unexpected key type. Expected String for value \(key)")
+            throw DataTransactionError.DataFormatError("Error creating field field_name. Expected a String and a (Type || NSDictionary) found \\(key) and \\(value)\")")
         }
 
         fieldName[kType] = (vType || try TypeName(payload: vType)
     }
     */
-    private static func jsonParseCodeBlockRequired(field: Field, valueType: SwiftType, service: Service) -> CodeBlock {
+    static func jsonParseCodeBlockRequired(fieldName: String, valueType: SwiftType, dictionaryName: String, service: Service) -> CodeBlock {
         let cb = CodeBlock.builder()
 
         let isModel: Bool
@@ -156,26 +156,26 @@ extension DictionaryGenerator {
 
         let guardValueType = isModel ? "NSDictionary" : valueType.asRequiredType.swiftTypeString
 
-        cb.addCodeLine("var \(field.cammelCaseName) = [String : \(valueType.asRequiredType.swiftTypeString)]()")
+        cb.addCodeLine("var \(fieldName) = [String : \(valueType.asRequiredType.swiftTypeString)]()")
 
-        cb.addCodeBlock(ControlFlow.forInControlFlow("(key, value)", iterable: "try payload.requiredDictionary(\(field.name.escapedString()))") {
+        cb.addCodeBlock(ControlFlow.forInControlFlow("(key, value)", iterable: dictionaryName) {
             let innerCB = CodeBlock.builder()
-            let leftOne = CodeBlock.builder().addLiteral("let kType").build()
-            let rightOne = CodeBlock.builder().addLiteral("key as? String").build()
+            let leftOne = "let kType".toCodeBlock()
+            let rightOne = "key as? String".toCodeBlock()
             let comparisonOne = ComparisonListItem(comparison: Comparison(lhs: leftOne, comparator: .OptionalCheck, rhs: rightOne))
 
-            let leftTwo = CodeBlock.builder().addLiteral("let vType").build()
-            let rightTwo = CodeBlock.builder().addLiteral("value as? \(guardValueType)").build()
+            let leftTwo = "let vType".toCodeBlock()
+            let rightTwo = "value as? \(guardValueType)".toCodeBlock()
             let comparisonTwo = ComparisonListItem(comparison: Comparison(lhs: leftTwo, comparator: .OptionalCheck, rhs: rightTwo), requirement: Requirement.OptionalList)
 
             let comparisons = ComparisonList(list: [comparisonOne, comparisonTwo])
 
 
             innerCB.addCodeBlock(ControlFlow.guardControlFlow(comparisons) {
-                return "throw DataTransactionError.DataFormatError(\"Error creating field \(field.name). Expected a \(guardValueType) found \\(key) and \\(value)\")".toCodeBlock()
-            })
+                return "throw DataTransactionError.DataFormatError(\"Error creating \(fieldName). Expected a String and a \(guardValueType) found \\(key) and \\(value)\")".toCodeBlock()
+                })
 
-            innerCB.addCodeLine("\(field.cammelCaseName)[kType] =")
+            innerCB.addCodeLine("\(fieldName)[kType] =")
 
             if isModel {
                 // (let) paramName = (try) TypeName(payload: jsonParamName)
@@ -183,11 +183,18 @@ extension DictionaryGenerator {
             } else {
                 innerCB.addLiteral("vType")
             }
-
+            
             return innerCB.build()
             })
-
+        
         return cb.build()
+    }
+
+    private static func jsonParseCodeBlockRequired(field: Field, valueType: SwiftType, service: Service) -> CodeBlock {
+        return DictionaryGenerator.jsonParseCodeBlockRequired(field.cammelCaseName,
+                                                              valueType: valueType,
+                                                              dictionaryName: "try payload.requiredDictionary(\(field.name.escapedString()))",
+            service: service)
     }
 
     /*
