@@ -30,7 +30,7 @@ class SimpleGeneratorTest: XCTestCase {
         "for (key, value) in try payload.requiredDictionary(\"test_field_name\") {\n" +
         "    \n" +
         "    guard let kType = key as? String, let vType = value as? String else {\n" +
-        "        throw DataTransactionError.DataFormatError(\"Error creating field test_field_name. Expected a String found \\(key) and \\(value)\")\n" +
+        "        throw DataTransactionError.DataFormatError(\"Error creating testFieldName. Expected a String and a String found \\(key) and \\(value)\")\n" +
         "    }\n" +
         "    testFieldName[kType] = vType\n" +
         "}"
@@ -74,7 +74,7 @@ class SimpleGeneratorTest: XCTestCase {
             "for (key, value) in try payload.requiredDictionary(\"test_field_name\") {\n" +
             "    \n" +
             "    guard let kType = key as? String, let vType = value as? NSDictionary else {\n" +
-            "        throw DataTransactionError.DataFormatError(\"Error creating field test_field_name. Expected a NSDictionary found \\(key) and \\(value)\")\n" +
+            "        throw DataTransactionError.DataFormatError(\"Error creating testFieldName. Expected a String and a NSDictionary found \\(key) and \\(value)\")\n" +
             "    }\n" +
             "    testFieldName[kType] = try TotallyAwesome(payload: vType)\n" +
         "}"

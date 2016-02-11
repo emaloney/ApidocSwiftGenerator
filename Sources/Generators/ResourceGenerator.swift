@@ -335,7 +335,10 @@ internal struct ResourceGenerator: Generator {
                     do {
                         // Array
                         let model = try payload.map { payload in
-                            let model = try TypeName(payload: payload as! NSDictionary)
+                            guard let payload = payoad as? NSDictionary else {
+                                DataTransactionError.DataFormatError("Error creating model. Expected an NSDictionary")")
+                            }
+                            let model = try TypeName(payload: payload)
                             return model
                         }
                         completion(.Succeeded(model, meta))
@@ -385,9 +388,14 @@ internal struct ResourceGenerator: Generator {
                 .addLiteral("let model = try payload.map")
                 .addCodeBlock(ControlFlow.closureControlFlow("payload", canThrow: true, returnType: typeName.swiftTypeString) {
                     return CodeBlock.builder()
-                        .addCodeBlock(ModelGenerator.toModelCodeBlock("model", typeName: typeName.swiftTypeString, jsonParamName: "(payload as! NSDictionary)", service: service, initalize: true))
-                        .addCodeLine("return model")
-                        .build()
+                        .addCodeBlock(ControlFlow.guardControlFlow(ComparisonList(lhs: "let payload".toCodeBlock(), comparator: .OptionalCheck, rhs: "payload as? NSDictionary".toCodeBlock())) {
+                            return "throw DataTransactionError.DataFormatError(\"Error creating model. Expected an NSDictionary\")".toCodeBlock()
+                        })
+                        .addCodeBlock(CodeBlock.builder()
+                            .addCodeBlock(ModelGenerator.toModelCodeBlock("model", typeName: typeName.swiftTypeString, jsonParamName: "payload", service: service, initalize: true))
+                            .addCodeLine("return model")
+                            .build())
+                    .build()
                 })
                 .addCodeLine("completion(.Succeeded(model, meta))")
                 .build()
