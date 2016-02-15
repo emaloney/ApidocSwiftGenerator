@@ -439,6 +439,8 @@
 		590260D61C402AA400FB39E8 /* Generator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Generator.swift; sourceTree = "<group>"; };
 		590260DB1C402B9900FB39E8 /* ApidocGeneratorConstructor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApidocGeneratorConstructor.swift; sourceTree = "<group>"; };
 		5915043A1C56B1BB00A9844A /* UnionGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnionGenerator.swift; sourceTree = "<group>"; };
+		5920C8761C72692D0034D5BD /* JSONEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONEncoder.swift; sourceTree = "<group>"; };
+		5920C8771C72692D0034D5BD /* NSDictionaryExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSDictionaryExtensions.swift; sourceTree = "<group>"; };
 		595ECF7A1C51460F002A43E1 /* ResourceGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResourceGenerator.swift; sourceTree = "<group>"; };
 		599D023D1C5BB56E0045DA0B /* SimpleSwiftType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleSwiftType.swift; sourceTree = "<group>"; };
 		599D024D1C5BB8100045DA0B /* FieldExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FieldExtension.swift; sourceTree = "<group>"; };
@@ -626,6 +628,7 @@
 		3BCBACE11BA369AD007F1C90 = {
 			isa = PBXGroup;
 			children = (
+				5920C8681C7268500034D5BD /* Resources */,
 				59AA66C81C3B2CBC003CD1A2 /* Libraries */,
 				3B00E4D21BA36B840011486D /* Sources */,
 				3B00E4D51BA36B840011486D /* Tests */,
@@ -732,6 +735,23 @@
 				599EAB7F1C45A74E002DEAB3 /* SwiftType.swift */,
 			);
 			path = Util;
+			sourceTree = "<group>";
+		};
+		5920C8681C7268500034D5BD /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				5920C8751C72692D0034D5BD /* DataLoading */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		5920C8751C72692D0034D5BD /* DataLoading */ = {
+			isa = PBXGroup;
+			children = (
+				5920C8761C72692D0034D5BD /* JSONEncoder.swift */,
+				5920C8771C72692D0034D5BD /* NSDictionaryExtensions.swift */,
+			);
+			path = DataLoading;
 			sourceTree = "<group>";
 		};
 		599D024B1C5BB7EA0045DA0B /* Extensions */ = {
