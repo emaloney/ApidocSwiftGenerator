@@ -2,14 +2,14 @@
 
 # ApidocSwiftGenerator
 
-ApidocSwiftGenerator generates swift models, enums, and api calls for you based on an apidoc.json file.
+ApidocSwiftGenerator generates Swift models, enums, and api calls for you based on an `apidoc.json` file.
 
 ApidocSwiftGenerator is part of [the Cleanroom Project](https://github.com/gilt/Cleanroom) from [Gilt Tech](http://tech.gilt.com).
 
 
 #### Why Code Generation?
-		ApiDoc makes it easy for an api owner to define thier models and api endpoints in a JSON format. Because this JSON is in a repeatable format, its reasonable to off load the mundane task of creating models and api endpoints to a code generator. Leaving app builders to focus on app middleware and presentation.
-	
+
+ApiDoc makes it easy for an api owner to define thier models and api endpoints in a JSON format. Because this JSON is in a repeatable format, its reasonable to off load the mundane task of creating models and api endpoints to a code generator. Leaving app builders to focus on app middleware and presentation.
 
 
 ### Swift 2.1 compatibility
