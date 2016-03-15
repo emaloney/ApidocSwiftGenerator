@@ -369,9 +369,7 @@ internal struct ResourceGenerator: Generator {
         switch swiftType.type {
         case .Unit:
             isUnit = true
-            successCB
-                .addLiteral("// Take no action")
-                .addCodeLine("return")
+            successCB.addLiteral("completion(.Succeeded((), meta))")
             break
         case .SwiftString, .Integer, .Long, .Double, .Boolean, .Decimal:
             successCB.addLiteral("completion(.Succeeded(payload, meta))")
@@ -428,7 +426,7 @@ internal struct ResourceGenerator: Generator {
                 .addEmitObject(.EndStatement)
         }
 
-        let successCase = isUnit ? ".Succeeded" : ".Succeeded(let payload, let meta)"
+        let successCase = isUnit ? ".Succeeded(_, let meta)" : ".Succeeded(let payload, let meta)"
 
         let cb = CodeBlock.builder()
             .addLiteral("innerTransaction?.executeTransaction()")
