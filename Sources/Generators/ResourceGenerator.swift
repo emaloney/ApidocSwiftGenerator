@@ -20,7 +20,8 @@ internal struct ResourceGenerator: Generator {
 
     internal static func generate(service: Service) -> ResultType {
 
-        return service.resources?.reduce([PoetFile]()) { (var list, resource) in
+        return service.resources?.reduce([PoetFile]()) { list, resource in
+            var returnList = list
             let transactionList: [PoetFile] = resource.operations.map { operation in
                 let classBuilder = ClassSpec.builder(resource.capitalizedName(operation))
                     .addFramework(service.name)
@@ -37,8 +38,8 @@ internal struct ResourceGenerator: Generator {
 
                 return classBuilder.build().toFile()
             }
-            list.appendContentsOf(transactionList)
-            return list
+            returnList.appendContentsOf(transactionList)
+            return returnList
         }
     }
 

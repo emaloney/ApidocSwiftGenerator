@@ -9,7 +9,7 @@
 import Foundation
 
 internal protocol Generator {
-    typealias ResultType
+    associatedtype ResultType
 
     static func generate(service: Service) -> ResultType
 }

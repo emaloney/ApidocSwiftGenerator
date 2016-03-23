@@ -66,7 +66,6 @@ class SimpleGeneratorTest: XCTestCase {
 
     func testDictionaryModelGenerationRequired() {
         let field = DummyField.create("test_field_name", type: "map[totally_awesome]")
-//        let type = SwiftType(apidocType: "string", service: DummyService.create())
         let cb = FieldGenerator.jsonParseCodeBlock(field, service: DummyService.create())
 
         let result =

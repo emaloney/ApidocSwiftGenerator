@@ -32,13 +32,13 @@ internal indirect enum SimpleSwiftType {
         if SimpleSwiftType.isDictionary(apidocType) {
             let endIndex = apidocType.rangeOfString("]")!.startIndex
             let startIndex = apidocType.rangeOfString("[")!.endIndex
-            let innerTypeStr = apidocType.substringWithRange(Range(start: startIndex, end: endIndex))
+            let innerTypeStr = apidocType.substringWithRange(startIndex..<endIndex)
 
             self = .Dictionary(SwiftType.StringType, SwiftType(apidocType: innerTypeStr, service: service, required: !SimpleSwiftType.isOptional(innerTypeStr)))
         }
         else if SimpleSwiftType.isArray(apidocType) {
             let chars = apidocType.characters
-            var range = Range(start: chars.startIndex.successor(), end: chars.endIndex.predecessor())
+            var range = chars.startIndex.successor()..<chars.endIndex
             range.endIndex = chars.endIndex.predecessor()
 
             let innerType = apidocType.substringWithRange(range)
