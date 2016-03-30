@@ -20,7 +20,8 @@ internal struct ResourceGenerator: Generator {
 
     internal static func generate(service: Service) -> ResultType {
 
-        return service.resources?.reduce([PoetFile]()) { (var list, resource) in
+        return service.resources?.reduce([PoetFile]()) { list, resource in
+            var returnList = list
             let transactionList: [PoetFile] = resource.operations.map { operation in
                 let classBuilder = ClassSpec.builder(resource.capitalizedName(operation))
                     .addFramework(service.name)
@@ -37,8 +38,8 @@ internal struct ResourceGenerator: Generator {
 
                 return classBuilder.build().toFile()
             }
-            list.appendContentsOf(transactionList)
-            return list
+            returnList.appendContentsOf(transactionList)
+            return returnList
         }
     }
 
@@ -369,9 +370,7 @@ internal struct ResourceGenerator: Generator {
         switch swiftType.type {
         case .Unit:
             isUnit = true
-            successCB
-                .addLiteral("// Take no action")
-                .addCodeLine("return")
+            successCB.addLiteral("completion(.Succeeded((), meta))")
             break
         case .SwiftString, .Integer, .Long, .Double, .Boolean, .Decimal:
             successCB.addLiteral("completion(.Succeeded(payload, meta))")
@@ -428,7 +427,7 @@ internal struct ResourceGenerator: Generator {
                 .addEmitObject(.EndStatement)
         }
 
-        let successCase = isUnit ? ".Succeeded" : ".Succeeded(let payload, let meta)"
+        let successCase = isUnit ? ".Succeeded(_, let meta)" : ".Succeeded(let payload, let meta)"
 
         let cb = CodeBlock.builder()
             .addLiteral("innerTransaction?.executeTransaction()")
