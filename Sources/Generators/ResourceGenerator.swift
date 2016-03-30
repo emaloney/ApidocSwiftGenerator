@@ -79,7 +79,7 @@ internal struct ResourceGenerator: Generator {
         var result = [FieldSpec]()
 
         let inner = FieldSpec.builder("innerTransaction", type: TypeName(keyword: "WrappedTransactionType?"), construct: Construct.Field)
-            .addModifier(.Private)
+            .addModifier(.Public)
             .build()
 
         result.append(inner)
