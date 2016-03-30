@@ -78,7 +78,7 @@ internal struct ResourceGenerator: Generator {
     static func transactionFields() -> [FieldSpec] {
         var result = [FieldSpec]()
 
-        let inner = FieldSpec.builder("innerTransaction", type: TypeName(keyword: "WrappedTransactionType?"), construct: Construct.Field)
+        let inner = FieldSpec.builder("wrappedTransaction", type: TypeName(keyword: "WrappedTransactionType?"), construct: Construct.Field)
             .addModifier(.Public)
             .build()
 
@@ -108,9 +108,9 @@ internal struct ResourceGenerator: Generator {
                 throw error
             }
 
-            self.innerTransaction = ApiDocDictionaryTransaction(request: request, uploadData: binaryData)
+            self.wrappedTransaction = ApiDocDictionaryTransaction(request: request, uploadData: binaryData)
         } catch {
-            self.innerTransaction = nil
+            self.wrappedTransaction = nil
             throw error
         }
     }
@@ -188,16 +188,16 @@ internal struct ResourceGenerator: Generator {
                     (".Failed(let error)", CodeBlock.builder().addLiteral("throw error").build())
                 ]))
 
-                cb.addCodeLine("self.innerTransaction = \(ResourceGenerator.getTransationType(swiftType))(request: request, uploadData: binaryData)")
+                cb.addCodeLine("self.wrappedTransaction = \(ResourceGenerator.getTransationType(swiftType))(request: request, uploadData: binaryData)")
 
             } else {
-                cb.addCodeLine("self.innerTransaction = \(ResourceGenerator.getTransationType(swiftType))(request: request, uploadData: nil)")
+                cb.addCodeLine("self.wrappedTransaction = \(ResourceGenerator.getTransationType(swiftType))(request: request, uploadData: nil)")
             }
             return cb.build()
 
         }) {
             return CodeBlock.builder()
-                .addCodeLine("self.innerTransaction = nil")
+                .addCodeLine("self.wrappedTransaction = nil")
                 .addCodeLine("throw error")
                 .build()
         })
@@ -318,7 +318,7 @@ internal struct ResourceGenerator: Generator {
 
     /*
     public func executeTransaction(completion: Callback) {
-        innerTransaction?.executeTransaction() { result in
+        wrappedTransaction?.executeTransaction() { result in
             switch result {
             case .Failed(let error):
                 completion(.Failed(error))
@@ -430,7 +430,7 @@ internal struct ResourceGenerator: Generator {
         let successCase = isUnit ? ".Succeeded(_, let meta)" : ".Succeeded(let payload, let meta)"
 
         let cb = CodeBlock.builder()
-            .addLiteral("innerTransaction?.executeTransaction()")
+            .addLiteral("wrappedTransaction?.executeTransaction()")
             .addEmitObjects(ControlFlow.closureControlFlow("result", canThrow: false, returnType: nil) {
                 return ControlFlow.switchControlFlow("result", cases: [
                     (".Failed(let error)", "completion(.Failed(error))".toCodeBlock()),
